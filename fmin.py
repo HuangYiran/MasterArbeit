@@ -98,7 +98,7 @@ def train_batch(model, loss_fn, optimizer, src, tgt):
 def evaluate(model, src, tgt):
     arr1 = predict(model, src)
     arr2 = tgt.view(1, -1)
-    #print(arr1)
+    print(arr1)
     #print(arr2)
     arr = torch.cat((arr1, arr2), 0).numpy()
     corr = numpy.corrcoef(arr)[0][1]

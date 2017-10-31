@@ -108,6 +108,7 @@ def main():
                 tgtBatch += [tgtTokens]
 
             if len(srcBatch) < opt.batch_size:
+                # ???
                 continue
         else:
             # at the end of file, check last batch
