@@ -21,7 +21,7 @@ parser.add_argument('-src_img_dir',   default="",
                     help='Source image directory')
 parser.add_argument('-tgt', default = "./data/preprosrc-ref.bpe.noUndo.de",
                     help='True target sequence (optional)')
-parser.add_argument('-output', default='pred.txt',
+parser.add_argument('-output', default="./test_data/hidden_value",
                     help="""Path to output the predictions (each line will
                     be the decoded sequence""")
 
@@ -115,10 +115,10 @@ def main():
             if len(srcBatch) == 0:
                 break
 
-    decOut, decStates, attn = pipeline.get_hidden(srcBatch, tgtBatch)
+    decOut= pipeline.get_hidden(srcBatch, tgtBatch)
     print(decOut.data.numpy().shape)
     
-    with open("./test_data/hidden_value", "w") as f:
+    with open(opt.output, "w") as f:
         tmp = decOut.data.numpy()
         numpy.save(f, tmp)
 
