@@ -6,6 +6,7 @@ import torch
 import argparse
 import numpy
 import random
+import math
 
 from data import DataUtil
 from LinearModel import BasicLinear
@@ -23,7 +24,7 @@ def o_func(params):
     data = DataUtil(opt)
 
     # build model
-    model = BasicLinear(dim1 = 1000, dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, d_rate = opt.drop_out_rate, mom = opt.momentum)
+    model = BasicLinear(dim1 = 1000, dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate, mom = opt.momentum)
     print(model)
 
     # set optimizer and loss functioin
@@ -64,6 +65,7 @@ li_space = hp.choice('opt',[
         'dim2': hp.choice('linear_dim2', [50, 100, 500]),
         'dim3': hp.choice('linear_dim3', [None, 5, 10, 50]),
         'act_func': hp.choice('linear_act_func', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
+        'act_func_out': hp.choice('linear_act_func_out', ['Tanh', 'Sigmoid', None]),
         'drop_out_rate': hp.uniform('drop_out_rate', 0.2, 0.8),
         'momentum': hp.uniform('bn_momentum', 0.1, 0.9),
     }
@@ -77,7 +79,7 @@ def get_best():
     best = fmin(fn = o_func,
             space = li_space,
             algo = optim_algo,
-            max_evals = 10)
+            max_evals = 500)
     return best
 
 
@@ -102,6 +104,9 @@ def evaluate(model, src, tgt):
     #print(arr2)
     arr = torch.cat((arr1, arr2), 0).numpy()
     corr = numpy.corrcoef(arr)[0][1]
+    if math.isnan(corr):
+        print("the corr is nan, which means the variance of the scores is 0")
+        corr = 0
     print("the correlation coeffizient is : %f" %(corr))
     return corr
 

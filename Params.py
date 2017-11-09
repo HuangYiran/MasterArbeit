@@ -15,6 +15,7 @@ class Params(object):
         self.dim2 = 500
         self.dim3 = None
         self.act_func = 'ReLU'
+        self.act_func_out = None
         self.drop_out_rate = 0.5
         self.momentum = 0.1
     
