@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import torch
 import numpy
 
@@ -5,8 +6,9 @@ class BasicLinear(torch.nn.Module):
     """
     multi-layer linear model: 1000 - 500 - 1 
     """
-    def __init__(self, dim1 = 1000, dim2 = 500, dim3 = None, act_func = "ReLU", act_func_out = None, d_rate = 0.5, mom = 0.1):
+    def __init__(self, dim2 = 500, dim3 = None, act_func = "ReLU", act_func_out = None, d_rate = 0.5, mom = 0.1):
         super(BasicLinear, self).__init__()
+        dim1 = 1000
         self.layers = torch.nn.Sequential()
         self.layers.add_module("fc1", torch.nn.Linear(dim1, dim2))
         self.layers.add_module(act_func + "1", getattr(torch.nn, act_func)())
@@ -32,4 +34,34 @@ class BasicLinear(torch.nn.Module):
         output: (1)
         """
         out = self.layers(input)
+        return out
+
+class BiLinear(torch.nn.Module):
+    def __init__(self,act_func = 'Tanh', act_func_out = None):
+        super(BiLinear, self).__init__()
+        dim1 = 500
+        self.li_sys = torch.nn.Linear(dim1, dim1, bias = False)
+        self.li_ref = torch.nn.Linear(dim1, dim1, bias = False)
+        self.act_func = getattr(torch.nn, act_func)()
+        self.li_out = torch.nn.Linear(dim1, 1)
+        self.act_func_out = None
+        if act_func_out:
+            self.act_func_out = getattr(torch.nn, act_func_out)()
+    
+    def forward(self, input):
+        """
+        input:
+            input: (batch, 1000)
+        output:
+            score: (1)
+        """
+        input_sys = input[:,:500]
+        input_ref = input[:,500:]
+        proj_sys = self.li_sys(input_sys)
+        proj_ref = self.li_ref(input_ref)
+        sum_in = proj_sys + proj_ref
+        acted_sum_in = self.act_func(sum_in)
+        out = self.li_out(acted_sum_in)
+        if self.act_func_out:
+            out = self.act_func_out(out)
         return out
