@@ -15,11 +15,11 @@ onmt.Markdown.add_md_help_argument(parser)
 
 parser.add_argument('-model', default = "../data/mt_model/prepro_model_ppl_20.07_e13.pt",
                     help='Path to model .pt file')
-parser.add_argument('-src', default = "./data/preprosrc-ref.bpe.noUndo.en",
+parser.add_argument('-src', default = "/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/data/preprosrc-ref.bpe.noUndo.en",
                     help='Source sequence to decode (one line per sequence)')
 parser.add_argument('-src_img_dir',   default="",
                     help='Source image directory')
-parser.add_argument('-tgt', default = "./data/preprosrc-ref.bpe.noUndo.de",
+parser.add_argument('-tgt', default = "/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/data/preprosrc-ref.bpe.noUndo.de",
                     help='True target sequence (optional)')
 parser.add_argument('-output', default="./test_data/hidden_value",
                     help="""Path to output the predictions (each line will

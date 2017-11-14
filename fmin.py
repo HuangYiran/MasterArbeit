@@ -9,7 +9,7 @@ import random
 import math
 
 from data import DataUtil
-from LinearModel import BasicLinear
+from LinearModel import BasicLinear, BiLinear
 from Params import Params
 from hyperopt import fmin, tpe, hp
 
@@ -24,7 +24,10 @@ def o_func(params):
     data = DataUtil(opt)
 
     # build model
-    model = BasicLinear(dim1 = 1000, dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate, mom = opt.momentum)
+    if opt.model == "BiLinear":
+        model = BiLinear(act_func = opt.act_func, act_func_out = opt.act_func_out)
+    else:
+        model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate, mom = opt.momentum)
     print(model)
 
     # set optimizer and loss functioin
@@ -57,9 +60,9 @@ li_space = hp.choice('opt',[
     {
         'type': 'linear',
         'model': './model/LinearModel',
-        'src_sys': './data/hidden_sys',
-        'src_ref': './data/hidden_ref',
-        'tgt': './data/data_scores',
+        'src_sys': '../data/MasterArbeit/data/sys_hidden',
+        'src_ref': '../data/MasterArbeit/data/ref_hidden',
+        'tgt': '../data/MasterArbeit/data/data_scores',
         'batch_size': hp.choice('li_batch_size', [50, 100, 200]),
         'lr': hp.uniform('li_lr', 0.01, 0.9),
         'dim2': hp.choice('linear_dim2', [50, 100, 500]),
@@ -68,6 +71,17 @@ li_space = hp.choice('opt',[
         'act_func_out': hp.choice('linear_act_func_out', ['Tanh', 'Sigmoid', None]),
         'drop_out_rate': hp.uniform('drop_out_rate', 0.2, 0.8),
         'momentum': hp.uniform('bn_momentum', 0.1, 0.9),
+    },
+    {
+        'type': 'linear',
+        'model': 'BiLinear',
+        'src_sys': '../data/MasterArbeit/data/sys_hidden',
+        'src_ref': '../data/MasterArbeit/data/ref_hidden',
+        'tgt': '../data/MasterArbeit/data/data_scores',
+        'batch_size': hp.choice('li_batch_size', [50, 100, 200]),
+        'lr': hp.uniform('li_lr', 0.01, 0.9),
+        'act_func': hp.choice('linear_act_func', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
+        'act_func_out': hp.choice('linear_act_func_out', [None, 'Tanh', 'Sigmoid']),        
     }
     ])
 
@@ -100,7 +114,7 @@ def train_batch(model, loss_fn, optimizer, src, tgt):
 def evaluate(model, src, tgt):
     arr1 = predict(model, src)
     arr2 = tgt.view(1, -1)
-    print(arr1)
+    #print(arr1)
     #print(arr2)
     arr = torch.cat((arr1, arr2), 0).numpy()
     corr = numpy.corrcoef(arr)[0][1]

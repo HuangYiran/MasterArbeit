@@ -22,9 +22,12 @@ class DataUtil(object):
             for line in fi:
                 self.data_tgt.append(float(line.strip()))
         self.data_tgt = torch.Tensor(self.data_tgt)
-        self._shuffle()
+        #self._shuffle()
 
     def _shuffle(self):
+        """
+        最后两行可能有问题，还没有测试
+        """
         random.seed(34843)
         order = range(len(self.data_in))
         random.shuffle(order)
@@ -35,8 +38,8 @@ class DataUtil(object):
         for i in range(len(data_in)):
             tmp_data_in.append(data_in[i].view(1, -1))
         self.data_in = torch.cat(tmp_data_in, 0)
-        self.data_sys = self.data_in[1:len(self.data_sys),]
-        self.data_ref = self.data_in[len(self.data_sys):,]
+        #self.data_sys = self.data_in[,1:len(self.data_sys[0])]
+        #self.data_ref = self.data_in[,len(self.data_sys[0]):]
 
 
     def get_batch(self, sep = False):
@@ -62,7 +65,7 @@ class DataUtil(object):
             end = len_data
 
         if sep:
-            return ((self.ata_sys[start:end,], self.data_ref[start:end,]), 
+            return ((self.data_sys[start:end,], self.data_ref[start:end,]), 
                     self.data_tgt[start:end,])
         else:
             return (self.data_in[start:end, ], 
