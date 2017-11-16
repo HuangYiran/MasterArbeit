@@ -25,7 +25,7 @@ def o_func(params):
 
     # build model
     if opt.model == "BiLinear":
-        model = BiLinear(act_func = opt.act_func, act_func_out = opt.act_func_out)
+        model = BiLinear(dim2 = opt.dim2, act_func = opt.act_func, act_func_out = opt.act_func_out)
     else:
         model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate, mom = opt.momentum)
     print(model)
@@ -58,30 +58,31 @@ def o_func(params):
 # set the search space for linear Model 
 li_space = hp.choice('opt',[
     {
-        'type': 'linear',
+        'type': 'nonlinear',
         'model': './model/LinearModel',
         'src_sys': '../data/MasterArbeit/data/sys_hidden',
         'src_ref': '../data/MasterArbeit/data/ref_hidden',
-        'tgt': '../data/MasterArbeit/data/data_scores',
-        'batch_size': hp.choice('li_batch_size', [50, 100, 200]),
-        'lr': hp.uniform('li_lr', 0.01, 0.9),
-        'dim2': hp.choice('linear_dim2', [50, 100, 500]),
-        'dim3': hp.choice('linear_dim3', [None, 5, 10, 50]),
-        'act_func': hp.choice('linear_act_func', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
-        'act_func_out': hp.choice('linear_act_func_out', ['Tanh', 'Sigmoid', None]),
-        'drop_out_rate': hp.uniform('drop_out_rate', 0.2, 0.8),
-        'momentum': hp.uniform('bn_momentum', 0.1, 0.9),
+        'tgt': hp.choice('basic_tgt', ['../data/MasterArbeit/data/data_scores', '../data/MasterArbeit/data/normalized_data_scores']),
+        'batch_size': hp.choice('basic_batch_size', [50, 100, 200]),
+        'lr': hp.uniform('basic_lr', 0.01, 0.9),
+        'dim2': hp.choice('basic_dim2', [50, 100, 500]),
+        'dim3': hp.choice('basic_dim3', [None, 5, 10, 50]),
+        'act_func': hp.choice('basic_act_func', ['ReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
+        'act_func_out': hp.choice('basic_act_func_out', ['Tanh', 'Sigmoid', None]),
+        'drop_out_rate': hp.uniform('basic_drop_out_rate', 0.2, 0.8),
+        'momentum': hp.uniform('basic_bn_momentum', 0.1, 0.9),
     },
     {
-        'type': 'linear',
+        'type': 'nonlinear',
         'model': 'BiLinear',
         'src_sys': '../data/MasterArbeit/data/sys_hidden',
         'src_ref': '../data/MasterArbeit/data/ref_hidden',
-        'tgt': '../data/MasterArbeit/data/data_scores',
-        'batch_size': hp.choice('li_batch_size', [50, 100, 200]),
-        'lr': hp.uniform('li_lr', 0.01, 0.9),
-        'act_func': hp.choice('linear_act_func', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
-        'act_func_out': hp.choice('linear_act_func_out', [None, 'Tanh', 'Sigmoid']),        
+        'tgt': hp.choice('bi_tgt', ['../data/MasterArbeit/data/data_scores', '../data/MasterArbeit/data/normalized_data_scores']),
+        'batch_size': hp.choice('bi_batch_size', [50, 100, 200]),
+        'lr': hp.uniform('bi_lr', 0.01, 0.9),
+        'dim2': hp.choice('bi_dim2', [None, 10, 50]),
+        'act_func': hp.choice('bl_act_func1', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
+        'act_func_out': hp.choice('bl_act_func_out', [None, 'Tanh', 'Sigmoid']),        
     }
     ])
 
@@ -93,10 +94,16 @@ def get_best():
     best = fmin(fn = o_func,
             space = li_space,
             algo = optim_algo,
-            max_evals = 500)
+            max_evals = 11)
     return best
 
 
+
+
+
+###########
+#training
+###########
 
 def train_batch(model, loss_fn, optimizer, src, tgt):
     src = torch.autograd.Variable(src, requires_grad = False)
