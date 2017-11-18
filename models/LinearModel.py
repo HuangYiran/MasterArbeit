@@ -18,10 +18,10 @@ class BasicLinear(torch.nn.Module):
             self.layers.add_module("fc2", torch.nn.Linear(dim2, dim3))
             self.layers.add_module(act_func + "2", getattr(torch.nn, act_func)())
             self.layers.add_module("bn2", torch.nn.BatchNorm1d(dim3, momentum = mom))
-            self.layers.add_module("drop_out", torch.nn.Dropout(d_rate))
+#            self.layers.add_module("drop_out", torch.nn.Dropout(d_rate))
             self.layers.add_module("fc3", torch.nn.Linear(dim3, 1))
         else:
-            self.layers.add_module("drop_out", torch.nn.Dropout(d_rate))
+ #           self.layers.add_module("drop_out", torch.nn.Dropout(d_rate))
             self.layers.add_module("fc2", torch.nn.Linear(dim2, 1))
         
         # 因为score的分数是从-1到1， 所以对应的结果是否加一个激活函数会比较好
