@@ -12,8 +12,9 @@ from data import DataUtil
 from LinearModel import BasicLinear, BiLinear
 from Params import Params
 from hyperopt import fmin, tpe, hp
-
+###########################################################################
 # define the objective function, this function will be used in optimization
+###########################################################################
 def o_func(params):
     # set params
     opt = Params()
@@ -26,8 +27,10 @@ def o_func(params):
     # build model
     if opt.model == "BiLinear":
         model = BiLinear(dim2 = opt.dim2, act_func = opt.act_func, act_func_out = opt.act_func_out)
+    else if opt.model == "BasicLinearDropout":
+        model = BasicLinear_dropout(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out)
     else:
-        model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate, mom = opt.momentum)
+        model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, mom = opt.momentum)
     print(model)
 
     # set optimizer and loss functioin
@@ -55,11 +58,27 @@ def o_func(params):
         
     return 1 - out/10.0
 
+#######################################
 # set the search space for linear Model 
+#######################################
 li_space = hp.choice('opt',[
     {
         'type': 'nonlinear',
         'model': './model/LinearModel',
+        'src_sys': '../data/MasterArbeit/data/sys_hidden',
+        'src_ref': '../data/MasterArbeit/data/ref_hidden',
+        'tgt': hp.choice('basic_dp_tgt', ['../data/MasterArbeit/data/data_scores', '../data/MasterArbeit/data/normalized_data_scores']),
+        'batch_size': hp.choice('basic_batch_size', [50, 100, 200]),
+        'lr': hp.uniform('basic_dp_lr', 0.01, 0.9),
+        'dim2': hp.choice('basic_dp_dim2', [50, 100, 500]),
+        'dim3': hp.choice('basic_dp_dim3', [None, 5, 10, 50]),
+        'act_func': hp.choice('basic_dp_act_func', ['ReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
+        'act_func_out': hp.choice('basic_dp_act_func_out', ['Tanh', 'Sigmoid', None]),
+        'drop_out_rate': hp.uniform('basic_dp_drop_out_rate', 0.2, 0.8),
+    },
+    {
+        'type': 'nonlinear',
+        'model': 'BssicLinearModelDropout',
         'src_sys': '../data/MasterArbeit/data/sys_hidden',
         'src_ref': '../data/MasterArbeit/data/ref_hidden',
         'tgt': hp.choice('basic_tgt', ['../data/MasterArbeit/data/data_scores', '../data/MasterArbeit/data/normalized_data_scores']),
@@ -69,7 +88,7 @@ li_space = hp.choice('opt',[
         'dim3': hp.choice('basic_dim3', [None, 5, 10, 50]),
         'act_func': hp.choice('basic_act_func', ['ReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
         'act_func_out': hp.choice('basic_act_func_out', ['Tanh', 'Sigmoid', None]),
-        'drop_out_rate': hp.uniform('basic_drop_out_rate', 0.2, 0.8),
+#        'drop_out_rate': hp.uniform('basic_drop_out_rate', 0.2, 0.8),
         'momentum': hp.uniform('basic_bn_momentum', 0.1, 0.9),
     },
     {
@@ -86,10 +105,64 @@ li_space = hp.choice('opt',[
     }
     ])
 
+## separate
+basic_linear_space = hp.choice('opt',[
+    {
+        'type': 'nonlinear',
+        'model': './model/LinearModel',
+        'src_sys': '../data/MasterArbeit/data/sys_hidden',
+        'src_ref': '../data/MasterArbeit/data/ref_hidden',
+        'tgt': hp.choice('basic_tgt', ['../data/MasterArbeit/data/data_scores', '../data/MasterArbeit/data/normalized_data_scores']),
+        'batch_size': hp.choice('basic_batch_size', [50, 100, 200]),
+        'lr': hp.uniform('basic_lr', 0.01, 0.9),
+        'dim2': hp.choice('basic_dim2', [50, 100, 500]),
+        'dim3': hp.choice('basic_dim3', [None, 5, 10, 50]),
+        'act_func': hp.choice('basic_act_func', ['ReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
+        'act_func_out': hp.choice('basic_act_func_out', ['Tanh', 'Sigmoid', None]),
+#        'drop_out_rate': hp.uniform('basic_drop_out_rate', 0.2, 0.8),
+        'momentum': hp.uniform('basic_bn_momentum', 0.1, 0.9),
+    }
+])
+basic_dp_linear_space =  hp.choice('opt',[
+    {
+        'type': 'nonlinear',
+        'model': 'BssicLinearModelDropout',
+        'src_sys': '../data/MasterArbeit/data/sys_hidden',
+        'src_ref': '../data/MasterArbeit/data/ref_hidden',
+        'tgt': hp.choice('basic_tgt', ['../data/MasterArbeit/data/data_scores', '../data/MasterArbeit/data/normalized_data_scores']),
+        'batch_size': hp.choice('basic_batch_size', [50, 100, 200]),
+        'lr': hp.uniform('basic_lr', 0.01, 0.9),
+        'dim2': hp.choice('basic_dim2', [50, 100, 500]),
+        'dim3': hp.choice('basic_dim3', [None, 5, 10, 50]),
+        'act_func': hp.choice('basic_act_func', ['ReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
+        'act_func_out': hp.choice('basic_act_func_out', ['Tanh', 'Sigmoid', None]),
+#        'drop_out_rate': hp.uniform('basic_drop_out_rate', 0.2, 0.8),
+        'momentum': hp.uniform('basic_bn_momentum', 0.1, 0.9),
+    }
+])
+bi_linear_space = hp.choice('opt',[
+    {
+        'type': 'nonlinear',
+        'model': 'BiLinear',
+        'src_sys': '../data/MasterArbeit/data/sys_hidden',
+        'src_ref': '../data/MasterArbeit/data/ref_hidden',
+        'tgt': hp.choice('bi_tgt', ['../data/MasterArbeit/data/data_scores', '../data/MasterArbeit/data/normalized_data_scores']),
+        'batch_size': hp.choice('bi_batch_size', [50, 100, 200]),
+        'lr': hp.uniform('bi_lr', 0.01, 0.9),
+        'dim2': hp.choice('bi_dim2', [None, 10, 50]),
+        'act_func': hp.choice('bl_act_func1', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
+        'act_func_out': hp.choice('bl_act_func_out', [None, 'Tanh', 'Sigmoid']),        
+    }
+])
+
+############################
 # set the optimize algorithm
+############################
 optim_algo = tpe.suggest
 
-# the the best options
+######################
+# get the best options
+######################
 def get_best():
     best = fmin(fn = o_func,
             space = li_space,
