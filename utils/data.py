@@ -4,7 +4,7 @@ import numpy
 import random
 
 class DataUtil(object):
-    def __init__(self, opt ):
+    def __init__(self, opt):
         # read data and shuffle
         self.opt = opt
         self.batch_size = opt.batch_size
@@ -41,6 +41,27 @@ class DataUtil(object):
         #self.data_sys = self.data_in[,1:len(self.data_sys[0])]
         #self.data_ref = self.data_in[,len(self.data_sys[0]):]
 
+    def normalize_z_score(self):
+        """
+        normalize the data with z-score
+        Problem: should i change the original data other simplily return teh normalized data???
+        """
+        data_in_numpy = self.data_in.numpy()
+        mean = numpy.mean(data_in_numpy)
+        std = numpy.std(data_in_numpy)
+        self.data_in = (data_in_numpy - mean)/std
+        self.data_in = torch.from_numpy(self.data_in)
+    
+    def normalize_minmax(self, new_min = -1, new_max = 1):
+        """
+        normalize the data with mix max, here set the new min and max to -1, 1.
+        x' = (x - min)/(max - min) * (new_max - new_min) + new_min
+        """
+        data_in_numpy = self.data_in.numpy()
+        min = numpy.min(data_in_numpy)
+        max = numpy.max(data_in_numpy)
+        self.data_in = (data_in_numpy - min)*(new_max - new_min)/(max - min) + new_min 
+        self.data_in = torch.from_numpy(self.data_in)
 
     def get_batch(self, sep = False):
         """
