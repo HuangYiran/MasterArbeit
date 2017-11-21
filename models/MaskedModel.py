@@ -12,7 +12,7 @@ class MaskedModel1(torch.nn.Module):
     这是使用ref信息来生成mask，把结果用于sys信息上。
     """
     def __init__(self, dim2 = 10, act_func = 'Tanh'):
-        super(MaskedModel, self).__init__()
+        super(MaskedModel1, self).__init__()
         self.li_1 = torch.nn.Linear(500, dim2)
         self.li_out = torch.nn.Linear(dim2, 1)
         self.li_mask = torch.nn.Linear(500, 500)
@@ -28,7 +28,7 @@ class MaskedModel1(torch.nn.Module):
         """
         input_sys = input[:, :500]
         input_ref = input[:, 500:]
-        proj_ref = self.mask(input_ref)
+        proj_ref = self.li_mask(input_ref)
         mask = self.sf(proj_ref)
         masked_sys = input_sys * mask
         proj_masked_sys = self.li_1(masked_sys)
@@ -41,14 +41,14 @@ class MaskedModel2(torch.nn.Module):
     使用综合信息作为mask源，同时把结果作用于sys
     相当于用综合信息给sys中各个维度的信息进行评分
     """
-    def __init_(self, dim2 = 20, act_func = 'Tanh'):
+    def __init__(self, dim2 = 20, act_func = 'Tanh'):
         super(MaskedModel2, self).__init__()
         self.li_sys = torch.nn.Linear(500, 500, bias = False)
         self.li_ref = torch.nn.Linear(500, 500, bias = False)
         self.li_mask = torch.nn.Linear(500, 500)
         self.sf = torch.nn.Softmax()
-        self.li_1 = torch.nn.Linear(500, dim2)
-        self.li_out = torch.nn.Linear(dim2, 1)
+        #self.li_1 = torch.nn.Linear(500, dim2)
+        self.li_out = torch.nn.Linear(500, 1)
         self.act_func = getattr(torch.nn, act_func)()
 
     def forward(self, input):
@@ -66,6 +66,7 @@ class MaskedModel2(torch.nn.Module):
         mask = self.li_mask(sum_in)
 
         masked_sys = mask * input_sys
-        proj_masked_sys = self.act_func(self.li_1(masked_sys))
-        out = self.li_out(proj_masked_sys)
+        out = self.li_out(masked_sys)
+#        proj_masked_sys = self.act_func(self.li_1(masked_sys))
+#        out = self.li_out(proj_masked_sys)
         return out
