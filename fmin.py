@@ -9,7 +9,8 @@ import random
 import math
 
 from data import DataUtil
-from LinearModel import BasicLinear, BiLinear
+from LinearModel import BasicLinear, BasicLinear_dropout, BiLinear
+from MaskedModel import MaskedModel1, MaskedModel2
 from Params import Params
 from hyperopt import fmin, tpe, hp
 ###########################################################################
@@ -23,12 +24,17 @@ def o_func(params):
 
     # read data
     data = DataUtil(opt)
+    data.normalize_minmax()
 
     # build model
     if opt.model == "BiLinear":
         model = BiLinear(dim2 = opt.dim2, act_func = opt.act_func, act_func_out = opt.act_func_out)
-    else if opt.model == "BasicLinearDropout":
-        model = BasicLinear_dropout(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out)
+    elif opt.model == "BasicLinearDropout":
+        model = BasicLinear_dropout(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate)
+    elif opt.model == "MaskedModel1":
+        model = MaskedModel1(dim2 = opt.dim2, act_func = opt.act_func)
+    elif opt.model == "MaskedModel2":
+        model = MaskedModel2(dim2 = opt.dim2, act_func = opt.act_func)
     else:
         model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, mom = opt.momentum)
     print(model)
@@ -102,6 +108,28 @@ li_space = hp.choice('opt',[
         'dim2': hp.choice('bi_dim2', [None, 10, 50]),
         'act_func': hp.choice('bl_act_func1', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
         'act_func_out': hp.choice('bl_act_func_out', [None, 'Tanh', 'Sigmoid']),        
+    },
+    {
+        'type': 'masked',
+        'model': 'MaskedModel1',
+        'src_sys': '../data/MasterArbeit/data/sys_hidden',
+        'src_ref': '../data/MasterArbeit/data/ref_hidden',
+        'tgt': hp.choice('bi_tgt', ['../data/MasterArbeit/data/data_scores', '../data/MasterArbeit/data/normalized_data_scores']),
+        'batch_size': hp.choice('m1_batch_size', [50, 100, 200]),
+        'lr': hp.uniform('m1_lr', 0.01, 0.9),
+        'dim2': hp.choice('m1_dim2', [10, 50]),
+        'act_func': hp.choice('m1_act_func1', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
+    },
+    {
+        'type': 'masked',
+        'model': 'MaskedModel2',
+        'src_sys': '../data/MasterArbeit/data/sys_hidden',
+        'src_ref': '../data/MasterArbeit/data/ref_hidden',
+        'tgt': hp.choice('bi_tgt', ['../data/MasterArbeit/data/data_scores', '../data/MasterArbeit/data/normalized_data_scores']),
+        'batch_size': hp.choice('m2_batch_size', [50, 100, 200]),
+        'lr': hp.uniform('m2_lr', 0.01, 0.9),
+        'dim2': hp.choice('m2_dim2', [10, 50]),
+        'act_func': hp.choice('m2_act_func1', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
     }
     ])
 
@@ -154,7 +182,32 @@ bi_linear_space = hp.choice('opt',[
         'act_func_out': hp.choice('bl_act_func_out', [None, 'Tanh', 'Sigmoid']),        
     }
 ])
-
+m1_space = hp.choice('opt', [
+    {
+        'type': 'masked',
+        'model': 'MaskedModel2',
+        'src_sys': '../data/MasterArbeit/data/sys_hidden',
+        'src_ref': '../data/MasterArbeit/data/ref_hidden',
+        'tgt': hp.choice('bi_tgt', ['../data/MasterArbeit/data/data_scores', '../data/MasterArbeit/data/normalized_data_scores']),
+        'batch_size': hp.choice('m2_batch_size', [50, 100, 200]),
+        'lr': hp.uniform('m2_lr', 0.01, 0.9),
+        'dim2': hp.choice('m2_dim2', [None, 10, 50]),
+        'act_func': hp.choice('m2_act_func1', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
+    }
+])
+m2_space = hp.choice('opt', [
+    {
+        'type': 'masked',
+        'model': 'MaskedModel2',
+        'src_sys': '../data/MasterArbeit/data/sys_hidden',
+        'src_ref': '../data/MasterArbeit/data/ref_hidden',
+        'tgt': hp.choice('bi_tgt', ['../data/MasterArbeit/data/data_scores', '../data/MasterArbeit/data/normalized_data_scores']),
+        'batch_size': hp.choice('m2_batch_size', [50, 100, 200]),
+        'lr': hp.uniform('m2_lr', 0.01, 0.9),
+        'dim2': hp.choice('m2_dim2', [10, 50]),
+        'act_func': hp.choice('m2_act_func1', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
+    }
+])
 ############################
 # set the optimize algorithm
 ############################
