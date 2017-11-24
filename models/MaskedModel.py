@@ -13,11 +13,15 @@ class MaskedModel1(torch.nn.Module):
     """
     def __init__(self, dim2 = 10, act_func = 'Tanh'):
         super(MaskedModel1, self).__init__()
-        self.li_1 = torch.nn.Linear(500, dim2)
-        self.li_out = torch.nn.Linear(dim2, 1)
         self.li_mask = torch.nn.Linear(500, 500)
         self.sf = torch.nn.Softmax()
-        self.act = getattr(torch.nn, act_func)()
+        self.li_1 = None
+        if dim2:
+            self.li_1 = torch.nn.Linear(500, dim2)
+            self.act_func = getattr(torch.nn, act_func)()
+            self.li_out = torch.nn.Linear(dim2, 1)
+        else:
+            self.li_out = torch.nn.Linear(500, 1)
 
     def forward(self, input):
         """
@@ -31,11 +35,14 @@ class MaskedModel1(torch.nn.Module):
         proj_ref = self.li_mask(input_ref)
         mask = self.sf(proj_ref)
         masked_sys = input_sys * mask
-        proj_masked_sys = self.li_1(masked_sys)
-        proj_masked_sys = self.act(proj_masked_sys)
-        out = self.li_out (proj_masked_sys)
+        masked_sys = mask * input_sys
+        if self.li_1:
+            proj_masked_sys = self.act_func(self.li_1(masked_sys))
+            out = self.li_out(proj_masked_sys)
+        else:
+            out = self.li_out(masked_sys)
         return out
-
+    
 class MaskedModel2(torch.nn.Module):
     """
     使用综合信息作为mask源，同时把结果作用于sys
@@ -47,9 +54,13 @@ class MaskedModel2(torch.nn.Module):
         self.li_ref = torch.nn.Linear(500, 500, bias = False)
         self.li_mask = torch.nn.Linear(500, 500)
         self.sf = torch.nn.Softmax()
-        #self.li_1 = torch.nn.Linear(500, dim2)
-        self.li_out = torch.nn.Linear(500, 1)
-        self.act_func = getattr(torch.nn, act_func)()
+        self.li_1 = None
+        if dim2:
+            self.li_1 = torch.nn.Linear(500, dim2)
+            self.act_func = getattr(torch.nn, act_func)()
+            self.li_out = torch.nn.Linear(dim2, 1)
+        else:
+            self.li_out = torch.nn.Linear(500, 1)
 
     def forward(self, input):
         """
@@ -66,7 +77,9 @@ class MaskedModel2(torch.nn.Module):
         mask = self.li_mask(sum_in)
 
         masked_sys = mask * input_sys
-        out = self.li_out(masked_sys)
-#        proj_masked_sys = self.act_func(self.li_1(masked_sys))
-#        out = self.li_out(proj_masked_sys)
+        if self.li_1:
+            proj_masked_sys = self.act_func(self.li_1(masked_sys))
+            out = self.li_out(proj_masked_sys)
+        else:
+            out = self.li_out(masked_sys)
         return out

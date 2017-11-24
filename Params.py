@@ -6,6 +6,8 @@ class Params(object):
         self.src_ref = './data/hidden_ref'
         self.tgt = './data/data_scores'
         self.out = './test_data/pred'
+        self.optim = 'Adam'
+        self.loss_fn = 'MSELoss'
         self.batch_size = 50
 
         # linear model
