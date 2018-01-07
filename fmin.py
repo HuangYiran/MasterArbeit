@@ -50,22 +50,23 @@ def o_func(params):
         loss_fn = torch.nn.L1Loss()
 
     # get the number of batch 
-    nu_batch = data.get_nu_batch()
-    print("number of batch is %d"%(nu_batch))
+    nu_batch, nu_val_batch, nu_test_batch = data.get_nu_batch()
+    print("number of batch is %d \nnumber of val batch %d \nnumber of test batch %d"%(nu_batch, nu_val_batch, nu_test_batch))
 
     # train
-    for i in range(50 * nu_batch):
-        src, tgt = data.get_batch_repeatly()
+    for i in range(nu_batch):
         if i % 10 == 0:
+            src, tgt = data.get_val_batch()
             print("evaluate %d" %(i/10))
             evaluate(model, src, tgt)
             evaluate_loss(model, loss_fn, src, tgt)
         else:
+            src, tgt = data.get_batch()
             train_batch(model, loss_fn, optimizer, src, tgt)
     
     out = 0.0
     for i in range(10):
-        src, tgt = data.get_batch_repeatly()
+        src, tgt = data.get_test_batch()
         out = out + evaluate(model, src, tgt)
         
     return 1 - out/10.0

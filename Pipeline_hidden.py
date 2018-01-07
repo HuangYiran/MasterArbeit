@@ -105,7 +105,12 @@ class Pipeline_hidden(object):
                 if word.data[0] == onmt.Constants.PAD:
                     break;
             # 第length个值是pad_word，所以最后一个再其前一个
-            lengths.append(length - 1)
+            # 另外这里的长度是指下标，所以下面还是进行了减一。
+            # 然而存在另外一个问题就是，如果长度为0的话，那么下标会是-1，
+            if length != 0
+                lengths.append(length - 1)
+            else:
+                lengths.append(length)
         return lengths
                     
 

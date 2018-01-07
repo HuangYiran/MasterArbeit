@@ -9,7 +9,10 @@ class DataUtil(object):
         self.opt = opt
         self.batch_size = opt.batch_size
         self.cur_index = 0
+        self.cur_test_index = 0
+        self.cur_val_index = 0
 
+        # read training data
         with file(opt.src_sys) as fi:
             self.data_sys = torch.from_numpy(numpy.load(fi))
         with file(opt.src_ref) as fi:
@@ -23,6 +26,32 @@ class DataUtil(object):
                 self.data_tgt.append(float(line.strip()))
         self.data_tgt = torch.Tensor(self.data_tgt)
         #self._shuffle()
+
+        # read val data
+        with file(opt.src_val_sys) as fi:
+            self.data_val_sys = torch.from_numpy(numpy.load(fi))
+        with file(opt.src_val_ref) as fi:
+            self.data_val_ref = torch.from_numpy(numpy.load(fi))
+        self.data_val_in = torch.cat((self.data_val_sys, self.data_val_ref), 1)
+        self.nu_val_batch = len(self.data_val_in)/self.batch_size
+        self.data_val_tgt = []
+        with open(opt.val_tgt) as fi:
+            for line in fi:
+                self.data_val_tgt.append(float(line.strip()))
+        self.data_val_tgt = torch.Tensor(self.data_val_tgt)
+        
+        # read test data
+        with file(opt.src_test_sys) as fi:
+            self.data_test_sys = torch.from_numpy(numpy.load(fi))
+        with file(opt.src_test_ref) as fi:
+            self.data_test_ref = torch.from_numpy(numpy.load(fi))
+        self.data_test_in = torch.cat((self.data_test_sys, self.data_test_ref), 1)
+        self.nu_test_batch = len(self.data_test_in)/self.batch_size
+        self.data_test_tgt = []
+        with open(opt.test_tgt) as fi:
+            for line in fi:
+                self.data_test_tgt.append(float(line.strip()))
+        self.data_test_tgt = torch.Tensor(self.data_test_tgt)
 
     def _shuffle(self):
         """
@@ -43,6 +72,7 @@ class DataUtil(object):
 
     def normalize_z_score(self):
         """
+        only training data
         normalize the data with z-score
         Problem: should i change the original data other simplily return teh normalized data???
         """
@@ -62,6 +92,18 @@ class DataUtil(object):
         max = numpy.max(data_in_numpy)
         self.data_in = (data_in_numpy - min)*(new_max - new_min)/(max - min) + new_min 
         self.data_in = torch.from_numpy(self.data_in)
+        
+        data_in_numpy = self.data_val_in.numpy()
+        min = numpy.min(data_in_numpy)
+        max = numpy.max(data_in_numpy)
+        self.data_val_in = (data_in_numpy - min)*(new_max - new_min)/(max - min) + new_min 
+        self.data_val_in = torch.from_numpy(self.data_val_in)
+        
+        data_in_numpy = self.data_test_in.numpy()
+        min = numpy.min(data_in_numpy)
+        max = numpy.max(data_in_numpy)
+        self.data_test_in = (data_in_numpy - min)*(new_max - new_min)/(max - min) + new_min 
+        self.data_test_in = torch.from_numpy(self.data_test_in)
 
     def get_batch(self, sep = False):
         """
@@ -75,8 +117,8 @@ class DataUtil(object):
 
         """
         self.cur_index += 1
-        start = self.batch_size * self.cur_index - 1
-        end = self.batch_size + start
+        start = self.batch_size * self.cur_index
+        end = self.batch_size + start + 1
         len_data = len(self.data_in)
         
         if start > len_data:
@@ -91,7 +133,68 @@ class DataUtil(object):
         else:
             return (self.data_in[start:end, ], 
                     self.data_tgt[start:end,])
+    
+    def get_test_batch(self, sep = False):
+        """
+        input: sep
+            sep: boolean return the separated data order the combinded data
+        output: (data_sys, data_ref), data_tgt  order data_in, data_tgt
+            data_sys: (batch_size, )
+            data_ref: (batch_size, )
+            data_in : (batch_size, )
+            data_tgt: (batch_size, )
 
+        """
+        self.cur_test_index += 1
+        start = self.batch_size * self.cur_test_index
+        end = self.batch_size + start + 1
+        len_data = len(self.data_test_in)
+        
+        if start > len_data:
+            print("the data set is empty")
+            return None, None
+        elif end > len_data:
+            end = len_data
+
+        if sep:
+            return ((self.data_test_sys[start:end,], self.data_test_ref[start:end,]), 
+                    self.data_test_tgt[start:end,])
+        else:
+            return (self.data_test_in[start:end, ], 
+                    self.data_test_tgt[start:end,])
+
+    def get_val_batch(self, sep = False):
+        """
+        input: sep
+            sep: boolean return the separated data order the combinded data
+        output: (data_sys, data_ref), data_tgt  order data_in, data_tgt
+            data_sys: (batch_size, )
+            data_ref: (batch_size, )
+            data_in : (batch_size, )
+            data_tgt: (batch_size, )
+
+        """
+        self.cur_val_index += 1
+        if self.cur_val_index == self.nu_val_batch:
+            self.cur_val_index = 0
+        #batch_size = 10
+        start = self.batch_size * self.cur_val_index
+        end = self.batch_size + start + 1
+        len_data = len(self.data_val_in)
+        
+        if start > len_data:
+            print("the data set is empty")
+            return None, None
+        elif end > len_data:
+            end = len_data
+
+        if sep:
+            return ((self.data_val_sys[start:end,], self.data_val_ref[start:end,]), 
+                    self.data_val_tgt[start:end,])
+        else:
+            return (self.data_val_in[start:end, ], 
+                    self.data_val_tgt[start:end,])
+    
     def get_batch_repeatly(self, sep = False):
         if self.cur_index == self.nu_batch:
             self.cur_index = 0
@@ -102,4 +205,4 @@ class DataUtil(object):
         """
         return the number of batch 
         """
-        return self.nu_batch
+        return self.nu_batch, self.nu_val_batch, self.nu_test_batch

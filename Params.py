@@ -2,9 +2,15 @@ class Params(object):
     def __init__(self):
         # public params
         self.model = './model/LinearModel'
-        self.src_sys = './data/hidden_sys'
-        self.src_ref = './data/hidden_ref'
-        self.tgt = './data/data_scores'
+        self.src_sys = '../data/MasterArbeit/data/hidden_value_pred'
+        self.src_ref = '../data/MasterArbeit/data/hidden_value_ref'
+        self.tgt = '../data/MasterArbeit/data/record_prepronce_clearned'
+        self.src_test_sys = '../data/MasterArbeit/data/hidden_value_pred_2015'
+        self.src_test_ref = '../data/MasterArbeit/data/hidden_value_ref_2015'
+        self.test_tgt = '../data/MasterArbeit/data/record_newstest2015_cleaned'
+        self.src_val_sys = '../data/MasterArbeit/data/hidden_value_pred_2016'
+        self.src_val_ref = '../data/MasterArbeit/data/hidden_value_ref_2016'
+        self.val_tgt = '../data/MasterArbeit/data/record_newstest2016_cleaned'
         self.out = './test_data/pred'
         self.optim = 'Adam'
         self.loss_fn = 'MSELoss'
