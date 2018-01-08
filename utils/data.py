@@ -105,7 +105,7 @@ class DataUtil(object):
         self.data_test_in = (data_in_numpy - min)*(new_max - new_min)/(max - min) + new_min 
         self.data_test_in = torch.from_numpy(self.data_test_in)
 
-    def get_batch(self, sep = False):
+    def get_batch(self, sep = False, rep = False):
         """
         input: sep
             sep: boolean return the separated data order the combinded data
@@ -117,6 +117,9 @@ class DataUtil(object):
 
         """
         self.cur_index += 1
+        if rep:
+            if self.cur_index == self.nu_batch:
+                self.cur_index = 0
         start = self.batch_size * self.cur_index
         end = self.batch_size + start + 1
         len_data = len(self.data_in)
@@ -134,7 +137,7 @@ class DataUtil(object):
             return (self.data_in[start:end, ], 
                     self.data_tgt[start:end,])
     
-    def get_test_batch(self, sep = False):
+    def get_test_batch(self, sep = False, rep = False):
         """
         input: sep
             sep: boolean return the separated data order the combinded data
@@ -146,6 +149,9 @@ class DataUtil(object):
 
         """
         self.cur_test_index += 1
+        if rep:
+            if self.cur_test_index == self.nu_test_batch:
+                self.cur_test_index = 0
         start = self.batch_size * self.cur_test_index
         end = self.batch_size + start + 1
         len_data = len(self.data_test_in)
@@ -163,7 +169,7 @@ class DataUtil(object):
             return (self.data_test_in[start:end, ], 
                     self.data_test_tgt[start:end,])
 
-    def get_val_batch(self, sep = False):
+    def get_val_batch(self, sep = False, rep = False):
         """
         input: sep
             sep: boolean return the separated data order the combinded data
@@ -175,8 +181,9 @@ class DataUtil(object):
 
         """
         self.cur_val_index += 1
-        if self.cur_val_index == self.nu_val_batch:
-            self.cur_val_index = 0
+        if rep:
+            if self.cur_val_index == self.nu_val_batch:
+                self.cur_val_index = 0
         #batch_size = 10
         start = self.batch_size * self.cur_val_index
         end = self.batch_size + start + 1

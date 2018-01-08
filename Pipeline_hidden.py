@@ -186,6 +186,9 @@ class Pipeline_hidden(object):
         return tmp
     
     def get_hidden(self, srcBatch, goldBatch):
+        """
+        获得每个句子隐藏层最后一个单词对应的输出
+        """
         # 把单词转化成对应的index，然后放进dataset中进行包装
         dataset = self.buildData(srcBatch, goldBatch) #设定balance为False了，因为没有给输入进行排序
         # 获得第一个num batch
@@ -203,6 +206,27 @@ class Pipeline_hidden(object):
             tmp = [tmp[0][i] for i, j in enumerate(tmp[0])]
             tmp = torch.stack(tmp)
             #print(tmp.data.size())
+            out.append(tmp)
+        out = torch.cat(out, 0)
+        print(out.data.size())
+        return out
+    
+    def get_hidden_full(self, srcBatch, goldBatch):
+        """
+        获得隐藏层的输出，
+        output:
+        out [batch_size, sql_len, hidden_size]
+        """
+        dataset = self.buildData(srcBatch, goldBatch)
+        nu_batch = len(dataset)
+        out = []
+        for i in range(nu_batch):
+            print("processing batch %s/%s" %(i, nu_batch))
+            src, tgt, indices = dataset[i]
+            tmp = self.get_hidden_batch(src, tgt)
+            tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x:x[-1])))[:-1]
+            tmp = [tmp[0][i] for i, j in enumerate(tmp[0])]
+            tmp = torch.stack(tmp)
             out.append(tmp)
         out = torch.cat(out, 0)
         print(out.data.size())

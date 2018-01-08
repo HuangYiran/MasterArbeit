@@ -7,6 +7,7 @@ import argparse
 import numpy
 import random
 import math
+import os
 
 from data import DataUtil
 from LinearModel import BasicLinear, BasicLinear_dropout, BiLinear
@@ -17,6 +18,15 @@ from hyperopt import fmin, tpe, hp
 # define the objective function, this function will be used in optimization
 ###########################################################################
 def o_func(params):
+    # file to save the tmp result
+    path_loss = '../data/MasterArbeit/mid_result/loss'
+    path_corr = '../data/MasterArbeit/mid_result/corr'
+    if os.path.exists(path_loss):
+        os.remove(path_loss)
+    if os.path.exists(path_corr):
+        os.remove(path_corr)
+    file_loss = open(path_loss, 'a')
+    file_corr = open(path_corr, 'a')
     # set params
     opt = Params()
     opt.set_params(params)
@@ -24,7 +34,7 @@ def o_func(params):
 
     # read data
     data = DataUtil(opt)
-    data.normalize_minmax()
+#    data.normalize_minmax()
 
     # build model
     if opt.model == "BiLinear":
@@ -54,20 +64,32 @@ def o_func(params):
     print("number of batch is %d \nnumber of val batch %d \nnumber of test batch %d"%(nu_batch, nu_val_batch, nu_test_batch))
 
     # train
-    for i in range(nu_batch):
+    for i in range(15 * nu_batch):
         if i % 10 == 0:
-            src, tgt = data.get_val_batch()
+            src, tgt = data.get_val_batch(rep = True)
+            #src, tgt = data.get_batch(rep = True)
             print("evaluate %d" %(i/10))
-            evaluate(model, src, tgt)
-            evaluate_loss(model, loss_fn, src, tgt)
+            corr = evaluate(model, src, tgt)
+            loss = evaluate_loss(model, loss_fn, src, tgt)
+            
+            # write mid result
+            tmp_loss = "%d,%f"%(int(i/10), loss)
+            file_loss.write(tmp_loss)
+            file_loss.write('\n')
+            tmp_corr = "%d,%f"%(int(i/10), corr)
+            file_corr.write(tmp_corr)
+            file_corr.write('\n')
         else:
-            src, tgt = data.get_batch()
+            src, tgt = data.get_batch(rep = True)
             train_batch(model, loss_fn, optimizer, src, tgt)
     
     out = 0.0
     for i in range(10):
-        src, tgt = data.get_test_batch()
+        src, tgt = data.get_test_batch(rep = True)
         out = out + evaluate(model, src, tgt)
+    
+    file_loss.close()
+    file_corr.close()
         
     return 1 - out/10.0
 
@@ -289,8 +311,8 @@ def evaluate_loss(model, loss_fn, src, tgt):
     out = model(src)
     loss = loss_fn(out, tgt).data.numpy()
     mean = numpy.mean(loss)
-    std = numpy.std(loss)
-    print("the mean loss is %f, the std is %f" %(mean, std))
+#    std = numpy.std(loss)
+    print("the mean loss is %f" %(mean))
     return mean
 
 def predict(model, src):
