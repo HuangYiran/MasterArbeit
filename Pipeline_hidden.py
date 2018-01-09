@@ -107,7 +107,7 @@ class Pipeline_hidden(object):
             # 第length个值是pad_word，所以最后一个再其前一个
             # 另外这里的长度是指下标，所以下面还是进行了减一。
             # 然而存在另外一个问题就是，如果长度为0的话，那么下标会是-1，
-            if length != 0
+            if length != 0:
                 lengths.append(length - 1)
             else:
                 lengths.append(length)
@@ -185,6 +185,26 @@ class Pipeline_hidden(object):
         #print(tmp)
         return tmp
     
+    def _get_full_hidden(self, src, tgt):
+        fixed_seq_len = 100
+        pred = self.get_hidden_batch(src, tgt) # 输出pred维度为[batch_size, seq_len, hidden_size]
+        # 每个Batch的seq_len是一样的，为这个Batch中最长的句子的长度。另外<EOS>后的hidden value虽然是不一样的，但是并没有价值
+        # 下面的操作是为了提取有用的hidden value，并把结果扩充到固定的句子长度，这里设定为100
+        lengths_tgt = self._get_sent_length(tgt)
+        tmp = []
+        for counter, item in enumerate(pred):
+            # item 是 [seq_len, hidden_size], 得到的tmp是扩充后的item，应该是[100, hidden_size]
+            num_word = lengths_tgt[counter] + 1 # get_sent_length返回的是坐标，所以加一
+            if num_word >= fixed_seq_len:
+                item_pad = item[:fixed_seq_len]
+            else:
+                item_ext = item[:num_word] # 加一是因为片取是不包括最后一位的。
+                padding = torch.Tensor(fixed_seq_len - num_word, item.size()[1]).fill_(0)
+                item_pad = torch.cat((item_ext, padding), 0)
+            tmp.append(item_pad)
+        tmp = torch.stack(tmp,0)
+        return tmp
+    
     def get_hidden(self, srcBatch, goldBatch):
         """
         获得每个句子隐藏层最后一个单词对应的输出
@@ -223,10 +243,11 @@ class Pipeline_hidden(object):
         for i in range(nu_batch):
             print("processing batch %s/%s" %(i, nu_batch))
             src, tgt, indices = dataset[i]
-            tmp = self.get_hidden_batch(src, tgt)
+            tmp = self._get_full_hidden(src, tgt)
             tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x:x[-1])))[:-1]
             tmp = [tmp[0][i] for i, j in enumerate(tmp[0])]
             tmp = torch.stack(tmp)
+            print(tmp.data.size())
             out.append(tmp)
         out = torch.cat(out, 0)
         print(out.data.size())

@@ -58,6 +58,9 @@ parser.add_argument('-normalize', action='store_true',
 parser.add_argument('-gpu', type=int, default=-1,
                     help="Device to run on")
 
+parser.add_argument('-get_last', action = 'store_true',
+                    help = 'only get the hidden value of the last word in the sentence, when false, get the hidden value for each word in the sentence')
+
 def addone(f):
     for line in f:
         yield line
@@ -115,7 +118,12 @@ def main():
             if len(srcBatch) == 0:
                 break
 
-    decOut= pipeline.get_hidden(srcBatch, tgtBatch)
+    if opt.get_last:
+        print("get last hidden value")
+        decOut = pipeline.get_hidden(srcBatch, tgtBatch)
+    else:
+        print("get full hidden value")
+        decOut = pipeline.get_hidden_full(srcBatch, tgtBatch)
     print(decOut.data.numpy().shape)
     
     with open(opt.output, "w") as f:
