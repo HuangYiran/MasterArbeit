@@ -40,3 +40,8 @@
 想法36. 只使用最后一个hidden value的结果有点不尽人意，所以尝试使用decoder的所有的hidden value
 37. 修改pipeline_hidden.py。增加_get_full_hidden内部方法和get_hidden_full方法，来获得整个句子的hidden value， 因为每个batch的句子长度不同，所以扩展到固定长度。
 38. 修改get_hidden.py。增加一个argument，询问是否获取所有的hidden value。
+39. 运行get_hidden.py，参数为prepronce的时候，出现了错误，因为数据太大了，内存不足。这估计会是一个大问题。
+40. 看了下util中的data方法，还想并不用改的样子。但还是测试一下吧
+41. 准备编写用于full hidden value 的新的model。但是存在一个问题是就和句子的长度不一一样，这里hidden value的长度也是不一的。作为参考，这里回去看一下论文，Attention is all you need.
+42. 加一个插曲，放到服务器上的程序，在跑到Batch1007的时候，就被kill了，原因未知。估计还是太大了的原因，所以还是先对 原始文件进行划分吧。
+43. 把原数据分成了十份，然后再扔到服务器上跑
