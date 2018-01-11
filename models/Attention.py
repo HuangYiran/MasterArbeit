@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
 import numpy
+import sys
+
+from Modules import Linear
 
 class ScaledDotProductAttention(nn.Module):
     def __init__(self, num_dim, dropout_rate = 0.1):
@@ -33,12 +36,12 @@ class ScaledDotProductAttention(nn.Module):
         return out, attn
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, num_head, num_dim, num_k, dropout_rate = 0.1):
+    def __init__(self, num_head, num_dim, num_dim_k, num_dim_v, dropout_rate = 0.1):
         """
         num_head: the number of head
         num_dim: the number of dimension of each query word and key
         num_dim_k: the number of dimension query and key will mapping to 
-        num_dim_k: the number of dimension value will mapping to 
+        num_dim_v: the number of dimension value will mapping to 
         """
         super(MultiHeadAttention, self).__init__()
         self.num_head = num_head
@@ -55,8 +58,7 @@ class MultiHeadAttention(nn.Module):
         nn.init_xavier_normal(self.w_k)
 
         self.attention = ScaledDotProductAttention(num_dim)
-        #self.LayerNormalisation = 
-        #self.project = nn.Linear(num_head*num_dim_v, num_dim)
+        self.project = Linear(num_head*num_dim_v, num_dim)
 
         self.dropout = nn.dropout(dropout_rate)
 
@@ -89,8 +91,8 @@ class MultiHeadAttention(nn.Module):
         # outs: (batch_size, num_q, num_head * num_dim_v)
         outs = torch.cat(torch.split(outs, batch_size, dim = 0), dim = -1)
 
+        # outs: (batch_size, num_q, num_dim)
         outs = self.proj(outs)
         outs = self.dropout(outs)
 
         return outs, attns
-
