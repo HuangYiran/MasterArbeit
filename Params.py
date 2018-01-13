@@ -26,6 +26,22 @@ class Params(object):
         self.act_func_out = None
         self.drop_out_rate = 0.5
         self.momentum = 0.1
+        
+        # FullHiddenAttn - mlp, rnn
+        self.num_head = 8
+        self.num_dim_k = 64
+        self.num_dim_v = 64
+        self.d_rate_attn = 0.1
+        self.act_func1 = "LeakyReLU"
+        self.act_func2 = "LeakyReLU"
+        
+        # FullHiddenAttn - conv
+        self.dim1 = 20
+        self.act_func1 = "LeakyReLU"
+        self.kernel_size1 = 3
+        self.stride1 = 2
+        self.kernel_size2 = 3
+        self.stride2 = 2
     
     def set_params(self, opt):
         for name, value in opt.items():

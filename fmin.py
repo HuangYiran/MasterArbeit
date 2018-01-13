@@ -12,6 +12,7 @@ import os
 from data import DataUtil
 from LinearModel import BasicLinear, BasicLinear_dropout, BiLinear
 from MaskedModel import MaskedModel1, MaskedModel2
+from FullHiddenModel import MultiHeadAttnMlpModel, MultiHeadAttnLSTMModel, MultiHeadAttnConvModel
 from Params import Params
 from hyperopt import fmin, tpe, hp
 ###########################################################################
@@ -27,6 +28,7 @@ def o_func(params):
         os.remove(path_corr)
     file_loss = open(path_loss, 'a')
     file_corr = open(path_corr, 'a')
+    
     # set params
     opt = Params()
     opt.set_params(params)
@@ -34,7 +36,7 @@ def o_func(params):
 
     # read data
     data = DataUtil(opt)
-#    data.normalize_minmax()
+    #data.normalize_minmax()
 
     # build model
     if opt.model == "BiLinear":
@@ -45,6 +47,12 @@ def o_func(params):
         model = MaskedModel1(dim2 = opt.dim2, act_func = opt.act_func)
     elif opt.model == "MaskedModel2":
         model = MaskedModel2(dim2 = opt.dim2, act_func = opt.act_func)
+    elif opt.model == "MultiHeadAttnMlpModel":
+        model = MultiHeadAttnMlpModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, act_func1 = opt.act_func1, dim2 = opt.dim2, act_func2 = opt.act_func2)
+    elif opt.model == "MultiHeadAttnLSTMModel":
+        model = MultiHeadAttnLSTMModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim2 = opt.dim2, act_func2 = opt.act_func2)
+    elif opt.model == "MultiHeadAttnConvModel":
+        model = MultiHeadAttnConvModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
     else:
         model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, mom = opt.momentum)
     print(model)

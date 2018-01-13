@@ -8,11 +8,12 @@ class Linear(nn.Module):
         dim_in: int
         dim_out: int
         """
+        super(Linear, self).__init__()
         self.dim_in = dim_in
         self.dim_out = dim_out
         self.li = nn.Linear(self.dim_in, self.dim_out, bias = True)
 
-    def vorward(self, data_in):
+    def forward(self, data_in):
         """
         data_in: torch.Variable (batch_size, num_q, num_head * num_dim_v)
         out: torch.Variable (batch_size, num_q, num_dim)

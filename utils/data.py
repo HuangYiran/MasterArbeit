@@ -121,7 +121,7 @@ class DataUtil(object):
             if self.cur_index == self.nu_batch:
                 self.cur_index = 0
         start = self.batch_size * self.cur_index
-        end = self.batch_size + start + 1
+        end = self.batch_size + start
         len_data = len(self.data_in)
         
         if start > len_data:
@@ -153,7 +153,7 @@ class DataUtil(object):
             if self.cur_test_index == self.nu_test_batch:
                 self.cur_test_index = 0
         start = self.batch_size * self.cur_test_index
-        end = self.batch_size + start + 1
+        end = self.batch_size + start
         len_data = len(self.data_test_in)
         
         if start > len_data:
@@ -186,7 +186,7 @@ class DataUtil(object):
                 self.cur_val_index = 0
         #batch_size = 10
         start = self.batch_size * self.cur_val_index
-        end = self.batch_size + start + 1
+        end = self.batch_size + start
         len_data = len(self.data_val_in)
         
         if start > len_data:
