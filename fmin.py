@@ -52,11 +52,14 @@ def o_func(params):
     elif opt.model == "MultiHeadAttnLSTMModel":
         model = MultiHeadAttnLSTMModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim2 = opt.dim2, act_func2 = opt.act_func2)
     elif opt.model == "MultiHeadAttnConvModel":
-        model = MultiHeadAttnConvModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
+        model = MultiHeadAttnConvModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, kernel_size2 = opt.kernel_size2)
     else:
         model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, mom = opt.momentum)
     print(model)
 
+    # if cuda is set use gpu to train the model
+    if opt.cuda == "True": # don't know how to set boolean value in the hyperopt
+        model.cuda()
     # set optimizer and loss functioin, use if-else because their parameters are different.
     # lr = 0.002, betas = (0.9, 0.888), eps = 1e-08, weight_decay = 0
     if opt.optim == 'Adam':
@@ -264,6 +267,33 @@ m2_space = hp.choice('opt', [
         'act_func': hp.choice('m2_act_func1', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh']),
     }
 ])
+fullHiddenModel_space = hp.choice('opt', [
+    {
+        'tgt': '../data/MasterArbeit/data2/record_NIST_dev2015_clean', 
+        'src_sys': '../data/MasterArbeit/data2/hidden_pred_preprodev2015',
+        'src_ref': '../data/MasterArbeit/data2/hidden_ref_preprodev2015',
+        'val_tgt': '../data/MasterArbeit/data2/record_NIST_tst2016_clean',
+        'src_val_sys': '../data/MasterArbeit/data2/hidden_pred_preprotst2016',
+        'src_val_ref': '../data/MasterArbeit/data2/hidden_ref_preprotst2016',
+        'test_tgt': '../data/MasterArbeit/data2/record_NIST_tst2016_clean',
+        'src_test_sys': '../data/MasterArbeit/data2/hidden_pred_preprotst2016',
+        'src_test_ref': '../data/MasterArbeit/data2/hidden_ref_preprotst2016',
+        'cuda': 'True',
+        'model': hp.choice('model', ['MultiHeadAttnMlpModel', 'MultiHeadAttnLSTMModel', 'MultiHeadAttnConvModel']),
+        'batch_size': hp.choice('batch_size', [20, 50, 100]),
+        'num_head': hp.choice('num_head', [4, 8, 32, 64, 128]),
+        'num_dim_k': hp.choice('num_dim_k', [16, 32, 64, 128, 512]),
+        'num_dim_v': hp.choice('num_dim_v', [16, 32, 64, 128, 512]),
+        'd_rate_attn': hp.uniform('d_rate_attn', 0.0, 0.9),
+        #'act_func1': hp.choice('act_func1', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh'])
+        #'act_func2': hp.choice('act_func2', ['ReLU', 'PReLU', 'LeakyReLU', 'Sigmoid', 'Tanh'])
+        'act_func1': 'LeakyReLU',
+        'act_func2': 'LeakyReLU',
+        'dim1': hp.choice('dim1', [64, 128, 256]),
+        'dim2': hp.choice('dim2', [16, 32, 64]),
+        'kernel_size1': hp.choice('kernel_size1', [2, 4, 8, 32, 64]),
+        'kernel_size2': hp.choice('kernel_size2', [2, 4, 8, 32])
+    }])
 ############################
 # set the optimize algorithm
 ############################
@@ -274,9 +304,9 @@ optim_algo = tpe.suggest
 ######################
 def get_best():
     best = fmin(fn = o_func,
-            space = li_space,
+            space = fullHiddenModel_space,
             algo = optim_algo,
-            max_evals = 11)
+            max_evals = 500)
     return best
 
 

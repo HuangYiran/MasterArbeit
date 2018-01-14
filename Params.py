@@ -11,10 +11,11 @@ class Params(object):
         self.src_val_sys = '../data/MasterArbeit/data/hidden_value_pred_2016'
         self.src_val_ref = '../data/MasterArbeit/data/hidden_value_ref_2016'
         self.val_tgt = '../data/MasterArbeit/data/record_newstest2016_cleaned'
-        self.out = './test_data/pred'
+        self.out = './pred'
         self.optim = 'Adam'
         self.loss_fn = 'MSELoss'
         self.batch_size = 50
+        self.cuda = False
 
         # linear model
         self.lr = 0.02
@@ -32,16 +33,15 @@ class Params(object):
         self.num_dim_k = 64
         self.num_dim_v = 64
         self.d_rate_attn = 0.1
+        #self.dim2 = 20
         self.act_func1 = "LeakyReLU"
         self.act_func2 = "LeakyReLU"
         
         # FullHiddenAttn - conv
         self.dim1 = 20
-        self.act_func1 = "LeakyReLU"
+        #self.act_func1 = "LeakyReLU"
         self.kernel_size1 = 3
-        self.stride1 = 2
         self.kernel_size2 = 3
-        self.stride2 = 2
     
     def set_params(self, opt):
         for name, value in opt.items():

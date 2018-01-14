@@ -5,6 +5,8 @@ import math
 
 from Attention import ScaledDotProductAttention, MultiHeadAttention
 
+seq_len = 100
+
 class MlpModel:
     pass
 
@@ -34,7 +36,7 @@ class MultiHeadAttnMlpModel(nn.Module):
         """
         data_in: (batch, seq_len * 2, num_dim)
         """
-        seq_len = 100
+        #seq_len = 100
         data_in_chunks = torch.split(data_in, seq_len, dim = 1)
         data_in_sys = data_in_chunks[0]
         data_in_ref = data_in_chunks[1]
@@ -57,7 +59,7 @@ class MultiHeadAttnLSTMModel(nn.Module):
         self.mlp.add_module('fc3', nn.Linear(dim2, 1))
 
     def forward(self, data_in):
-        seq_len = 100
+        #seq_len = 100
         data_in_chunks = torch.split(data_in, seq_len, dim = 1)
         data_in_sys = data_in_chunks[0]
         data_in_ref = data_in_chunks[1]
@@ -73,25 +75,31 @@ class MultiHeadAttnLSTMModel(nn.Module):
         return out
 
 class MultiHeadAttnConvModel(nn.Module):
-    def __init__(self, num_head = 8, num_dim_k = 64, num_dim_v = 64, d_rate_attn = 0.1, dim1 = 20, act_func1 = "LeakyReLU", kernel_size1 = 3, stride1 = 2, kernel_size2 = 3, stride2 = 2):
+    def __init__(self, num_head = 8, num_dim_k = 64, num_dim_v = 64, d_rate_attn = 0.1, dim1 = 20, act_func1 = "LeakyReLU", kernel_size1 = 3, kernel_size2 = 3):
         num_dim = 500
-        seq_len = 100
+        #seq_len = 100
         super(MultiHeadAttnConvModel, self).__init__()
         self.attn = MultiHeadAttention(num_head, num_dim, num_dim_k, num_dim_v, d_rate_attn)
         self.layers = nn.Sequential()
-        self.layers.add_module("conv1", nn.Conv1d(seq_len, dim1, kernel_size1, stride1))
+        self.layers.add_module("conv1", nn.Conv1d(seq_len, dim1, kernel_size1, 3))
         self.layers.add_module("bn1", nn.BatchNorm1d(dim1))
         self.layers.add_module("act_fun1", getattr(nn, act_func1)())
-        self.layers.add_module("conv2", nn.Conv1d(dim1, 1, kernel_size2, stride2))
-        self.layers.add_module("maxpool", nn.MaxPool1d(124))
+        self.layers.add_module("conv2", nn.Conv1d(dim1, 1, kernel_size2, 3))
+        #self.layers.add_module("maxpool", nn.MaxPool1d(124))
+        self.li = nn.Linear(55, 1, bias = True)
 
     def forward(self, data_in):
-        seq_len = 100
+        #seq_len = 100
         data_in_chunks = torch.split(data_in, seq_len, dim=1)
         data_in_sys = data_in_chunks[0]
         data_in_ref = data_in_chunks[1]
         data_attn, _ = self.attn(data_in_ref, data_in_ref, data_in_ref)
-        out = self.layers(data_attn)
+        #print data_attn.size()
+        data_conv = self.layers(data_attn)
+        data_conv = data_conv.squeeze()
+        #print data_conv.size()
+        out = self.li(data_conv)
+        #print out.size()
         return out
 
 def index_select(src, indexes):
