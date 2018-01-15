@@ -52,7 +52,7 @@ def o_func(params):
     elif opt.model == "MultiHeadAttnLSTMModel":
         model = MultiHeadAttnLSTMModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim2 = opt.dim2, act_func2 = opt.act_func2)
     elif opt.model == "MultiHeadAttnConvModel":
-        model = MultiHeadAttnConvModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, kernel_size2 = opt.kernel_size2)
+        model = MultiHeadAttnConvModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
     else:
         model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, mom = opt.momentum)
     print(model)
@@ -69,15 +69,29 @@ def o_func(params):
         loss_fn = torch.nn.MSELoss()
     elif opt.loss_fn == 'L1Loss':
         loss_fn = torch.nn.L1Loss()
+    
+    if opt.cuda == "True":
+        loss_fn.cuda()
 
+    # load checkpoint
+    if opt.resume:
+        if os.path.isfile(opt.checkpoint):
+            print("loading checkpoint from '{}'".format(opt.checkpoint))
+            # forget to check the model type
+            checkpoint = torch.load(opt.checkpoint)
+            model.load_state_dict(checkpoint['state_dict'])
+            optimizer.load_state_dict(checkpoint['optimizer'])
+            
     # get the number of batch 
     nu_batch, nu_val_batch, nu_test_batch = data.get_nu_batch()
     print("number of batch is %d \nnumber of val batch %d \nnumber of test batch %d"%(nu_batch, nu_val_batch, nu_test_batch))
 
     # train
-    for i in range(15 * nu_batch):
+    for i in range(50 * nu_batch):
         if i % 10 == 0:
             src, tgt = data.get_val_batch(rep = True)
+            if opt.cuda == "True":
+                tgt = tgt.cuda()
             #src, tgt = data.get_batch(rep = True)
             print("evaluate %d" %(i/10))
             corr = evaluate(model, src, tgt)
@@ -90,13 +104,25 @@ def o_func(params):
             tmp_corr = "%d,%f"%(int(i/10), corr)
             file_corr.write(tmp_corr)
             file_corr.write('\n')
+            
+            # save checkpoint
+            print "save checkpoint " + str(i/10)
+            save_checkpoint({
+                'model': opt.model,
+                'state_dict': model.state_dict(),
+                'optimizer': optimizer.state_dict()
+            }, './checkpoints/cp'+str(i/10))
         else:
             src, tgt = data.get_batch(rep = True)
+            if opt.cuda == "True":
+                tgt = tgt.cuda
             train_batch(model, loss_fn, optimizer, src, tgt)
     
     out = 0.0
     for i in range(10):
         src, tgt = data.get_test_batch(rep = True)
+        if opt.cuda == "True":
+            tgt = tgt.cuda()
         out = out + evaluate(model, src, tgt)
     
     file_loss.close()
@@ -292,7 +318,9 @@ fullHiddenModel_space = hp.choice('opt', [
         'dim1': hp.choice('dim1', [64, 128, 256]),
         'dim2': hp.choice('dim2', [16, 32, 64]),
         'kernel_size1': hp.choice('kernel_size1', [2, 4, 8, 32, 64]),
-        'kernel_size2': hp.choice('kernel_size2', [2, 4, 8, 32])
+        'kernel_size2': hp.choice('kernel_size2', [2, 4, 8, 32]),
+        'stride1': hp.choice('stride1', [1, 2, 4, 16]),
+        'stride2': hp.choice('stride2', [1, 2, 4, 16])
     }])
 ############################
 # set the optimize algorithm
@@ -335,7 +363,9 @@ def evaluate(model, src, tgt):
     arr2 = tgt.view(1, -1)
     #print(arr1)
     #print(arr2)
-    arr = torch.cat((arr1, arr2), 0).numpy()
+    arr = torch.cat((arr1, arr2), 0)
+    arr = arr.cpu()
+    arr = arr.numpy()
     corr = numpy.corrcoef(arr)[0][1]
     if math.isnan(corr):
         print("the corr is nan, which means the variance of the scores is 0")
@@ -347,7 +377,9 @@ def evaluate_loss(model, loss_fn, src, tgt):
     src = torch.autograd.Variable(src, requires_grad = False)
     tgt = torch.autograd.Variable(tgt, requires_grad = False)
     out = model(src)
-    loss = loss_fn(out, tgt).data.numpy()
+    loss = loss_fn(out, tgt).data
+    loss = loss.cpu()
+    loss = loss.numpy()
     mean = numpy.mean(loss)
 #    std = numpy.std(loss)
     print("the mean loss is %f" %(mean))
@@ -357,3 +389,6 @@ def predict(model, src):
     src = torch.autograd.Variable(src, requires_grad = False)
     out = model(src)
     return out.view(1, -1).data
+
+def save_checkpoint(state, filename):
+    torch.save(state, filename)

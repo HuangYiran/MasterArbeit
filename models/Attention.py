@@ -84,10 +84,10 @@ class MultiHeadAttention(nn.Module):
         num_q = query.size()[1]
         num_k = key.size()[1]
         num_v = value.size()[1]
-        # bmm->(num_head, batch_size*num_q, num_k) -> (num_head*batch_size, num_q, num_k)
+        # bmm->(num_head, batch_size*num_q, num_dim_k) -> (num_head*batch_size, num_q, num_dim_k)
         queries = torch.bmm(queries, self.w_q).view(-1, num_q, self.num_dim_k)
         keys = torch.bmm(keys, self.w_k).view(-1, num_k, self.num_dim_k)
-        values = torch.bmm(values, self.w_k).view(-1, num_v, self.num_dim_v)
+        values = torch.bmm(values, self.w_v).view(-1, num_v, self.num_dim_v)
         # outs: (num_head*batch_size, num_q, num_dim_v), attns: (num_head*batch_size, num_q, num_v)
         outs, attns = self.attention(queries, keys, values)
 

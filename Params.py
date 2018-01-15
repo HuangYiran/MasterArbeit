@@ -11,6 +11,8 @@ class Params(object):
         self.src_val_sys = '../data/MasterArbeit/data/hidden_value_pred_2016'
         self.src_val_ref = '../data/MasterArbeit/data/hidden_value_ref_2016'
         self.val_tgt = '../data/MasterArbeit/data/record_newstest2016_cleaned'
+        self.resume = False
+        self.checkpoint = './checkpoints/cp1'
         self.out = './pred'
         self.optim = 'Adam'
         self.loss_fn = 'MSELoss'
@@ -41,7 +43,9 @@ class Params(object):
         self.dim1 = 20
         #self.act_func1 = "LeakyReLU"
         self.kernel_size1 = 3
+        self.stride1 = 2
         self.kernel_size2 = 3
+        self.stride2 = 2
     
     def set_params(self, opt):
         for name, value in opt.items():
