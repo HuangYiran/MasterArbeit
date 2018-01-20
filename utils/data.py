@@ -35,7 +35,7 @@ class DataUtil(object):
         self.data_val_in = torch.cat((self.data_val_sys, self.data_val_ref), 1)
         self.nu_val_batch = len(self.data_val_in)/self.batch_size
         self.data_val_tgt = []
-        with open(opt.val_tgt) as fi:
+        with open(opt.tgt_val) as fi:
             for line in fi:
                 self.data_val_tgt.append(float(line.strip()))
         self.data_val_tgt = torch.Tensor(self.data_val_tgt)
@@ -48,7 +48,7 @@ class DataUtil(object):
         self.data_test_in = torch.cat((self.data_test_sys, self.data_test_ref), 1)
         self.nu_test_batch = len(self.data_test_in)/self.batch_size
         self.data_test_tgt = []
-        with open(opt.test_tgt) as fi:
+        with open(opt.tgt_test) as fi:
             for line in fi:
                 self.data_test_tgt.append(float(line.strip()))
         self.data_test_tgt = torch.Tensor(self.data_test_tgt)
@@ -202,14 +202,26 @@ class DataUtil(object):
             return (self.data_val_in[start:end, ], 
                     self.data_val_tgt[start:end,])
     
-    def get_batch_repeatly(self, sep = False):
-        if self.cur_index == self.nu_batch:
-            self.cur_index = 0
-            self._shuffle()
-        return self.get_batch(sep)
-
+    def get_random_batch(self):
+        rands_src = []
+        rands_tgt = []
+        for i in range(self.batch_size):
+            rands_src.append(random.randint(1, len(self.data_in)-1))
+            rands_tgt.append(random.randint(1, len(self.data_in)-1))
+        rands_src = torch.LongTensor(rands_src)
+        rands_tgt = torch.LongTensor(rands_tgt)
+        return (self.data_in[rands_src], self.data_tgt[rands_tgt])
+    
     def get_nu_batch(self):
         """
         return the number of batch 
         """
         return self.nu_batch, self.nu_val_batch, self.nu_test_batch
+    
+"""
+    def get_batch_repeatly(self, sep = False):
+        if self.cur_index == self.nu_batch:
+            self.cur_index = 0
+            self._shuffle()
+        return self.get_batch(sep)
+"""
