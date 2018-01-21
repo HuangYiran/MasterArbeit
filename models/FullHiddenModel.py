@@ -80,15 +80,20 @@ class MultiHeadAttnConvModel(nn.Module):
         #seq_len = 100
         super(MultiHeadAttnConvModel, self).__init__()
         self.attn = MultiHeadAttention(num_head, num_dim, num_dim_k, num_dim_v, d_rate_attn)
+        self.dim_conv_out1 = get_dim_out(num_dim, kernel_size1, stride1)
+        self.dim_conv_out2 = get_dim_out(self.dim_conv_out1, kernel_size2, stride2)
         self.layers = nn.Sequential()
         self.layers.add_module("conv1", nn.Conv1d(seq_len, dim1, kernel_size1, stride1))
         self.layers.add_module("bn1", nn.BatchNorm1d(dim1))
         self.layers.add_module("act_fun1", getattr(nn, act_func1)())
-        self.layers.add_module("conv2", nn.Conv1d(dim1, 1, kernel_size2, stride2))
+        if self.dim_conv_out2 < 1:
+            self.layers.add_module("conv2", nn.Conv1d(dim1, 1, 2, 1))
+            self.dim_conv_out = get_dim_out(self.dim_conv_out1, 2, 1)
+        else:
+            self.layers.add_module("conv2", nn.Conv1d(dim1, 1, kernel_size2, stride2))
+            self.dim_conv_out = self.dim_conv_out2
         #self.layers.add_module("maxpool", nn.MaxPool1d(124))
-        self.dim_out = get_dim_out(num_dim, kernel_size1, stride1)
-        self.dim_out = get_dim_out(self.dim_out, kernel_size2, stride2)
-        self.li = nn.Linear(self.dim_out, 1, bias = True)
+        self.li = nn.Linear(self.dim_conv_out, 1, bias = True)
 
     def forward(self, data_in):
         #seq_len = 100
@@ -100,9 +105,9 @@ class MultiHeadAttnConvModel(nn.Module):
         data_conv = self.layers(data_attn)
         #print data_conv.size()
         data_conv = data_conv.squeeze()
-        if self.dim_out == 1:
+        if self.dim_conv_out == 1:
             data_conv = data_conv.unsqueeze(1)
-        #print data_conv.size()
+            #print data_conv.size()
         out = self.li(data_conv)
         #print out.size()
         return out
@@ -140,6 +145,9 @@ def getSentenceLengths(data_in):
     return lengths
 
 def get_dim_out(dim_in, kernel_size, stride, padding = 0, dilation = 1):
+    """
+    calculate number of the output dimention for the convolutional network
+    """
     dim_out =  int(math.floor((dim_in + 2 * padding - dilation * (kernel_size -1) - 1)/stride + 1))
     #print dim_out
     return dim_out

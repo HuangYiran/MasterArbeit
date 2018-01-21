@@ -7,10 +7,10 @@ class Params(object):
         self.tgt = '../data/MasterArbeit/data/record_prepronce_clearned'
         self.src_test_sys = '../data/MasterArbeit/data/hidden_value_pred_2015'
         self.src_test_ref = '../data/MasterArbeit/data/hidden_value_ref_2015'
-        self.test_tgt = '../data/MasterArbeit/data/record_newstest2015_cleaned'
+        self.tgt_test = '../data/MasterArbeit/data/record_newstest2015_cleaned'
         self.src_val_sys = '../data/MasterArbeit/data/hidden_value_pred_2016'
         self.src_val_ref = '../data/MasterArbeit/data/hidden_value_ref_2016'
-        self.val_tgt = '../data/MasterArbeit/data/record_newstest2016_cleaned'
+        self.tgt_val = '../data/MasterArbeit/data/record_newstest2016_cleaned'
         self.resume = False
         self.checkpoint = './checkpoints/cp1'
         self.out = './pred'
@@ -18,6 +18,8 @@ class Params(object):
         self.loss_fn = 'MSELoss'
         self.batch_size = 50
         self.cuda = False
+        self.isRandom = False
+        self.debug = False
 
         # linear model
         self.lr = 0.02

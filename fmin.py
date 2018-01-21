@@ -8,6 +8,8 @@ import numpy
 import random
 import math
 import os
+import nnInit
+import nnLoss
 
 from data import DataUtil
 from LinearModel import BasicLinear, BasicLinear_dropout, BiLinear
@@ -65,10 +67,12 @@ def o_func(params):
     if opt.optim == 'Adam':
         optimizer = torch.optim.Adam(model.parameters(), lr = opt.lr, eps = opt.eps, weight_decay = opt.weight_decay)
     
-    if opt.loss_fn == 'MSELoss':
-        loss_fn = torch.nn.MSELoss()
+    if opt.loss_fn == 'CorrLoss':
+        loss_fn = nnLoss.CorrLoss()
     elif opt.loss_fn == 'L1Loss':
         loss_fn = torch.nn.L1Loss()
+    else:
+        loss_fn = torch.nn.MSELoss()
     
     if opt.cuda == "True":
         loss_fn.cuda()
@@ -81,20 +85,24 @@ def o_func(params):
             checkpoint = torch.load(opt.checkpoint)
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
+    else:
+        # if not resume from the checkpoint then initialize the parameters
+        print 'initializing the model...'
+        model.apply(nnInit.weight_init)
             
     # get the number of batch 
     nu_batch, nu_val_batch, nu_test_batch = data.get_nu_batch()
     print("number of batch is %d \nnumber of val batch %d \nnumber of test batch %d"%(nu_batch, nu_val_batch, nu_test_batch))
 
     # train
-    for i in range(50 * nu_batch):
+    for i in range(15 * nu_batch):
         if i % 10 == 0:
             src, tgt = data.get_val_batch(rep = True)
             if opt.cuda == "True":
                 tgt = tgt.cuda()
             #src, tgt = data.get_batch(rep = True)
             print("evaluate %d" %(i/10))
-            corr = evaluate(model, src, tgt)
+            corr = evaluate_corr(model, src, tgt)
             loss = evaluate_loss(model, loss_fn, src, tgt)
             
             # write mid result
@@ -113,7 +121,10 @@ def o_func(params):
                 'optimizer': optimizer.state_dict()
             }, './checkpoints/cp'+str(i/10))
         else:
-            src, tgt = data.get_batch(rep = True)
+            if opt.isRandom:
+                src, tgt = data.get_random_batch()
+            else:
+                src, tgt = data.get_batch(rep = True)
             if opt.cuda == "True":
                 tgt = tgt.cuda
             train_batch(model, loss_fn, optimizer, src, tgt)
@@ -348,8 +359,10 @@ def get_best():
 def train_batch(model, loss_fn, optimizer, src, tgt):
     src = torch.autograd.Variable(src, requires_grad = False)
     tgt = torch.autograd.Variable(tgt, requires_grad = False)
+    tgt = tgt.unsqueeze(dim = 1)
 
     optimizer.zero_grad()
+    model.train()
     out = model(src)
     loss = loss_fn(out, tgt)
     #print(loss)
@@ -358,7 +371,7 @@ def train_batch(model, loss_fn, optimizer, src, tgt):
     optimizer.step()
     return True
 
-def evaluate(model, src, tgt):
+def evaluate_corr(model, src, tgt):
     arr1 = predict(model, src)
     arr2 = tgt.view(1, -1)
     #print(arr1)
@@ -376,6 +389,8 @@ def evaluate(model, src, tgt):
 def evaluate_loss(model, loss_fn, src, tgt):
     src = torch.autograd.Variable(src, requires_grad = False)
     tgt = torch.autograd.Variable(tgt, requires_grad = False)
+    tgt = tgt.unsqueeze(dim = 1)
+    model.eval()
     out = model(src)
     loss = loss_fn(out, tgt).data
     loss = loss.cpu()
@@ -387,8 +402,10 @@ def evaluate_loss(model, loss_fn, src, tgt):
 
 def predict(model, src):
     src = torch.autograd.Variable(src, requires_grad = False)
+    model.eval()
     out = model(src)
     return out.view(1, -1).data
 
 def save_checkpoint(state, filename):
-    torch.save(state, filename)
+    #torch.save(state, filename)
+    print "please remove the comment sign before saving a checkpoint"
