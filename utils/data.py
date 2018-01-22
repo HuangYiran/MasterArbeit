@@ -25,7 +25,6 @@ class DataUtil(object):
             for line in fi:
                 self.data_tgt.append(float(line.strip()))
         self.data_tgt = torch.Tensor(self.data_tgt)
-        #self._shuffle()
 
         # read val data
         with file(opt.src_val_sys) as fi:
@@ -52,11 +51,15 @@ class DataUtil(object):
             for line in fi:
                 self.data_test_tgt.append(float(line.strip()))
         self.data_test_tgt = torch.Tensor(self.data_test_tgt)
+        
+        # shuffle
+        self._shuffle2()
 
     def _shuffle(self):
         """
-        最后两行可能有问题，还没有测试
+        only shuffle the training data for last hidden value 
         """
+        print("shuffling the dataset")
         random.seed(34843)
         order = range(len(self.data_in))
         random.shuffle(order)
@@ -69,10 +72,35 @@ class DataUtil(object):
         self.data_in = torch.cat(tmp_data_in, 0)
         #self.data_sys = self.data_in[,1:len(self.data_sys[0])]
         #self.data_ref = self.data_in[,len(self.data_sys[0]):]
+        
+    def _shuffle2(self):
+        """
+        implement shuffle function with torch.index_select(), can be used for both last hidden and full hidden
+        the input data and target data here should be type of torch.Tensor or Variable
+        """
+        random.seed(34843)
+        order = range(len(self.data_in))
+        random.shuffle(order)
+        order = torch.LongTensor(order)
+        self.data_in = self.data_in.index_select(0, order)
+        self.data_tgt = self.data_tgt.index_select(0, order)
+        
+        # the same operate for the val and test dataset
+        order = range(len(self.data_val_in))
+        random.shuffle(order)
+        order = torch.LongTensor(order)
+        self.data_val_in = self.data_val_in.index_select(0, order)
+        self.data_val_tgt = self.data_val_tgt.index_select(0, order)
+
+        order = range(len(self.data_test_in))
+        random.shuffle(order)
+        order = torch.LongTensor(order)
+        self.data_test_in = self.data_test_in.index_select(0, order)
+        self.data_test_tgt = self.data_test_tgt.index_select(0, order)
 
     def normalize_z_score(self):
         """
-        only training data
+        only for last hidden 
         normalize the data with z-score
         Problem: should i change the original data other simplily return teh normalized data???
         """
@@ -81,9 +109,23 @@ class DataUtil(object):
         std = numpy.std(data_in_numpy)
         self.data_in = (data_in_numpy - mean)/std
         self.data_in = torch.from_numpy(self.data_in)
+
+        data_val_in_numpy = self.data_val_in.numpy()
+        mean = numpy.mean(data_val_in_numpy)
+        std = numpy.std(data_val_in_numpy)
+        self.data_val_in = (data_val_in_numpy - mean)/std
+        self.data_val_in = torch.from_numpy(self.data_val_in)
+
+        data_test_in_numpy = self.data_test_in.numpy()
+        mean = numpy.mean(data_test_in_numpy)
+        std = numpy.std(data_test_in_numpy)
+        self.data_test_in = (data_test_in_numpy - mean)/std
+        self.data_test_in = torch.from_numpy(self.data_test_in)
+
     
     def normalize_minmax(self, new_min = -1, new_max = 1):
         """
+        only for last hidden value
         normalize the data with mix max, here set the new min and max to -1, 1.
         x' = (x - min)/(max - min) * (new_max - new_min) + new_min
         """

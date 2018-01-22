@@ -41,5 +41,5 @@ def weight_init(model):
         num_biases = len(model.bias)
         model.bias.data.fill_(1.0/num_biases)
     else:
-        print '=> spring the self defined model'
+        print "=> spring the self defined model and the model that doesn't need the initialization"
         print model

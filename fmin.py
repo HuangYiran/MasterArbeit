@@ -134,7 +134,7 @@ def o_func(params):
         src, tgt = data.get_test_batch(rep = True)
         if opt.cuda == "True":
             tgt = tgt.cuda()
-        out = out + evaluate(model, src, tgt)
+        out = out + evaluate_corr(model, src, tgt)
     
     file_loss.close()
     file_corr.close()
