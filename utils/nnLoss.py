@@ -51,3 +51,17 @@ class MESCorrLoss(nn.Module):
         corr = 1- self.corrLoss(o, t)
         loss = mse - corr
         return loss
+
+class PReLULoss(nn.Module):
+    """
+    use PReLU as the loss function
+    wish that when the o smaller as t, it get more (or less) punishment 
+    """
+    def __init__(self, p = 12):
+        super(PReLULoss, self).__init__()
+        self.p = p
+    
+    def forward(self, o, t):
+        dis = o - t
+        loss = torch.max(0, dis) + self.p * torch.min(0, x)
+        return loss
