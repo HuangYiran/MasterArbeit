@@ -98,8 +98,9 @@ class DataUtil(object):
         self.data_test_in = self.data_test_in.index_select(0, order)
         self.data_test_tgt = self.data_test_tgt.index_select(0, order)
 
-    def normalize_z_score(self):
+    def normalize_z_score2(self):
         """
+        wrong example
         only for last hidden 
         normalize the data with z-score
         Problem: should i change the original data other simplily return teh normalized data???
@@ -121,10 +122,31 @@ class DataUtil(object):
         std = numpy.std(data_test_in_numpy)
         self.data_test_in = (data_test_in_numpy - mean)/std
         self.data_test_in = torch.from_numpy(self.data_test_in)
+    
+    def normalize_z_score(self):
+        self.data_in = _normalize_z_score(self.data_in)
+        self.data_val_in = _normalize_z_score(self.data_val_in)
+        self.data_test_in = _normalize_z_score(self.data_test_in)
+    
+    def _normalize_z_score(self, data_in):
+        data_in_size = data_in.size()
+        data_in = data_in.view(self.batch_size, -1)
+        num_dim = data_in.size()[1]
+        data_out = []
+        for index in range(num_dim):
+            data_slice = data_in[:, index]
+            mean = torch.mean(data_slice)
+            std = torch.std(data_slice)
+            data_tmp = (data_slice - mean)/std
+            data_out.append(data_tmp)
+        data_out = torch.stack(data_out, dim = 0)
+        data_out = data_out.view(data_in_size)
+        return data_out
 
     
-    def normalize_minmax(self, new_min = -1, new_max = 1):
+    def normalize_minmax2(self, new_min = -1, new_max = 1):
         """
+        wrong example
         only for last hidden value
         normalize the data with mix max, here set the new min and max to -1, 1.
         x' = (x - min)/(max - min) * (new_max - new_min) + new_min
@@ -146,6 +168,33 @@ class DataUtil(object):
         max = numpy.max(data_in_numpy)
         self.data_test_in = (data_in_numpy - min)*(new_max - new_min)/(max - min) + new_min 
         self.data_test_in = torch.from_numpy(self.data_test_in)
+    
+    def normalize_minmax(self, new_min = -1, new_max = 1):
+        """
+        x' = (x - min)/(max - min) * (new_max - new_min) + new_min
+        """
+        self.data_in = _normalize_minmax(self.data_in, new_min, new_max)
+        self.data_val_in = _normalize_minmax(self.data_val_in, new_min, new_max)
+        self.data_test_in = _normalize_minmax(self.data_test_in, new_min, new_max)
+    
+    def _normalize_minmax(self, data_in, new_min = -1, new_max = 1):
+        """
+        input: Tensor of size (batch_size, ...) 
+        output: Tensor of size (batch_size, ...)
+        """
+        data_in_size = data_in.size()
+        data_in = data_in.view(self.batch_size, -1)
+        num_dim = data_in.size()[1]
+        data_out = []
+        for index in range(num_dim):
+            data_slice = data_in[:, index]
+            min = data_slice.min()
+            max = data_slice.max()
+            data_tmp = (data_slice - min) * (new_max - new_min)/ (max - min) + new_min
+            data_out.append(data_tmp)
+        data_out = torch.stack(data_out, dim = 0)
+        data_out = data_out.view(data_in_size)
+        return data_out
 
     def get_batch(self, sep = False, rep = False):
         """
