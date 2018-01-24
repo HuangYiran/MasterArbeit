@@ -1,6 +1,9 @@
 # -*- coding:UTF-8 -*-
+import sys
+sys.path.append('../untils/')
 import torch
 import numpy
+import nnActi
 
 """
     基本思想和embedding的多维含义显现相似。
@@ -18,7 +21,7 @@ class MaskedModel1(torch.nn.Module):
         self.li_1 = None
         if dim2:
             self.li_1 = torch.nn.Linear(500, dim2)
-            self.act_func = getattr(torch.nn, act_func)()
+            self.act_func = nnActi(act_func)
             self.li_out = torch.nn.Linear(dim2, 1)
         else:
             self.li_out = torch.nn.Linear(500, 1)
@@ -57,7 +60,7 @@ class MaskedModel2(torch.nn.Module):
         self.li_1 = None
         if dim2:
             self.li_1 = torch.nn.Linear(500, dim2)
-            self.act_func = getattr(torch.nn, act_func)()
+            self.act_func = nnActi(act_func)
             self.li_out = torch.nn.Linear(dim2, 1)
         else:
             self.li_out = torch.nn.Linear(500, 1)

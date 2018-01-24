@@ -1,6 +1,9 @@
 # -*- coding: UTF-8 -*-
+import sys
+sys.path.append('../utils/')
 import torch
 import numpy
+import nnActi
 
 class BasicLinear(torch.nn.Module):
     """
@@ -17,12 +20,12 @@ class BasicLinear(torch.nn.Module):
         #self.layers.add_module("bn0", torch.nn.BatchNorm1d(dim1))
         self.layers.add_module("fc1", torch.nn.Linear(dim1, dim2, bias = False))
         self.layers.add_module("bn", torch.nn.BatchNorm1d(dim2))
-        self.layers.add_module(act_func + "1", getattr(torch.nn, act_func)())
+        self.layers.add_module(act_func + "1", nnActi.get_acti(act_func))
  
         if dim3:
             self.layers.add_module("fc2", torch.nn.Linear(dim2, dim3, bias = False))
             self.layers.add_module("bn2", torch.nn.BatchNorm1d(dim3, momentum = mom))
-            self.layers.add_module(act_func + "2", getattr(torch.nn, act_func)())
+            self.layers.add_module(act_func + "2", nnActi.get_acti(act_func))
 #            self.layers.add_module("drop_out", torch.nn.Dropout(0.5))
             self.layers.add_module("fc3", torch.nn.Linear(dim3, 1))
         else:
@@ -32,7 +35,7 @@ class BasicLinear(torch.nn.Module):
         # 因为score的分数是从-1到1， 所以对应的结果是否加一个激活函数会比较好
         if act_func_out:
             self.layers.add_module("bn_out",  torch.nn.BatchNorm1d(dim3, momentum = mon))
-            self.layers.add_module(act_func_out, getattr(torch.nn, act_func_out)())
+            self.layers.add_module(act_func_out, nnActi.get_acti(act_func_out))
 
     def forward(self, input):
         """
@@ -56,11 +59,11 @@ class BasicLinear_dropout(torch.nn.Module):
         dim1 = 1000
         self.layers = torch.nn.Sequential()
         self.layers.add_module("fc1", torch.nn.Linear(dim1, dim2))
-        self.layers.add_module(act_func + "1", getattr(torch.nn, act_func)())
+        self.layers.add_module(act_func + "1", nnActi.get_acti(act_func))
  
         if dim3:
             self.layers.add_module("fc2", torch.nn.Linear(dim2, dim3))
-            self.layers.add_module(act_func + "2", getattr(torch.nn, act_func)())
+            self.layers.add_module(act_func + "2", nnActi.get_acti(act_func))
             self.layers.add_module("drop_out", torch.nn.Dropout(d_rate))
             self.layers.add_module("fc3", torch.nn.Linear(dim3, 1))
         else:
@@ -69,7 +72,7 @@ class BasicLinear_dropout(torch.nn.Module):
         
         # 因为score的分数是从-1到1， 所以对应的结果是否加一个激活函数会比较好
         if act_func_out:
-            self.layers.add_module(act_func_out, getattr(torch.nn, act_func_out)())
+            self.layers.add_module(act_func_out, nnActi.get_acti(act_func_out))
 
     def forward(self, input):
         """
@@ -85,7 +88,7 @@ class BiLinear(torch.nn.Module):
         dim1 = 500
         self.li_sys = torch.nn.Linear(dim1, dim1, bias = False)
         self.li_ref = torch.nn.Linear(dim1, dim1, bias = False)
-        self.act_func = getattr(torch.nn, act_func)()
+        self.act_func = nnActi.get_acti(act_func)
         self.fc = None
         if dim2:
             self.fc = torch.nn.Linear(dim1, dim2)
@@ -95,7 +98,7 @@ class BiLinear(torch.nn.Module):
             self.li_out = torch.nn.Linear(dim1, 1)
         self.act_func_out = None
         if act_func_out:
-            self.act_func_out = getattr(torch.nn, act_func_out)()
+            self.act_func_out = nnActi.get_acti(act_func_out)
     
     def forward(self, input):
         """

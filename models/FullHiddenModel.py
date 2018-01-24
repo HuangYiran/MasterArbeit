@@ -1,7 +1,10 @@
+import sys
+sys.path.append('../utils')
 import torch
 import torch.nn as nn
 import numpy
 import math
+import nnActi
 
 from Attention import ScaledDotProductAttention, MultiHeadAttention
 
@@ -26,10 +29,10 @@ class MultiHeadAttnMlpModel(nn.Module):
         self.mlp = nn.Sequential()
         self.mlp.add_module('fc1', nn.Linear(num_seq*num_dim, num_dim))
         self.mlp.add_module('bn1', nn.BatchNorm1d(num_dim))
-        self.mlp.add_module('act_fun1', getattr(nn, act_func1)())
+        self.mlp.add_module('act_fun1', nnActi.get_acti(act_func1))
         self.mlp.add_module('fc2', nn.Linear(num_dim, dim2))
         self.mlp.add_module('bn2', nn.BatchNorm1d(dim2))
-        self.mlp.add_module('act_fun2', getattr(nn, act_func2)())
+        self.mlp.add_module('act_fun2', nnActi.get_acti(act_func2))
         self.mlp.add_module('fc3', nn.Linear(dim2, 1))
 
     def forward(self, data_in):
@@ -55,7 +58,7 @@ class MultiHeadAttnLSTMModel(nn.Module):
         self.mlp = nn.Sequential()
         self.mlp.add_module('fc1', nn.Linear(500, dim2))
         self.mlp.add_module('bn2', nn.BatchNorm1d(dim2))
-        self.mlp.add_module('act_fun2', getattr(nn, act_func2)())
+        self.mlp.add_module('act_fun2', nnActi.get_acti(act_func2))
         self.mlp.add_module('fc3', nn.Linear(dim2, 1))
 
     def forward(self, data_in):
@@ -75,7 +78,7 @@ class MultiHeadAttnLSTMModel(nn.Module):
         return out
 
 class MultiHeadAttnConvModel(nn.Module):
-    def __init__(self, num_head = 8, num_dim_k = 64, num_dim_v = 64, d_rate_attn = 0.1, dim1 = 20, act_func1 = "LeakyReLU", kernel_size1 = 3, stride1 = 2, kernel_size2 = 3, stride2 = 2):
+    def __init__(self, num_head = 8, num_dim_k = 64, num_dim_v = 64, d_rate_attn = 0.1, dim1 = 20, act_func1 = "LeakyReLU", kernel_size1 = 3, stride1 = 2, act_func2 = "LeakyReLU", kernel_size2 = 3, stride2 = 2):
         num_dim = 500
         #seq_len = 100
         super(MultiHeadAttnConvModel, self).__init__()
@@ -85,13 +88,15 @@ class MultiHeadAttnConvModel(nn.Module):
         self.layers = nn.Sequential()
         self.layers.add_module("conv1", nn.Conv1d(seq_len, dim1, kernel_size1, stride1))
         self.layers.add_module("bn1", nn.BatchNorm1d(dim1))
-        self.layers.add_module("act_fun1", getattr(nn, act_func1)())
+        self.layers.add_module("act_func1", nnActi.get_acti(act_func1))
         if self.dim_conv_out2 < 1:
             self.layers.add_module("conv2", nn.Conv1d(dim1, 1, 2, 1))
             self.dim_conv_out = get_dim_out(self.dim_conv_out1, 2, 1)
         else:
             self.layers.add_module("conv2", nn.Conv1d(dim1, 1, kernel_size2, stride2))
             self.dim_conv_out = self.dim_conv_out2
+        self.layers.add_module('bn2', nn.BatchNorm1d(1))
+        self.layers.add_module('act_func2', nnActi.get_acti(act_func2))
         #self.layers.add_module("maxpool", nn.MaxPool1d(124))
         self.li = nn.Linear(self.dim_conv_out, 1, bias = True)
 
