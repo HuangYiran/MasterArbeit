@@ -124,9 +124,9 @@ class DataUtil(object):
         self.data_test_in = torch.from_numpy(self.data_test_in)
     
     def normalize_z_score(self):
-        self.data_in = _normalize_z_score(self.data_in)
-        self.data_val_in = _normalize_z_score(self.data_val_in)
-        self.data_test_in = _normalize_z_score(self.data_test_in)
+        self.data_in = self._normalize_z_score(self.data_in)
+        self.data_val_in = self._normalize_z_score(self.data_val_in)
+        self.data_test_in = self._normalize_z_score(self.data_test_in)
     
     def _normalize_z_score(self, data_in):
         data_in_size = data_in.size()
@@ -173,9 +173,9 @@ class DataUtil(object):
         """
         x' = (x - min)/(max - min) * (new_max - new_min) + new_min
         """
-        self.data_in = _normalize_minmax(self.data_in, new_min, new_max)
-        self.data_val_in = _normalize_minmax(self.data_val_in, new_min, new_max)
-        self.data_test_in = _normalize_minmax(self.data_test_in, new_min, new_max)
+        self.data_in = self._normalize_minmax(self.data_in, new_min, new_max)
+        self.data_val_in = self._normalize_minmax(self.data_val_in, new_min, new_max)
+        self.data_test_in = self._normalize_minmax(self.data_test_in, new_min, new_max)
     
     def _normalize_minmax(self, data_in, new_min = -1, new_max = 1):
         """

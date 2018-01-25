@@ -1,3 +1,4 @@
+#-*- coding: UTF-8 -*-
 import torch
 import torch.nn as nn
 import torch.nn.functional as fn
@@ -59,9 +60,32 @@ class PReLULoss(nn.Module):
     """
     def __init__(self, p = 12):
         super(PReLULoss, self).__init__()
-        self.p = p
+        self.prelu = nn.PReLU(1, p)
+        for param in self.prelu.parameters():
+            param.requires_grad = False
     
     def forward(self, o, t):
+        loss = self.prelu(o - t)
+        return torch.mean(torch.abs(loss))
+        """
         dis = o - t
-        loss = torch.max(0, dis) + self.p * torch.min(0, x)
-        return loss
+        batch_size = dis.size()[0]
+        zero = torch.rand([1]).fill_(0)
+        loss = 0
+        # print dis # 这里涉及到首个Evaluation 的问题，所以应该另外考虑 可以单纯跳了先
+        #print '=====' 
+        for i in range(batch_size):
+            nan = torch.sqrt(torch.FloatTensor([-1])) # don't know how to create a nan Tensor directly
+            # can not use torch.equal to compare the nan value
+            print(dis[i], nan)
+            if torch.equal(dis[i].data, nan):
+                print 'equal'
+                loss = loss + 10
+                continue
+            print 'unequal'
+            combined = torch.cat((dis[i], zero), 0)
+            #print combined
+            #print '-----------;'
+            loss += torch.max(combined) - self.p * torch.min(combined)
+        return loss/batch_size
+        """
