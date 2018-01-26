@@ -36,7 +36,7 @@ class CorrLoss(nn.Module):
         #print corr.size()
         return  1 - corr
 
-class MESCorrLoss(nn.Module):
+class MSECorrLoss(nn.Module):
     """
     use MSE - p * Corr as the loss, p is the 
     a problem is the value of MSE dependend on the target value and the value of Corr is [-1, 1]. so i don't know if it is sinnful to do the coordination
@@ -58,7 +58,7 @@ class PReLULoss(nn.Module):
     use PReLU as the loss function
     wish that when the o smaller as t, it get more (or less) punishment 
     """
-    def __init__(self, p = 12):
+    def __init__(self, p = 2):
         super(PReLULoss, self).__init__()
         self.prelu = nn.PReLU(1, p)
         for param in self.prelu.parameters():

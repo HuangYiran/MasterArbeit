@@ -21,22 +21,22 @@ from hyperopt import fmin, tpe, hp
 # define the objective function, this function will be used in optimization
 ###########################################################################
 def o_func(params):
+    # set params
+    opt = Params()
+    opt.set_params(params)
+    opt.show_params()
+    
     # file to save the tmp result
-    path_loss = '../data/MasterArbeit/mid_result/loss'
-    path_corr = '../data/MasterArbeit/mid_result/corr'
+    path_loss = opt.dir_mid_result + 'loss'
+    path_corr = opt.dir_mid_result + 'corr'
     if os.path.exists(path_loss):
         os.remove(path_loss)
     if os.path.exists(path_corr):
         os.remove(path_corr)
     file_loss = open(path_loss, 'a')
     file_corr = open(path_corr, 'a')
-    
-    # set params
-    opt = Params()
-    opt.set_params(params)
-    opt.show_params()
 
-    # read data
+    # read data and normalize if necessary
     data = DataUtil(opt)
     #data.normalize_minmax()
 
@@ -54,7 +54,7 @@ def o_func(params):
     elif opt.model == "MultiHeadAttnLSTMModel":
         model = MultiHeadAttnLSTMModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim2 = opt.dim2, act_func2 = opt.act_func2)
     elif opt.model == "MultiHeadAttnConvModel":
-        model = MultiHeadAttnConvModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
+        model = MultiHeadAttnConvModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, act_func2 = opt.act_func2, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
     else:
         model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, mom = opt.momentum)
     print(model)
@@ -71,8 +71,14 @@ def o_func(params):
         loss_fn = nnLoss.CorrLoss()
     elif opt.loss_fn == 'L1Loss':
         loss_fn = torch.nn.L1Loss()
-    else:
+    elif opt.loss_fn == 'MSELoss':
         loss_fn = torch.nn.MSELoss()
+    elif opt.loss_fn == 'MSECorrLoss':
+        loss_fn = nnLoss.MSECorrLoss()
+    elif opt.loss_fn == 'PReLULoss':
+        loss_fn = nnLoss.PReLULoss()
+    else:
+        print("unknown Loss function")
     
     if opt.cuda == "True":
         loss_fn.cuda()
@@ -391,7 +397,10 @@ def evaluate_loss(model, loss_fn, src, tgt):
     tgt = torch.autograd.Variable(tgt, requires_grad = False)
     tgt = tgt.unsqueeze(dim = 1)
     model.eval()
+    #print("src1",src[1][0])
+    #print("src2",src[1][100]) 
     out = model(src)
+    #print("out", out)
     loss = loss_fn(out, tgt).data
     loss = loss.cpu()
     loss = loss.numpy()

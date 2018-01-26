@@ -222,11 +222,11 @@ class Pipeline_hidden(object):
             tmp = self._get_last_hidden(src, tgt)
             # 把次序调整回改变之前，还没有测试，所以并不清楚tmp最后的类型，按道理应该是list类型，
             # 所以这个数据应该还要进行处理，这个留到测试的时候再做了、、、、、、、、、、、、、、？？
-            #tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x: x[-1])))[:-1] 
-            #tmp = [tmp[0][i] for i, j in enumerate(tmp[0])]
-            #tmp = torch.stack(tmp)
-            indices = torch.LongTensor(indices)
-            tmp = tmp.index_select(0, indices)
+            tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x: x[-1])))[:-1] 
+            tmp = [tmp[0][i] for i, j in enumerate(tmp[0])]
+            tmp = torch.stack(tmp)
+            #indices = torch.LongTensor(indices)
+            #tmp = tmp.index_select(0, indices) # can not be used here the indices here is the order of the original range
             #print(tmp.data.size())
             out.append(tmp)
         out = torch.cat(out, 0)
@@ -246,11 +246,11 @@ class Pipeline_hidden(object):
             print("processing batch %s/%s" %(i, nu_batch))
             src, tgt, indices = dataset[i]
             tmp = self._get_full_hidden(src, tgt)
-            #tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x:x[-1])))[:-1]
-            #tmp = [tmp[0][i] for i, j in enumerate(tmp[0])]
-            #tmp = torch.stack(tmp)
-            indices = torch.LongTensor(indices)
-            tmp = tmp.index_select(0, indices)
+            tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x:x[-1])))[:-1]
+            tmp = [tmp[0][i] for i, j in enumerate(tmp[0])]
+            tmp = torch.stack(tmp)
+            # indices = torch.LongTensor(indices)
+            # tmp = tmp.index_select(0, indices) # can not be used here
             print(tmp.data.size())
             out.append(tmp)
         out = torch.cat(out, 0)

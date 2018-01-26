@@ -14,6 +14,7 @@ class Params(object):
         self.resume = False
         self.checkpoint = './checkpoints/cp1'
         self.out = './pred'
+        self.dir_mid_result = '../data/MasterArbeit/mid_result/'
         self.optim = 'Adam'
         self.loss_fn = 'MSELoss'
         self.batch_size = 50
