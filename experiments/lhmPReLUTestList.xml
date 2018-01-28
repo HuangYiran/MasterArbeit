@@ -1,0 +1,122 @@
+<elist>
+	<!-- test prelu loss function with different p_rate value from 0.4 to 16 -->
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>100</dim2>
+		<dim3 type = 'int'>10</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>PReLULoss</loss_fn>
+		<PReLU_rate type = 'float'>2.0</PReLU_rate>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/lasthidden_minmaxinit_leakyacti_prelu2loss_
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>100</dim2>
+		<dim3 type = 'int'>10</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>PReLULoss</loss_fn>
+		<PReLU_rate type = 'float'>4.0</PReLU_rate>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/lasthidden_minmaxinit_leakyacti_prelu4loss_
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>100</dim2>
+		<dim3 type = 'int'>10</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>PReLULoss</loss_fn>
+		<PReLU_rate type = 'float'>8.0</PReLU_rate>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/lasthidden_minmaxinit_leakyacti_prelu8loss_
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>100</dim2>
+		<dim3 type = 'int'>10</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>PReLULoss</loss_fn>
+		<PReLU_rate type = 'float'>16.0</PReLU_rate>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/lasthidden_minmaxinit_leakyacti_prelu16loss_
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>100</dim2>
+		<dim3 type = 'int'>10</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>PReLULoss</loss_fn>
+		<PReLU_rate type = 'float'>1.0</PReLU_rate>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/lasthidden_minmaxinit_leakyacti_prelu1loss_
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>100</dim2>
+		<dim3 type = 'int'>10</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>PReLULoss</loss_fn>
+		<PReLU_rate type = 'float'>0.8</PReLU_rate>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/lasthidden_minmaxinit_leakyacti_prelu0.8loss_
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>100</dim2>
+		<dim3 type = 'int'>10</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>PReLULoss</loss_fn>
+		<PReLU_rate type = 'float'>0.4</PReLU_rate>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/lasthidden_minmaxinit_leakyacti_prelu0.4loss_
+		</dir_mid_result>
+	</e>
+</elist>

@@ -1,0 +1,358 @@
+<?xml version="1.0"?>
+<elist>
+	<!-- test set for MultiHeadAttnConvModel-->
+	<e>
+		<model type = "string"> 
+			 MultiHeadAttnConvModel 
+		</model>
+		<batch_size type = "int">
+			100
+		</batch_size>
+		<num_dim_k type = "int">
+			16
+		</num_dim_k>
+		<num_dim_v type ="int">
+			64
+		</num_dim_v>
+		<kernel_size1 type = "int">
+			4
+		</kernel_size1>
+		<kernel_size2 type = "int">
+			8
+		</kernel_size2>
+	        <num_head type = "int">
+        		8
+       		</num_head>
+		<stride1 type = "int">
+			4
+		</stride1>
+		<stride2 type = "int">
+			4
+		</stride2>
+		<act_func1 type = "string">
+			 PReLU 
+		</act_func1>
+		<act_func2 type = "string">
+			 PReLU 
+		</act_func2>
+		<loss_fn type = "string">
+			 PReLULoss 
+		</loss_fn>
+		<dir_mid_result type = "string">
+			 ../data/MasterArbeit/mid_result/datashuffle_minmaxinit_preluacti_prelu2loss_ 
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = "string"> 
+			 MultiHeadAttnConvModel 
+		</model>
+		<batch_size type = "int">
+			100
+		</batch_size>
+		<num_dim_k type = "int">
+			16
+		</num_dim_k>
+		<num_dim_v type ="int">
+			64
+		</num_dim_v>
+        	<num_head type = "int">
+            		8
+        	</num_head>
+		<kernel_size1 type = "int">
+			4
+		</kernel_size1>
+		<kernel_size2 type = "int">
+			8
+		</kernel_size2>
+		<stride1 type = "int">
+			4
+		</stride1>
+		<stride2 type = "int">
+			4
+		</stride2>
+		<act_func1 type = "string">
+			 PReLU 
+		</act_func1>
+		<act_func2 type = "string">
+			 PReLU 
+		</act_func2>
+		<loss_fn type = "string">
+			 MSELoss 
+		</loss_fn>
+		<dir_mid_result type = "string">
+			 ../data/MasterArbeit/mid_result/datashuffle_minmaxinit_preluacti_mseloss_ 
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = "string"> 
+			 MultiHeadAttnConvModel 
+		</model>
+		<batch_size type = "int">
+			100
+		</batch_size>
+		<num_dim_k type = "int">
+			16
+		</num_dim_k>
+		<num_dim_v type ="int">
+			64
+		</num_dim_v>
+        	<num_head type = "int">
+            		8
+        	</num_head>
+		<kernel_size1 type = "int">
+			4
+		</kernel_size1>
+		<kernel_size2 type = "int">
+			8
+		</kernel_size2>
+		<stride1 type = "int">
+			4
+		</stride1>
+		<stride2 type = "int">
+			4
+		</stride2>
+		<act_func1 type = "string">
+			 PReLU 
+		</act_func1>
+		<act_func2 type = "string">
+			 PReLU 
+		</act_func2>
+		<loss_fn type = "string">
+			 MSECorrLoss 
+		</loss_fn>
+		<dir_mid_result type = "string">
+			 ../data/MasterArbeit/mid_result/datashuffle_minmaxinit_preluacti_msecorrloss_ 
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = "string"> 
+			 MultiHeadAttnConvModel 
+		</model>
+		<batch_size type = "int">
+			100
+		</batch_size>
+		<num_dim_k type = "int">
+			16
+		</num_dim_k>
+		<num_dim_v type ="int">
+			64
+		</num_dim_v>
+        	<num_head type = "int">
+            		8
+        	</num_head>
+		<kernel_size1 type = "int">
+			4
+		</kernel_size1>
+		<kernel_size2 type = "int">
+			8
+		</kernel_size2>
+		<stride1 type = "int">
+			4
+		</stride1>
+		<stride2 type = "int">
+			4
+		</stride2>
+		<act_func1 type = "string">
+			 PReLU 
+		</act_func1>
+		<act_func2 type = "string">
+			 PReLU 
+		</act_func2>
+		<loss_fn type = "string">
+			 CorrLoss 
+		</loss_fn>
+		<dir_mid_result type = "string">
+			 ../data/MasterArbeit/mid_result/datashuffle_minmaxinit_preluacti_corrloss_ 
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = "string"> 
+			 MultiHeadAttnConvModel 
+		</model>
+		<batch_size type = "int">
+			100
+		</batch_size>
+		<num_dim_k type = "int">
+			16
+		</num_dim_k>
+		<num_dim_v type ="int">
+			64
+		</num_dim_v>
+        	<num_head type = "int">
+            		8
+        	</num_head>
+		<kernel_size1 type = "int">
+			4
+		</kernel_size1>
+		<kernel_size2 type = "int">
+			8
+		</kernel_size2>
+		<stride1 type = "int">
+			4
+		</stride1>
+		<stride2 type = "int">
+			4
+		</stride2>
+		<act_func1 type = "string">
+			 PReLU 
+		</act_func1>
+		<act_func2 type = "string">
+			 PReLU 
+		</act_func2>
+		<loss_fn type = "string">
+			 L1Loss 
+		</loss_fn>
+		<dir_mid_result type = "string">
+			 ../data/MasterArbeit/mid_result/datashuffle_minmaxinit_preluacti_l1loss_ 
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = "string"> 
+			 MultiHeadAttnConvModel 
+		</model>
+		<batch_size type = "int">
+			100
+		</batch_size>
+		<num_dim_k type = "int">
+			16
+		</num_dim_k>
+		<num_dim_v type ="int">
+			64
+		</num_dim_v>
+        	<num_head type = "int">
+            		8
+        	</num_head>
+		<kernel_size1 type = "int">
+			4
+		</kernel_size1>
+		<kernel_size2 type = "int">
+			8
+		</kernel_size2>
+		<stride1 type = "int">
+			4
+		</stride1>
+		<stride2 type = "int">
+			4
+		</stride2>
+		<act_func1 type = "string">
+			 PReLU 
+		</act_func1>
+		<act_func2 type = "string">
+			 PReLU 
+		</act_func2>
+		<loss_fn type = "string">
+			 CorrLoss 
+		</loss_fn>
+		<dir_mid_result type = "string">
+			 ../data/MasterArbeit/mid_result/datashuffle_minmaxinit_preluacti_corrloss_ 
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = "string"> 
+			 MultiHeadAttnConvModel 
+		</model>
+		<batch_size type = "int">
+			100
+		</batch_size>
+		<num_dim_k type = "int">
+			16
+		</num_dim_k>
+		<num_dim_v type ="int">
+			64
+		</num_dim_v>
+        	<num_head type = "int">
+            		8
+        	</num_head>
+		<kernel_size1 type = "int">
+			4
+		</kernel_size1>
+		<kernel_size2 type = "int">
+			8
+		</kernel_size2>
+		<stride1 type = "int">
+			4
+		</stride1>
+		<stride2 type = "int">
+			4
+		</stride2>
+		<act_func1 type = "string">
+			 Swish 
+		</act_func1>
+		<act_func2 type = "string">
+			 Swish 
+		</act_func2>
+		<loss_fn type = "string">
+			 MSECorrLoss 
+		</loss_fn>
+		<dir_mid_result type = "string">
+			 ../data/MasterArbeit/mid_result/datashuffle_minmaxinit_swishacti_msecorrloss_ 
+		</dir_mid_result>
+	</e>
+	<!-- test set for scaledDotAttnConvModel-->
+	<e>
+		<model type = "string"> 
+			 ScaledDotAttnConvModel 
+		</model>
+		<batch_size type = "int">
+			100
+		</batch_size>
+		<kernel_size1 type = "int">
+			4
+		</kernel_size1>
+		<kernel_size2 type = "int">
+			8
+		</kernel_size2>
+		<stride1 type = "int">
+			4
+		</stride1>
+		<stride2 type = "int">
+			4
+		</stride2>
+		<act_func1 type = "string">
+			 PReLU 
+		</act_func1>
+		<act_func2 type = "string">
+			 PReLU 
+		</act_func2>
+		<loss_fn type = "string">
+			 MSECorrLoss 
+		</loss_fn>
+		<dir_mid_result type = "string">
+			 ../data/MasterArbeit/mid_result/scaleAttn_datashuffle_minmaxinit_preluacti_msecorrloss_ 
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = "string"> 
+			 ScaledDotAttnConvModel 
+		</model>
+		<batch_size type = "int">
+			100
+		</batch_size>
+		<kernel_size1 type = "int">
+			4
+		</kernel_size1>
+		<kernel_size2 type = "int">
+			8
+		</kernel_size2>
+		<stride1 type = "int">
+			4
+		</stride1>
+		<stride2 type = "int">
+			4
+		</stride2>
+		<act_func1 type = "string">
+			 Swish 
+		</act_func1>
+		<act_func2 type = "string">
+			 Swish 
+		</act_func2>
+		<loss_fn type = "string">
+			 PReLULoss 
+		</loss_fn>
+		<dir_mid_result type = "string">
+			 ../data/MasterArbeit/mid_result/scaledAttn_datashuffle_minmaxinit_swishacti_preluloss_ 
+		</dir_mid_result>
+	</e>
+
+
+</elist>
