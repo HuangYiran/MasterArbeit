@@ -21,6 +21,15 @@ class Params(object):
         self.cuda = False
         self.isRandom = False
         self.debug = False
+        
+        # rank model, add an additional system output data
+        self.rank = True
+        self.src_sys2 = ''
+        self.src_test_sys2 = ''
+        self.src_val_sys2 = ''
+        
+        # PReLU loss function
+        self.PReLU_rate = 2
 
         # linear model
         self.lr = 0.02

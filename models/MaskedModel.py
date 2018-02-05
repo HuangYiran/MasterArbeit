@@ -21,7 +21,7 @@ class MaskedModel1(torch.nn.Module):
         self.li_1 = None
         if dim2:
             self.li_1 = torch.nn.Linear(500, dim2)
-            self.act_func = nnActi(act_func)
+            self.act_func = nnActi.get_acti(act_func)
             self.li_out = torch.nn.Linear(dim2, 1)
         else:
             self.li_out = torch.nn.Linear(500, 1)
@@ -37,7 +37,6 @@ class MaskedModel1(torch.nn.Module):
         input_ref = input[:, 500:]
         proj_ref = self.li_mask(input_ref)
         mask = self.sf(proj_ref)
-        masked_sys = input_sys * mask
         masked_sys = mask * input_sys
         if self.li_1:
             proj_masked_sys = self.act_func(self.li_1(masked_sys))
@@ -60,7 +59,7 @@ class MaskedModel2(torch.nn.Module):
         self.li_1 = None
         if dim2:
             self.li_1 = torch.nn.Linear(500, dim2)
-            self.act_func = nnActi(act_func)
+            self.act_func = nnActi.get_acti(act_func)
             self.li_out = torch.nn.Linear(dim2, 1)
         else:
             self.li_out = torch.nn.Linear(500, 1)

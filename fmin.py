@@ -14,7 +14,7 @@ import nnLoss
 from data import DataUtil
 from LinearModel import BasicLinear, BasicLinear_dropout, BiLinear
 from MaskedModel import MaskedModel1, MaskedModel2
-from FullHiddenModel import MultiHeadAttnMlpModel, MultiHeadAttnLSTMModel, MultiHeadAttnConvModel
+from FullHiddenModel import MultiHeadAttnMlpModel, MultiHeadAttnLSTMModel, MultiHeadAttnConvModel, MultiHeadAttnConvModel2, ScaledDotAttnConvModel
 from Params import Params
 from hyperopt import fmin, tpe, hp
 ###########################################################################
@@ -38,9 +38,9 @@ def o_func(params):
 
     # read data and normalize if necessary
     data = DataUtil(opt)
-    #data.normalize_minmax()
+    data.normalize_minmax()
 
-    # build model
+    # build model, 
     if opt.model == "BiLinear":
         model = BiLinear(dim2 = opt.dim2, act_func = opt.act_func, act_func_out = opt.act_func_out)
     elif opt.model == "BasicLinearDropout":
@@ -49,12 +49,16 @@ def o_func(params):
         model = MaskedModel1(dim2 = opt.dim2, act_func = opt.act_func)
     elif opt.model == "MaskedModel2":
         model = MaskedModel2(dim2 = opt.dim2, act_func = opt.act_func)
+    elif opt.model == "ScaledDotAttnConvModel":
+        model = ScaledDotAttnConvModel(d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, act_func2 = opt.act_func2, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
     elif opt.model == "MultiHeadAttnMlpModel":
         model = MultiHeadAttnMlpModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, act_func1 = opt.act_func1, dim2 = opt.dim2, act_func2 = opt.act_func2)
     elif opt.model == "MultiHeadAttnLSTMModel":
         model = MultiHeadAttnLSTMModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim2 = opt.dim2, act_func2 = opt.act_func2)
     elif opt.model == "MultiHeadAttnConvModel":
         model = MultiHeadAttnConvModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, act_func2 = opt.act_func2, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
+    elif opt.model == "MultiHeadAttnConvModel2":
+        model = MultiHeadAttnConvModel2(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, act_func2 = opt.act_func2, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
     else:
         model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, mom = opt.momentum)
     print(model)
@@ -76,9 +80,11 @@ def o_func(params):
     elif opt.loss_fn == 'MSECorrLoss':
         loss_fn = nnLoss.MSECorrLoss()
     elif opt.loss_fn == 'PReLULoss':
-        loss_fn = nnLoss.PReLULoss()
+        loss_fn = nnLoss.PReLULoss(opt.PReLU_rate)
+    elif opt.loss_fn == 'PReLUCorrLoss':
+        loss_fn = nnLoss.PReLUCorrLoss()
     else:
-        print("unknown Loss function")
+        print("++++++++ unknown Loss function, set loss to mse loss")
     
     if opt.cuda == "True":
         loss_fn.cuda()

@@ -83,23 +83,28 @@ class BasicLinear_dropout(torch.nn.Module):
         return out
 
 class BiLinear(torch.nn.Module):
-    def __init__(self, dim2 = None, act_func = 'Tanh', act_func_out = None):
+    def __init__(self, dim2 = 64, dim3 = None, act_func = 'Tanh', act_func_out = None):
         super(BiLinear, self).__init__()
         dim1 = 500
         self.li_sys = torch.nn.Linear(dim1, dim1, bias = False)
         self.li_ref = torch.nn.Linear(dim1, dim1, bias = False)
         self.act_func = nnActi.get_acti(act_func)
-        self.fc = None
-        if dim2:
-            self.fc = torch.nn.Linear(dim1, dim2)
-            self.drop_out = torch.nn.Dropout(0.5)
-            self.li_out = torch.nn.Linear(dim2, 1)
+
+        self.layers = torch.nn.Sequential()
+        self.layers.add_module("fc1", torch.nn.Linear(dim1, dim2))
+        self.laeyrs.add_module("act_func1", nnActi.get_acti(act_func))
+        self.layers.add_module("dp1", torch.nn.Dropout(d_rate))
+        if dim3:
+            self.layers.add_module("fc2", torch.nn.Linear(dim2, dim3))
+            self.layers.add_module("act_func2", nnActi.get_acti(act_func))
+            self.layers.add_module("dp2", torch.nn.Dropout(d_rate))
+            self.layers.add_module("fc_out", torch.nn.Linear(dim3, 1))
         else:
-            self.li_out = torch.nn.Linear(dim1, 1)
-        self.act_func_out = None
+            self.layers.add_module("fc_out", torch.nn.Linear(dim2, 1))
+
         if act_func_out:
-            self.act_func_out = nnActi.get_acti(act_func_out)
-    
+            self.layers.add_module("act_out", nnActi.get_acti(act_func_out))
+
     def forward(self, input):
         """
         input:
@@ -113,9 +118,5 @@ class BiLinear(torch.nn.Module):
         proj_ref = self.li_ref(input_ref)
         sum_in = proj_sys + proj_ref
         acted_sum_in = self.act_func(sum_in)
-        if self.fc:
-            acted_sum_in = self.drop_out(self.fc(acted_sum_in))
-        out = self.li_out(acted_sum_in)
-        if self.act_func_out:
-            out = self.act_func_out(out)
+        out = self.layers(acted_sum_in)
         return out

@@ -1,0 +1,9 @@
+import os
+
+os.system('python get_hidden.py -src ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_sys_train.bpe.noUndo.en -tgt ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_sys_train.bpe.noUndo.de -output ../data/MasterArbeit/plan_b_en.de/hidden_ed_sys_train -get_last')
+os.system('python get_hidden.py -src ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_ref_train.bpe.noUndo.en -tgt ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_ref_train.bpe.noUndo.de -output ../data/MasterArbeit/plan_b_en.de/hidden_ed_ref_train -get_last')
+os.system('python get_hidden.py -src ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_sys_val.bpe.noUndo.en -tgt ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_sys_val.bpe.noUndo.de -output ../data/MasterArbeit/plan_b_en.de/hidden_ed_sys_val -get_last')
+os.system('python get_hidden.py -src ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_ref_val.bpe.noUndo.en -tgt ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_ref_val.bpe.noUndo.de -output ../data/MasterArbeit/plan_b_en.de/hidden_ed_ref_val -get_last')
+os.system('python get_hidden.py -src ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_sys_test.bpe.noUndo.en -tgt ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_sys_test.bpe.noUndo.de -output ../data/MasterArbeit/plan_b_en.de/hidden_ed_sys_test -get_last')
+os.system('python get_hidden.py -src ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_ref_test.bpe.noUndo.en -tgt ../data/MasterArbeit/plan_b_source_en.de/prepro_extracted_data/preproplan_b_ed_ref_test.bpe.noUndo.de -output ../data/MasterArbeit/plan_b_en.de/hidden_ed_ref_test -get_last')
+

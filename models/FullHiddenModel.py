@@ -13,6 +13,47 @@ seq_len = 100
 class MlpModel:
     pass
 
+class ScaledDotAttnConvModel(nn.Module):
+    def __init__(self, d_rate_attn = 0.1, dim1 = 20, act_func1 = "LeakyReLU", kernel_size1 = 3, stride1 = 2, act_func2 = "LeakyReLU", kernel_size2 = 3, stride2 = 2):
+        num_dim = 500
+        #seq_len = 100
+        super(ScaledDotAttnConvModel, self).__init__()
+        self.attn = ScaledDotProductAttention(num_dim, d_rate_attn)
+        self.dim_conv_out1 = get_dim_out(seq_len, kernel_size1, stride1)
+        self.dim_conv_out2 = get_dim_out(self.dim_conv_out1, kernel_size2, stride2)
+        self.layers = nn.Sequential()
+        self.layers.add_module("conv1", nn.Conv1d(num_dim, dim1, kernel_size1, stride1))
+        self.layers.add_module("bn1", nn.BatchNorm1d(dim1))
+        self.layers.add_module("act_func1", nnActi.get_acti(act_func1))
+        if self.dim_conv_out2 < 1:
+            self.layers.add_module("conv2", nn.Conv1d(dim1, 1, 2, 1))
+            self.dim_conv_out = get_dim_out(self.dim_conv_out1, 2, 1)
+        else:
+            self.layers.add_module("conv2", nn.Conv1d(dim1, 1, kernel_size2, stride2))
+            self.dim_conv_out = self.dim_conv_out2
+        self.layers.add_module('bn2', nn.BatchNorm1d(1))
+        self.layers.add_module('act_func2', nnActi.get_acti(act_func2))
+        #self.layers.add_module("maxpool", nn.MaxPool1d(124))
+        self.li = nn.Linear(self.dim_conv_out, 1, bias = True)
+
+    def forward(self, data_in):
+        #seq_len = 100
+        data_in_chunks = torch.split(data_in, seq_len, dim=1)
+        data_in_sys = data_in_chunks[0]
+        data_in_ref = data_in_chunks[1]
+        data_attn, _ = self.attn(data_in_ref, data_in_sys, data_in_sys)
+        data_attn = data_attn.transpose(1,2)
+        #print data_attn.size()
+        data_conv = self.layers(data_attn)
+        #print data_conv.size()
+        data_conv = data_conv.squeeze()
+        if self.dim_conv_out == 1:
+            data_conv = data_conv.unsqueeze(1)
+            #print data_conv.size()
+        out = self.li(data_conv)
+        #print out.size()
+        return out
+
 class MultiHeadAttnMlpModel(nn.Module):
     def __init__(self, num_head = 8, num_dim_k = 64, num_dim_v = 64, d_rate_attn = 0.1, act_func1 = "LeakyReLU", dim2 = 100, act_func2 = "LeakyReLU"):
         """
@@ -83,10 +124,10 @@ class MultiHeadAttnConvModel(nn.Module):
         #seq_len = 100
         super(MultiHeadAttnConvModel, self).__init__()
         self.attn = MultiHeadAttention(num_head, num_dim, num_dim_k, num_dim_v, d_rate_attn)
-        self.dim_conv_out1 = get_dim_out(num_dim, kernel_size1, stride1)
+        self.dim_conv_out1 = get_dim_out(seq_len, kernel_size1, stride1)
         self.dim_conv_out2 = get_dim_out(self.dim_conv_out1, kernel_size2, stride2)
         self.layers = nn.Sequential()
-        self.layers.add_module("conv1", nn.Conv1d(seq_len, dim1, kernel_size1, stride1))
+        self.layers.add_module("conv1", nn.Conv1d(num_dim, dim1, kernel_size1, stride1))
         self.layers.add_module("bn1", nn.BatchNorm1d(dim1))
         self.layers.add_module("act_func1", nnActi.get_acti(act_func1))
         if self.dim_conv_out2 < 1:
@@ -106,6 +147,48 @@ class MultiHeadAttnConvModel(nn.Module):
         data_in_sys = data_in_chunks[0]
         data_in_ref = data_in_chunks[1]
         data_attn, _ = self.attn(data_in_ref, data_in_sys, data_in_sys)
+        data_attn = data_attn.transpose(1,2)
+        #print data_attn.size()
+        data_conv = self.layers(data_attn)
+        #print data_conv.size()
+        data_conv = data_conv.squeeze()
+        if self.dim_conv_out == 1:
+            data_conv = data_conv.unsqueeze(1)
+            #print data_conv.size()
+        out = self.li(data_conv)
+        #print out.size()
+        return out
+
+class MultiHeadAttnConvModel2(nn.Module):
+    def __init__(self, num_head = 8, num_dim_k = 64, num_dim_v = 64, d_rate_attn = 0.1, dim1 = 20, act_func1 = "LeakyReLU", kernel_size1 = 3, stride1 = 2, act_func2 = "LeakyReLU", kernel_size2 = 3, stride2 = 2):
+        num_dim = 500
+        #seq_len = 100
+        super(MultiHeadAttnConvModel2, self).__init__()
+        self.attn = MultiHeadAttention(num_head, num_dim, num_dim_k, num_dim_v, d_rate_attn)
+        self.dim_conv_out1 = get_dim_out(seq_len, kernel_size1, stride1)
+        self.dim_conv_out2 = get_dim_out(self.dim_conv_out1, kernel_size2, stride2)
+        self.layers = nn.Sequential()
+        self.layers.add_module("conv1", nn.Conv1d(num_dim, dim1, kernel_size1, stride1))
+        self.layers.add_module("bn1", nn.BatchNorm1d(dim1))
+        self.layers.add_module("act_func1", nnActi.get_acti(act_func1))
+        if self.dim_conv_out2 < 1:
+            self.layers.add_module("conv2", nn.Conv1d(dim1, 1, 2, 1))
+            self.dim_conv_out = get_dim_out(self.dim_conv_out1, 2, 1)
+        else:
+            self.layers.add_module("conv2", nn.Conv1d(dim1, 1, kernel_size2, stride2))
+            self.dim_conv_out = self.dim_conv_out2
+        self.layers.add_module('bn2', nn.BatchNorm1d(1))
+        self.layers.add_module('act_func2', nnActi.get_acti(act_func2))
+        #self.layers.add_module("maxpool", nn.MaxPool1d(124))
+        self.li = nn.Linear(self.dim_conv_out, 1, bias = True)
+
+    def forward(self, data_in):
+        #seq_len = 100
+        data_in_chunks = torch.split(data_in, seq_len, dim=1)
+        data_in_sys = data_in_chunks[0]
+        data_in_ref = data_in_chunks[1]
+        data_attn, _ = self.attn(data_in_sys, data_in_ref, data_in_ref)
+        data_attn = data_attn.transpose(1,2)
         #print data_attn.size()
         data_conv = self.layers(data_attn)
         #print data_conv.size()

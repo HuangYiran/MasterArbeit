@@ -49,8 +49,8 @@ class MSECorrLoss(nn.Module):
         
     def forward(self, o, t):
         mse = self.mseLoss(o, t)
-        corr = 1- self.corrLoss(o, t)
-        loss = mse - corr
+        corr = self.corrLoss(o, t)
+        loss = mse + self.p * corr
         return loss
 
 class PReLULoss(nn.Module):
@@ -89,3 +89,18 @@ class PReLULoss(nn.Module):
             loss += torch.max(combined) - self.p * torch.min(combined)
         return loss/batch_size
         """
+class PReLUCorrLoss(nn.Module):
+    """
+    PReLU + corr
+    """
+    def __init__(self, p_rate = 2, gate_rate = 1.5):
+        super(PReLUCorrLoss, self).__init__()
+        self.gate_rate = gate_rate
+        self.ploss = PReLULoss(p_rate)
+        self.corr = CorrLoss()
+    
+    def forward(self, o, t):
+        prelu = self.ploss(o, t)
+        corr = self.corr(o, t)
+        loss = prelu + self.gate_rate * corr
+        return loss

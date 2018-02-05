@@ -1,0 +1,74 @@
+<!-- plan b en.de
+     include 4 test with different model. following hyperotp stay the same:
+	batch_size = 100
+	optim = Adam
+	lr = 0.005926
+	momentum = 0.193385389
+	drop_out_rate = 0.568304
+	loss_fn = Corr
+	act_func = LeakyReLU
+     -->
+<elist>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>100</dim2>
+		<dim3 type = 'int'>10</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_biLinear
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_maskedModel1
+		</dir_mid_result>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_maskedModel2
+		</dir_mid_result>
+	</e>
+
+</elist>
