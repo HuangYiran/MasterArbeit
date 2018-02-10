@@ -15,6 +15,7 @@ from data import DataUtil
 from LinearModel import BasicLinear, BasicLinear_dropout, BiLinear
 from MaskedModel import MaskedModel1, MaskedModel2
 from FullHiddenModel import MultiHeadAttnMlpModel, MultiHeadAttnLSTMModel, MultiHeadAttnConvModel, MultiHeadAttnConvModel2, ScaledDotAttnConvModel
+from RankModel import *
 from Params import Params
 from hyperopt import fmin, tpe, hp
 ###########################################################################
@@ -41,36 +42,16 @@ def o_func(params):
     data.normalize_minmax()
 
     # build model, 
-    if opt.model == "BiLinear":
-        model = BiLinear(dim2 = opt.dim2, act_func = opt.act_func, act_func_out = opt.act_func_out)
-    elif opt.model == "BasicLinearDropout":
-        model = BasicLinear_dropout(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate)
-    elif opt.model == "MaskedModel1":
-        model = MaskedModel1(dim2 = opt.dim2, act_func = opt.act_func)
-    elif opt.model == "MaskedModel2":
-        model = MaskedModel2(dim2 = opt.dim2, act_func = opt.act_func)
-    elif opt.model == "ScaledDotAttnConvModel":
-        model = ScaledDotAttnConvModel(d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, act_func2 = opt.act_func2, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
-    elif opt.model == "MultiHeadAttnMlpModel":
-        model = MultiHeadAttnMlpModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, act_func1 = opt.act_func1, dim2 = opt.dim2, act_func2 = opt.act_func2)
-    elif opt.model == "MultiHeadAttnLSTMModel":
-        model = MultiHeadAttnLSTMModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim2 = opt.dim2, act_func2 = opt.act_func2)
-    elif opt.model == "MultiHeadAttnConvModel":
-        model = MultiHeadAttnConvModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, act_func2 = opt.act_func2, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
-    elif opt.model == "MultiHeadAttnConvModel2":
-        model = MultiHeadAttnConvModel2(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, act_func2 = opt.act_func2, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
-    else:
-        model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, mom = opt.momentum)
-    print(model)
+    model = build_model(opt)
 
     # if cuda is set use gpu to train the model
     if opt.cuda == "True": # don't know how to set boolean value in the hyperopt
         model.cuda()
+        
     # set optimizer and loss functioin, use if-else because their parameters are different.
     # lr = 0.002, betas = (0.9, 0.888), eps = 1e-08, weight_decay = 0
     if opt.optim == 'Adam':
-        optimizer = torch.optim.Adam(model.parameters(), lr = opt.lr, eps = opt.eps, weight_decay = opt.weight_decay)
-    
+        optimizer = torch.optim.Adam(model.parameters(), lr = opt.lr, eps = opt.eps, weight_decay = opt.weight_decay)   
     if opt.loss_fn == 'CorrLoss':
         loss_fn = nnLoss.CorrLoss()
     elif opt.loss_fn == 'L1Loss':
@@ -83,9 +64,10 @@ def o_func(params):
         loss_fn = nnLoss.PReLULoss(opt.PReLU_rate)
     elif opt.loss_fn == 'PReLUCorrLoss':
         loss_fn = nnLoss.PReLUCorrLoss()
+    elif opt.loss_fn == 'CrossEntropyLoss':
+        loss_fn = torch.nn.CrossEntropyLoss()
     else:
-        print("++++++++ unknown Loss function, set loss to mse loss")
-    
+        print("++++++++ unknown Loss function, set loss to mse loss")    
     if opt.cuda == "True":
         loss_fn.cuda()
 
@@ -109,13 +91,17 @@ def o_func(params):
     # train
     for i in range(15 * nu_batch):
         if i % 10 == 0:
+            # evaluate 
             src, tgt = data.get_val_batch(rep = True)
             if opt.cuda == "True":
                 tgt = tgt.cuda()
-            #src, tgt = data.get_batch(rep = True)
+            # src, tgt = data.get_batch(rep = True)
             print("evaluate %d" %(i/10))
-            corr = evaluate_corr(model, src, tgt)
-            loss = evaluate_loss(model, loss_fn, src, tgt)
+            if opt.rank:
+                corr = evaluate_corr_rank(model, src, tgt)
+            else:
+                corr = evaluate_corr(model, src, tgt)
+            loss = evaluate_loss(model, loss_fn, src, tgt, opt)
             
             # write mid result
             tmp_loss = "%d,%f"%(int(i/10), loss)
@@ -133,25 +119,110 @@ def o_func(params):
                 'optimizer': optimizer.state_dict()
             }, './checkpoints/cp'+str(i/10))
         else:
+            # train
             if opt.isRandom:
                 src, tgt = data.get_random_batch()
             else:
                 src, tgt = data.get_batch(rep = True)
             if opt.cuda == "True":
                 tgt = tgt.cuda
-            train_batch(model, loss_fn, optimizer, src, tgt)
+            train_batch(model, loss_fn, optimizer, src, tgt, opt)
     
+    print "--test model"
+    test = test_model(opt, model, data)
+    print "--val model"
+    val = val_model(opt, model, data)
+    with open(opt.dir_mid_result + '_val', 'w') as fi:
+        val = "%f"%(val)
+        fi.write(val)
+        fi.write('\n')
+    file_corr.close()
+    file_loss.close()
+        
+    return test, val
+
+
+###############################################
+# some function that extracted from the o_func
+##############################################
+def test_model(opt, model, data):
     out = 0.0
-    for i in range(10):
-        src, tgt = data.get_test_batch(rep = True)
+    path_test = opt.dir_mid_result + 'test'
+    if os.path.exists(path_test):
+        os.remove(path_test)
+    file_test = open(path_test, 'a')
+    num_train, num_val, num_test = data.get_nu_batch()
+    for i in range(num_test):
+        src, tgt = data.get_test_batch()
         if opt.cuda == "True":
             tgt = tgt.cuda()
-        out = out + evaluate_corr(model, src, tgt)
-    
-    file_loss.close()
-    file_corr.close()
-        
-    return 1 - out/10.0
+        if opt.rank:
+            corr = evaluate_corr_rank(model, src, tgt)
+        else:
+            corr = evaluate_corr(model, src, tgt)
+        out = out + corr
+        tmp_corr = "%d,%f"%(i, corr)
+        file_test.write(tmp_corr)
+        file_test.write('\n')
+    file_test.close()
+    return out/num_test
+
+def val_model(opt, model, data):
+    out = 0.0
+    num_train, num_val, num_test = data.get_nu_batch()
+    data.reset_cur_val_index()
+    for i in range(num_val):
+        src, tgt = data.get_val_batch()
+        if opt.cuda == "True":
+            tgt = tgt.cuda()
+        if opt.rank:
+            corr = evaluate_corr_rank(model, src, tgt)
+        else:
+            corr = evaluate_corr(model, src, tgt)
+        out = out + corr
+    return out/num_val
+
+def build_model(opt):
+    # build model, 
+    if opt.model == "BiLinear":
+        model = BiLinear(dim2 = opt.dim2, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate)
+    elif opt.model == "BasicLinearDropout":
+        model = BasicLinear_dropout(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate)
+    elif opt.model == "MaskedModel1":
+        model = MaskedModel1(dim2 = opt.dim2, act_func = opt.act_func)
+    elif opt.model == "MaskedModel2":
+        model = MaskedModel2(dim2 = opt.dim2, act_func = opt.act_func)
+    elif opt.model == "ScaledDotAttnConvModel":
+        model = ScaledDotAttnConvModel(d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, act_func2 = opt.act_func2, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
+    elif opt.model == "MultiHeadAttnMlpModel":
+        model = MultiHeadAttnMlpModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, act_func1 = opt.act_func1, dim2 = opt.dim2, act_func2 = opt.act_func2)
+    elif opt.model == "MultiHeadAttnLSTMModel":
+        model = MultiHeadAttnLSTMModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim2 = opt.dim2, act_func2 = opt.act_func2)
+    elif opt.model == "MultiHeadAttnConvModel":
+        model = MultiHeadAttnConvModel(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, act_func2 = opt.act_func2, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
+    elif opt.model == "MultiHeadAttnConvModel2":
+        model = MultiHeadAttnConvModel2(num_head = opt.num_head, num_dim_k = opt.num_dim_k, num_dim_v = opt.num_dim_v, d_rate_attn = opt.d_rate_attn, dim1 = opt.dim1, act_func1 = opt.act_func1, kernel_size1 = opt.kernel_size1, stride1 = opt.stride1, act_func2 = opt.act_func2, kernel_size2 = opt.kernel_size2, stride2 = opt.stride2)
+    elif opt.model == "MLPRank":
+        model = MLPRank(dim2 = opt.dim2, dim3 = opt.dim3, dim4 = opt.dim4, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate)
+    elif opt.model == "MLPSoftmaxRank":
+        model = MLPSoftmaxRank(dim2 = opt.dim2, dim3 = opt.dim3, dim4 = opt.dim4, act_func = opt.act_func, d_rate = opt.drop_out_rate)
+    elif opt.model == "TriLinearRank":
+        model = TriLinearRank(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate)
+    elif opt.model == "TriLinearSoftmaxRank":
+        model = TriLinearSoftmaxRank(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, d_rate = opt.drop_out_rate)
+    elif opt.model == "MaskedModelRank1":
+        model = MaskedModelRank1(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate)
+    elif opt.model == "MaskedModelRank2":
+        model = MaskedModelRank2(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate)
+    elif opt.model == "MaskedModelRank3":
+        model = MaskedModelRank3(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, d_rate = opt.drop_out_rate)
+    elif opt.model == "BasicLinear":
+        model = BasicLinear(dim2 = opt.dim2, dim3 = opt.dim3, act_func = opt.act_func, act_func_out = opt.act_func_out, mom = opt.momentum)
+    print(model)
+    return model
+
+
+
 
 #######################################
 # set the search space for linear Model 
@@ -368,10 +439,11 @@ def get_best():
 #training
 ###########
 
-def train_batch(model, loss_fn, optimizer, src, tgt):
+def train_batch(model, loss_fn, optimizer, src, tgt, opt):
     src = torch.autograd.Variable(src, requires_grad = False)
     tgt = torch.autograd.Variable(tgt, requires_grad = False)
-    tgt = tgt.unsqueeze(dim = 1)
+    if not opt.sf_output:
+        tgt = tgt.unsqueeze(dim = 1)
 
     optimizer.zero_grad()
     model.train()
@@ -385,6 +457,7 @@ def train_batch(model, loss_fn, optimizer, src, tgt):
 
 def evaluate_corr(model, src, tgt):
     arr1 = predict(model, src)
+    arr1 = arr1.view(1, -1)
     arr2 = tgt.view(1, -1)
     #print(arr1)
     #print(arr2)
@@ -398,15 +471,53 @@ def evaluate_corr(model, src, tgt):
     print("the correlation coeffizient is : %f" %(corr))
     return corr
 
-def evaluate_loss(model, loss_fn, src, tgt):
+def evaluate_corr_rank(model, src, tgt, threshold = 0.5):
+    arr1 = predict(model, src)
+    arr1 = arr1.numpy()
+    # arr2 = tgt.view(1, -1)
+    arr2 = tgt.numpy()
+    # precess the output of the model
+    if arr1.shape[1] == 3:
+        # softmax output
+        arr1 = numpy.array(list(map(result_transform_sf_to_score, arr1)))
+        arr2 = arr2 - 1
+    else:
+        # score output, didn't use the threshold either.
+        arr1 = numpy.array(list(map(lambda x: round(x), arr1)))
+    arr = numpy.vstack((arr1, arr2))
+    corr = numpy.corrcoef(arr)[0][1]
+    if math.isnan(corr):
+        print("the corr is nan, which means the variance of the scores is 0")
+        corr = 0
+    print("the correlation coeffizient is : %f" %(corr))
+    return corr
+
+def result_transform_sf_to_score(x):
+    a, b, c = x[0], x[1], x[2]
+    if a > b and a > c:
+        return -1
+    elif b > a and b > c:
+        return 0
+    elif c > a and c > b:
+        return 1
+    else:
+        # ???
+        return 0
+    
+def get_result1(x):
+    pass
+     
+        
+def evaluate_loss(model, loss_fn, src, tgt , opt):
     src = torch.autograd.Variable(src, requires_grad = False)
     tgt = torch.autograd.Variable(tgt, requires_grad = False)
-    tgt = tgt.unsqueeze(dim = 1)
+    if not opt.sf_output:
+        tgt = tgt.unsqueeze(dim = 1)
     model.eval()
     #print("src1",src[1][0])
     #print("src2",src[1][100]) 
     out = model(src)
-    #print("out", out)
+    #print("shape out and tgt", out.data.shape, tgt.data.shape)
     loss = loss_fn(out, tgt).data
     loss = loss.cpu()
     loss = loss.numpy()
@@ -419,7 +530,8 @@ def predict(model, src):
     src = torch.autograd.Variable(src, requires_grad = False)
     model.eval()
     out = model(src)
-    return out.view(1, -1).data
+    #return out.view(1, -1).data
+    return out.data
 
 def save_checkpoint(state, filename):
     #torch.save(state, filename)
