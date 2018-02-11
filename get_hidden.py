@@ -13,8 +13,10 @@ from Pipeline_hidden import Pipeline_hidden
 parser = argparse.ArgumentParser(description='translate.py')
 onmt.Markdown.add_md_help_argument(parser)
 
-parser.add_argument('-model', default = "../data/mt_model/prepro_model_ppl_20.07_e13.pt",
-                    help='Path to model .pt file')
+#parser.add_argument('-model', default = "../data/mt_model/prepro_model_ppl_20.07_e13.pt",
+#                    help='Path to model .pt file')
+parser.add_argument('-model', default = "/Users/ihuangyiran/Documents/Workplace_Python/data/mt_model/model_deen_ppl_16.93_e13.pt",
+        help = 'Path to model .pt file')
 parser.add_argument('-src', default = "/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/data/preprosrc-ref.bpe.noUndo.en",
                     help='Source sequence to decode (one line per sequence)')
 parser.add_argument('-src_img_dir',   default="",
