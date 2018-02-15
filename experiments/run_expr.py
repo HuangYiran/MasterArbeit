@@ -93,17 +93,17 @@ elif opt.expr == 'plan_b_de.en':
           'src_test_sys': '../data/MasterArbeit/plan_b_de.en/test_sys_hidden',
           'src_test_ref': '../data/MasterArbeit/plan_b_de.en/test_ref_hidden',
             }
-elif opt.expr == 'plan_c_da_de.en':
+elif opt.expr == 'plan_c_rank_de.en':
     params_data = {
-          'tgt': '../data/MasterArbeit/plan_c_da_de.en/train_scores',
-          'src_sys': '../data/MasterArbeit/plan_c_da_de.en/train_sys_hidden',
-          'src_ref': '../data/MasterArbeit/plan_c_da_de.en/train_ref_hidden',
-          'tgt_val': '../data/MasterArbeit/plan_c_da_de.en/val_scores',
-          'src_val_sys': '../data/MasterArbeit/plan_c_da_de.en/val_sys_hidden',
-          'src_val_ref': '../data/MasterArbeit/plan_c_da_de.en/val_ref_hidden',
-          'tgt_test': '../data/MasterArbeit/plan_c_da_de.en/test_scores',
-          'src_test_sys': '../data/MasterArbeit/plan_c_da_de.en/test_sys_hidden',
-          'src_test_ref': '../data/MasterArbeit/plan_c_da_de.en/test_ref_hidden',
+          'tgt': '../data/MasterArbeit/plan_c_rank_de.en/train_scores',
+          'src_sys': '../data/MasterArbeit/plan_c_rank_de.en/train_sys_hidden',
+          'src_ref': '../data/MasterArbeit/plan_c_rank_de.en/train_ref_hidden',
+          'tgt_val': '../data/MasterArbeit/plan_c_rank_de.en/val_scores',
+          'src_val_sys': '../data/MasterArbeit/plan_c_rank_de.en/val_sys_hidden',
+          'src_val_ref': '../data/MasterArbeit/plan_c_rank_de.en/val_ref_hidden',
+          'tgt_test': '../data/MasterArbeit/plan_c_rank_de.en/test_scores',
+          'src_test_sys': '../data/MasterArbeit/plan_c_rank_de.en/test_sys_hidden',
+          'src_test_ref': '../data/MasterArbeit/plan_c_rank_de.en/test_ref_hidden',
             }
 elif opt.expr == 'plan_c_rank_en.de':
     params_data = {
@@ -117,24 +117,24 @@ elif opt.expr == 'plan_c_rank_en.de':
           'src_test_sys': '../data/MasterArbeit/plan_c_rank_en.de/test_sys_hidden',
           'src_test_ref': '../data/MasterArbeit/plan_c_rank_en.de/test_ref_hidden',
             }
-elif opt.expr == 'plan_c_rank_de.en':
+elif opt.expr == 'plan_c_da_de.en':
     params_data = {
-          'tgt': '../data/MasterArbeit/plan_c_rank_de.en/train_scores',
-          'src_sys': '../data/MasterArbeit/plan_c_rank_de.en/train_sys_hidden',
-          'src_ref': '../data/MasterArbeit/plan_c_rank_de.en/train_ref_hidden',
-          'tgt_val': '../data/MasterArbeit/plan_c_rank_de.en/val_scores',
-          'src_val_sys': '../data/MasterArbeit/plan_c_rank_de.en/val_sys_hidden',
-          'src_val_ref': '../data/MasterArbeit/plan_c_rank_de.en/val_ref_hidden',
-          'tgt_test': '../data/MasterArbeit/plan_c_rank_de.en/test_scores',
-          'src_test_sys': '../data/MasterArbeit/plan_c_rank_de.en/test_sys_hidden',
-          'src_test_ref': '../data/MasterArbeit/plan_c_rank_de.en/test_ref_hidden',
+          'tgt': '../data/MasterArbeit/plan_c_da_de.en/train_scores',
+          'src_sys': '../data/MasterArbeit/plan_c_da_de.en/train_sys_hidden',
+          'src_ref': '../data/MasterArbeit/plan_c_da_de.en/train_ref_hidden',
+          'tgt_val': '../data/MasterArbeit/plan_c_da_de.en/val_scores',
+          'src_val_sys': '../data/MasterArbeit/plan_c_da_de.en/val_sys_hidden',
+          'src_val_ref': '../data/MasterArbeit/plan_c_da_de.en/val_ref_hidden',
+          'tgt_test': '../data/MasterArbeit/plan_c_da_de.en/data_scores_2016',
+          'src_test_sys': '../data/MasterArbeit/plan_c_da_de.en/sys_hidden_2016',
+          'src_test_ref': '../data/MasterArbeit/plan_c_da_de.en/ref_hidden_2016',
             }
 
 params_list = xml.read_exp_list(opt.doc)
 
 results = []
 for params in params_list:
-    params.update(params_data)
+#    params.update(params_data)
     result = fmin.o_func(params)
     results.append(result)
 print results

@@ -1,0 +1,288 @@
+<elist>
+	<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_scores_0</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_sys_hidden_0</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_ref_hidden_0</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_scores_0</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_sys_hidden_0</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_ref_hidden_0</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_scores_0</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_sys_hidden_0</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_ref_hidden_0</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+	<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_scores_1</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_sys_hidden_1</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_ref_hidden_1</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_scores_1</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_sys_hidden_1</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_ref_hidden_1</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_scores_1</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_sys_hidden_1</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_ref_hidden_1</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_scores_2</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_sys_hidden_2</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_ref_hidden_2</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_scores_2</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_sys_hidden_2</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_ref_hidden_2</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_scores_2</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_sys_hidden_2</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_ref_hidden_2</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_scores_3</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_sys_hidden_3</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_ref_hidden_3</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_scores_3</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_sys_hidden_3</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_ref_hidden_3</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_scores_3</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_sys_hidden_3</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_ref_hidden_3</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_scores_4</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_sys_hidden_4</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_ref_hidden_4</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_scores_4</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_sys_hidden_4</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_ref_hidden_4</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_scores_4</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_sys_hidden_4</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_ref_hidden_4</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_scores_5</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_sys_hidden_5</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_ref_hidden_5</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_scores_5</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_sys_hidden_5</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_ref_hidden_5</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_scores_5</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_sys_hidden_5</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_ref_hidden_5</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_scores_6</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_sys_hidden_6</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_ref_hidden_6</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_scores_6</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_sys_hidden_6</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_ref_hidden_6</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_scores_6</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_sys_hidden_6</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_ref_hidden_6</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_scores_7</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_sys_hidden_7</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_ref_hidden_7</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_scores_7</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_sys_hidden_7</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_ref_hidden_7</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_scores_7</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_sys_hidden_7</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_ref_hidden_7</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_scores_8</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_sys_hidden_8</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_ref_hidden_8</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_scores_8</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_sys_hidden_8</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_ref_hidden_8</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_scores_8</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_sys_hidden_8</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_ref_hidden_8</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_scores_9</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_sys_hidden_9</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_ref_hidden_9</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_scores_9</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_sys_hidden_9</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_ref_hidden_9</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_scores_9</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_sys_hidden_9</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_ref_hidden_9</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_scores_10</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_sys_hidden_10</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/train_ref_hidden_10</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_scores_10</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_sys_hidden_10</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/val_ref_hidden_10</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_scores_10</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_sys_hidden_10</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_b_de.en_cross/test_ref_hidden_10</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_b_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+
+
+</elist>
