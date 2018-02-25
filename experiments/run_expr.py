@@ -134,7 +134,7 @@ params_list = xml.read_exp_list(opt.doc)
 
 results = []
 for params in params_list:
-#    params.update(params_data)
+    params.update(params_data)
     result = fmin.o_func(params)
     results.append(result)
 print results

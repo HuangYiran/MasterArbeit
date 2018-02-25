@@ -1,0 +1,27 @@
+<elist>
+	<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_a_en.de_cross/train_scores0</tgt>
+		<src_sys type = 'string'>../data/MasterArbeit/plan_a_en.de_cross/train_sys_hidden0</src_sys>
+		<src_ref type = 'string'>../data/MasterArbeit/plan_a_en.de_cross/train_ref_hidden0</src_ref>
+		<tgt_val type = 'string'>../data/MasterArbeit/plan_a_en.de_cross/val_scores0</tgt_val>
+		<src_val_sys type = 'string'>../data/MasterArbeit/plan_a_en.de_cross/val_sys_hidden0</src_val_sys>
+		<src_val_ref type = 'string'>../data/MasterArbeit/plan_a_en.de_cross/val_ref_hidden0</src_val_ref>
+		<tgt_test type = 'string'>../data/MasterArbeit/plan_a_en.de_cross/test_scores0</tgt_test>
+		<src_test_sys type = 'string'>../data/MasterArbeit/plan_a_en.de_cross/test_sys_hidden0</src_test_sys>
+		<src_test_ref type = 'string'>../data/MasterArbeit/plan_a_en.de_cross/test_ref_hidden0</src_test_ref>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>SELU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>MSELoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_a_ende_basicLinearDropout
+		</dir_mid_result>
+	</e>
+</elist>
