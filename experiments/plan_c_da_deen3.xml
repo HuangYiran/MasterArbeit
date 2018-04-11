@@ -1,0 +1,1035 @@
+<!-- plan c da de.en 2
+     # 
+     0. target:
+	test the effect of mix training data
+	test the effect of the parameter ratio
+     1. use two data set to train the model alternately:
+	accuracy data set
+	sub accuracy data set
+     2. the ratio of the data is saved as a parameter ratio.
+     3. include 4 test with different model. following hyperotp stay the same:
+	batch_size = 100
+	optim = Adam
+	lr = 0.005926
+	momentum = 0.193385389
+	drop_out_rate = 0.568304
+	loss_fn = Corr
+	act_func = LeakyReLU
+     -->
+<elist>
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 1 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 1 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 1 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 1 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 1 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 2 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 2 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 2 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 2 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 2 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 3 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 3 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 3 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 3 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 3 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 4 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 4 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 4 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 4 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 4 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 5 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 5 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 5 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 5 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 5 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 6 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 6 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 6 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 6 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 6 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 7 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 7 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 7 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 7 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 7 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 8 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 8 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 8 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 8 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 8 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 9 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 9 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 9 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 9 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 9 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 10 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 10 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 10 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 10 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 10 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 11 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 11 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 11 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 11 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 11 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 12 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 12 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 12 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 12 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 12 </ratio>
+	</e>
+
+	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 13 </ratio>
+       	</e>
+	<e>
+		<model type = 'string'>BasicLinearDropout</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>0</dim3>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_basicLinearDropout
+		</dir_mid_result>
+		<ratio type = 'int'> 13 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>BiLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_biLinear
+		</dir_mid_result>
+		<ratio type = 'int'> 13 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel1</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel1
+		</dir_mid_result>
+		<ratio type = 'int'> 13 </ratio>
+	</e>
+	<e>
+		<model type = 'string'>MaskedModel2</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<dim2 type = 'int'>10</dim2>
+		<lr type = 'float'>0.005926</lr>
+		<momentum  type = 'float'>0.193385389</momentum>
+		<drop_out_rate type = 'float'>0.568304</drop_out_rate>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'none'>None</act_func_out>
+		<loss_fn type = 'string'>CorrLoss</loss_fn>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_maskedModel2
+		</dir_mid_result>
+		<ratio type = 'int'> 13 </ratio>
+	</e>
+
+
+</elist>
