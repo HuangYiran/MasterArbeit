@@ -10,48 +10,46 @@ from Attention import ScaledDotProductAttention, MultiHeadAttention
 
 seq_len = 100
 
-class MlpModel:
-    pass
-
-class ScaledDotAttnConvModel(nn.Module):
-    def __init__(self, d_rate_attn = 0.1, dim1 = 20, act_func1 = "LeakyReLU", kernel_size1 = 3, stride1 = 2, act_func2 = "LeakyReLU", kernel_size2 = 3, stride2 = 2):
-        num_dim = 500
-        #seq_len = 100
-        super(ScaledDotAttnConvModel, self).__init__()
-        self.attn = ScaledDotProductAttention(num_dim, d_rate_attn)
-        self.dim_conv_out1 = get_dim_out(seq_len, kernel_size1, stride1)
-        self.dim_conv_out2 = get_dim_out(self.dim_conv_out1, kernel_size2, stride2)
-        self.layers = nn.Sequential()
-        self.layers.add_module("conv1", nn.Conv1d(num_dim, dim1, kernel_size1, stride1))
-        self.layers.add_module("bn1", nn.BatchNorm1d(dim1))
-        self.layers.add_module("act_func1", nnActi.get_acti(act_func1))
-        if self.dim_conv_out2 < 1:
-            self.layers.add_module("conv2", nn.Conv1d(dim1, 1, 2, 1))
-            self.dim_conv_out = get_dim_out(self.dim_conv_out1, 2, 1)
+class LSTMMlpModel_rank(nn.Module):
+    def __init__(self, dim2 = 128, dim3 = 16, act_func = "LeakyReLU", softmax = True):
+        num_dim = 300
+        super(LSTMMlpModel_rank, self).__init__()
+        self.rnn_ref = nn.LSTM(input_size = num_dim, hidden_size = num_dim, num_layers = 1)
+        self.rnn_s1 = nn.LSTM(input_size = num_dim, hidden_size = num_dim, num_layers = 1)
+        self.rnn_s2 = nn.LSTM(input_size = num_dim, hidden_size = num_dim, num_layers = 1)
+        self.mlp = nn.Sequential()
+        self.mlp.add_module('fc1', nn.Linear(num_dim*3, dim2))
+        self.mlp.add_module('bn1', nn.BatchNorm1d(dim2))
+        self.mlp.add_module('act_fun', nnActi.get_acti(act_func))
+        self.mlp.add_module('fc2', nn.Linear(dim2, dim3))
+        self.mlp.add_module('bn2', nn.BatchNorm1d(dim3))
+        self.mlp.add_module('act_fun2', nnActi.get_acti(act_func))
+        if softmax:
+            self.mlp.add_module('fc3', nn.Linear(dim3, 3))
         else:
-            self.layers.add_module("conv2", nn.Conv1d(dim1, 1, kernel_size2, stride2))
-            self.dim_conv_out = self.dim_conv_out2
-        self.layers.add_module('bn2', nn.BatchNorm1d(1))
-        self.layers.add_module('act_func2', nnActi.get_acti(act_func2))
-        #self.layers.add_module("maxpool", nn.MaxPool1d(124))
-        self.li = nn.Linear(self.dim_conv_out, 1, bias = True)
+            self.mlp.add_module('fc3', nn.Linear(dim3, 1))
 
     def forward(self, data_in):
-        #seq_len = 100
-        data_in_chunks = torch.split(data_in, seq_len, dim=1)
-        data_in_sys = data_in_chunks[0]
-        data_in_ref = data_in_chunks[1]
-        data_attn, _ = self.attn(data_in_ref, data_in_sys, data_in_sys)
-        data_attn = data_attn.transpose(1,2)
-        #print data_attn.size()
-        data_conv = self.layers(data_attn)
-        #print data_conv.size()
-        data_conv = data_conv.squeeze()
-        if self.dim_conv_out == 1:
-            data_conv = data_conv.unsqueeze(1)
-            #print data_conv.size()
-        out = self.li(data_conv)
-        #print out.size()
+        seq_len = 30
+        data_in_chunks = torch.split(data_in, seq_len, dim = 1)
+        data_in_s1 = data_in_chunks[0]
+        data_in_s2 = data_in_chunks[1]
+        data_in_ref = data_in_chunks[2]
+        # input of rnn: (seq_len, batch, input_size)
+        data_in_s1 = torch.transpose(data_in_s1, 0, 1)
+        data_in_s2 = torch.transpose(data_in_s2, 0, 1)
+        data_in_ref = torch.transpose(data_in_ref, 0, 1)
+        # run rnn, rnn has two output 
+        out_rnn_ref, _ = self.rnn_ref(data_in_ref)
+        out_rnn_s1, _ = self.rnn_s1(data_in_s1)
+        out_rnn_s2, _  = self.rnn_s2(data_in_s2)
+        # output of rnn: (seq_len, batch, input_size)
+        out_rnn_ref = torch.transpose(out_rnn_ref, 0, 1)[:,-1,:]
+        out_rnn_s1 = torch.transpose(out_rnn_s1, 0, 1)[:,-1,:]
+        out_rnn_s2 = torch.transpose(out_rnn_s2, 0, 1)[:,-1,:]
+        # cat the data and run mlp
+        out_rnn = torch.cat((out_rnn_s1, out_rnn_s2, out_rnn_ref),1)
+        out = self.mlp(out_rnn)
         return out
 
 class MultiHeadAttnMlpModel(nn.Module):
@@ -200,6 +198,87 @@ class MultiHeadAttnConvModel2(nn.Module):
         #print out.size()
         return out
 
+class ScaledDotAttnConvModel(nn.Module):
+    def __init__(self, d_rate_attn = 0.1, dim1 = 20, act_func1 = "LeakyReLU", kernel_size1 = 3, stride1 = 2, act_func2 = "LeakyReLU", kernel_size2 = 3, stride2 = 2):
+        num_dim = 500
+        #seq_len = 100
+        super(ScaledDotAttnConvModel, self).__init__()
+        self.attn = ScaledDotProductAttention(num_dim, d_rate_attn)
+        self.dim_conv_out1 = get_dim_out(seq_len, kernel_size1, stride1)
+        self.dim_conv_out2 = get_dim_out(self.dim_conv_out1, kernel_size2, stride2)
+        self.layers = nn.Sequential()
+        self.layers.add_module("conv1", nn.Conv1d(num_dim, dim1, kernel_size1, stride1))
+        self.layers.add_module("bn1", nn.BatchNorm1d(dim1))
+        self.layers.add_module("act_func1", nnActi.get_acti(act_func1))
+        if self.dim_conv_out2 < 1:
+            self.layers.add_module("conv2", nn.Conv1d(dim1, 1, 2, 1))
+            self.dim_conv_out = get_dim_out(self.dim_conv_out1, 2, 1)
+        else:
+            self.layers.add_module("conv2", nn.Conv1d(dim1, 1, kernel_size2, stride2))
+            self.dim_conv_out = self.dim_conv_out2
+        self.layers.add_module('bn2', nn.BatchNorm1d(1))
+        self.layers.add_module('act_func2', nnActi.get_acti(act_func2))
+        #self.layers.add_module("maxpool", nn.MaxPool1d(124))
+        self.li = nn.Linear(self.dim_conv_out, 1, bias = True)
+
+    def forward(self, data_in):
+        #seq_len = 100
+        data_in_chunks = torch.split(data_in, seq_len, dim=1)
+        data_in_sys = data_in_chunks[0]
+        data_in_ref = data_in_chunks[1]
+        data_attn, _ = self.attn(data_in_ref, data_in_sys, data_in_sys)
+        data_attn = data_attn.transpose(1,2)
+        #print data_attn.size()
+        data_conv = self.layers(data_attn)
+        #print data_conv.size()
+        data_conv = data_conv.squeeze()
+        if self.dim_conv_out == 1:
+            data_conv = data_conv.unsqueeze(1)
+            #print data_conv.size()
+        out = self.li(data_conv)
+        #print out.size()
+        return out
+
+class ScaledDotAttnMlpModel_rank(nn.Module):
+    def __init__(self, d_rate_attn = 0.1, dim2 = 256, dim3 = 64, act_func = "LeakyReLU", softmax = True):
+        num_dim = 300
+        super(ScaledDotAttnMlpModel_rank, self).__init__()
+        self.attn_s1 = ScaledDotProductAttention(num_dim, d_rate_attn)
+        self.attn_s2 = ScaledDotProductAttention(num_dim, d_rate_attn)
+        self.mlp = nn.Sequential()
+        self.mlp.add_module('fc1', nn.Linear(num_dim*2, dim2))
+        self.mlp.add_module('bn1', nn.BatchNorm1d(dim2))
+        self.mlp.add_module('act_fun', nnActi.get_acti(act_func))
+        self.mlp.add_module('fc2', nn.Linear(dim2, dim3))
+        self.mlp.add_module('bn2', nn.BatchNorm1d(dim3))
+        self.mlp.add_module('act_fun2', nnActi.get_acti(act_func))
+        if softmax:
+            self.mlp.add_module('fc3', nn.Linear(dim3, 3))
+        else:
+            self.mlp.add_module('fc3', nn.Linear(dim3, 1))
+
+    def forward():
+        seq_len = 30
+        data_in_chunks = torch.split(data_in, seq_len, dim = 1)
+        data_in_s1 = data_in_chunks[0]
+        data_in_s2 = data_in_chunks[1]
+        data_in_ref = data_in_chunks[2]
+        # output of Attn: (batch, num_q, num_dim)
+        out_attn_s1, _ = self.attn_s1(data_in_ref, data_in_s1, data_in_s1)
+        out_attn_s2, _ = self.attn_s2(data_in_ref, data_in_s2, data_in_s2)
+        # get sum of words
+        out_attn_s1 = torch.sum(out_attn_s1, dim = 1)
+        out_attn_s2 = torch.sum(out_attn_s2, dim = 2)
+        out_attn = torch.cat((out_attn_s1, out_attn_s2), 1)
+        out = self.mlp(out_attn)
+        return out
+
+
+
+
+######################
+# assist functions
+######################
 def index_select(src, indexes):
     """
     in:
