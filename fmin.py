@@ -31,14 +31,22 @@ def o_func(params):
     opt.show_params()
     
     # file to save the tmp result
-    path_loss = opt.dir_mid_result + 'loss'
-    path_corr = opt.dir_mid_result + 'corr'
-    if os.path.exists(path_loss):
-        os.remove(path_loss)
-    if os.path.exists(path_corr):
-        os.remove(path_corr)
-    file_loss = open(path_loss, 'a')
-    file_corr = open(path_corr, 'a')
+    path_train_corr = opt.dir_mid_result + 'train_corr'
+    path_train_loss = opt.dir_mid_result + 'train_loss'
+    path_val_loss = opt.dir_mid_result + 'val_loss'
+    path_val_corr = opt.dir_mid_result + 'val_corr'
+    if os.path.exists(path_train_loss):
+        os.remove(path_train_loss)
+    if os.path.exists(path_train_corr):
+        os.remove(path_train_corr)
+    if os.path.exists(path_val_corr):
+        os.remove(path_val_corr)
+    if os.path.exists(path_val_loss):
+        os.remove(path_val_loss)
+    file_train_corr = open(path_train_corr, 'a')
+    file_train_loss = open(path_train_loss, 'a')
+    file_val_corr = open(path_val_corr, 'a')
+    file_val_loss = open(path_val_loss, 'a')
 
     # read data and normalize if necessary
     data = DataUtil(opt)
@@ -109,14 +117,26 @@ def o_func(params):
     for i in range(10 * nu_batch):
         if i%nu_batch == 0:
             # write mid result
-            corr, taul = val_model(opt, model, data)
+            if opt.rank:
+                corr, taul = val_model(opt, model, data)
+            else:
+                taul = val_model(opt, model, data)
             test = test_model(opt, model, data)
-            tmp_loss = "%d,%f"%(int(i/nu_batch), test)
-            file_loss.write(tmp_loss)
-            file_loss.write('\n')
-            tmp_corr = "%d,%f"%(int(i/nu_batch), taul)
-            file_corr.write(tmp_corr)
-            file_corr.write('\n')
+            train_loss = val_model_with_loss(opt, model, data, loss_fn)
+            val_loss = test_model_with_loss(opt, model, data, loss_fn)
+            tmp_corr = "%d,%f"%(int(i/nu_batch), test)
+            file_val_corr.write(tmp_corr)
+            file_val_corr.write('\n')
+            tmp_taul = "%d,%f"%(int(i/nu_batch), taul)
+            file_train_corr.write(tmp_taul)
+            file_train_corr.write('\n')
+            tmp_train_loss = "%d,%f"%(int(i/nu_batch), train_loss)
+            file_train_loss.write(tmp_train_loss)
+            file_train_loss.write('\n')
+            tmp_val_loss = "%d,%f"%(int(i/nu_batch), val_loss)
+            file_val_loss.write(tmp_val_loss)
+            file_val_loss.write('\n')
+
         if i % 10 == 0:
             # evaluate 
             src, tgt = data.get_val_batch(rep = True)
@@ -149,8 +169,10 @@ def o_func(params):
             train_batch(model, loss_fn, optimizer, src, tgt, opt)
     
     # close the opened file
-    file_corr.close()
-    file_loss.close()
+    file_train_corr.close()
+    file_val_corr.close()
+    file_train_loss.close()
+    file_val_loss.close()
 
     # test and valuate the model 
     print "--test model"
@@ -274,14 +296,12 @@ def test_da_model_with_rr_data(opt, model, data):
         taul = valTauLike(tgt, rr)
     return taul
 
-
-
-
 def val_model(opt, model, data):
     out_corr = 0.0
     out_mae = 0.0
     out_rmse = 0.0    
     out_spearmanr = 0.0
+    out_loss = 0.0
     num_train, num_val, num_test = data.get_nu_batch()
     data.reset_cur_val_index()
     src_tau = []
@@ -304,6 +324,49 @@ def val_model(opt, model, data):
         return out_corr/num_val, taul
     else:
         return out_corr/num_val
+
+def val_model_with_loss(opt, model, data, loss_fn):
+    out_corr = 0.0
+    out_mae = 0.0
+    out_rmse = 0.0    
+    out_spearmanr = 0.0
+    out_loss = 0.0
+    num_train, num_val, num_test = data.get_nu_batch()
+    data.reset_cur_val_index()
+    src_tau = []
+    tgt_tau = []
+    for i in range(num_val):
+        src, tgt = data.get_val_batch()
+        src_tau.append(src)
+        tgt_tau.append(tgt)
+        if opt.cuda == "True":
+            tgt = tgt.cuda()
+    src_tau = torch.cat(src_tau)
+    tgt_tau = torch.cat(tgt_tau)
+    loss = evaluate_loss(model, loss_fn, src_tau, tgt_tau, opt)
+    return loss
+
+def test_model_with_loss(opt, model, data, loss_fn):
+    out_corr = 0.0
+    out_mae = 0.0
+    out_rmse = 0.0    
+    out_spearmanr = 0.0
+    out_loss = 0.0
+    num_train, num_val, num_test = data.get_nu_batch()
+    data.reset_cur_test_index()
+    src_tau = []
+    tgt_tau = []
+    for i in range(num_test):
+        src, tgt = data.get_test_batch()
+        src_tau.append(src)
+        tgt_tau.append(tgt)
+        if opt.cuda == "True":
+            tgt = tgt.cuda()
+    src_tau = torch.cat(src_tau)
+    tgt_tau = torch.cat(tgt_tau)
+    loss = evaluate_loss(model, loss_fn, src_tau, tgt_tau, opt)
+    return loss
+
 
 def build_model(opt):
     # build model, 
