@@ -4,6 +4,40 @@ import torch.nn as nn
 import torch.nn.functional as fn
 
 #class CorrLoss(torch.autograd.Function):
+class MarginLoss(nn.Module):
+    """
+    L_c = T_c max(0, m+ -||v||)^2 + \lambda (1-T_c)max(0, ||v|| - m-)^2 
+    """
+    def __init__(self, m_plus=0.9, m_minus=0.1, lamb = 0.5):
+        super(MarginLoss, self).__init__()
+        self.m_plus = m_plus
+        self.m_minus = m_minus
+        self.lamb = lamb
+
+    def forward(self, o, t):
+        """
+        input:
+            o: should be output of capsure with the shape (batch_size, num_class, num_dim)
+            t: target class with the shape (batch_size,)
+        """
+        # set attribute 
+        batch_size, num_class, num_dim = o.shape
+        zero = torch.autograd.Variable(torch.zeros([1]).double())
+        lamb = torch.autograd.Variable(torch.Tensor([self.lamb]).double())
+        # transform the int target value to one-hot. if the shape of o is wrong then the program callapse
+        t_hot = torch.zeros([batch_size, num_class])
+        for index, value in t:
+            t_hot[index, value] = 1
+        # now t_hot ''s shape is (batch_size, num_class)
+        # calcute the norm of o: shape (batch_size, num_class)
+        o_norm = torch.sqrt(torch.sum(o**2, dim = 2, keepdim = True)).squeeze()
+        # calcute the loss
+        L = torch.max(zero, self.m_plus - o_norm)**2
+        R = torch.max(zero, o_norm - self.minus)**2
+        loss = torch.sum(t*L + lamb*(1-t)*R, dim = 1)
+        return loss.mean()
+
+
 class CorrLoss(nn.Module):
     """
     use 1 - correlational coefficience between the output of the network and the target as the loss
