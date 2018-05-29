@@ -1,0 +1,26 @@
+#!/bin/bash
+
+export PATH="/home/jniehues/anaconda3/bin:$PATH"
+export LC_CTYPE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+source activate metrics
+
+#python scripts/showStatistics.py
+
+srun python scripts/collect_rr_data_orderby_sid.py
+
+#srun python scripts/get_valTauLike2.py
+
+#cat tmp/tmp1 | tail -n +2 | awk '{print $2}' > tmp/scores1
+
+#cat tmp/tmp2 | tail -n +2 | awk '{print $2}' > tmp/scores2
+
+#paste tmp/scores1 tmp/scores2 | awk '{if($1 > $2) print "1"; if($2 > $1) print -1; if($2 == $1) print "0"}' > tmp/compare
+#paste collect_data/data_scores tmp/compare  | awk '{if($1 != 0){nom+= 1}; sum +=$1*$2}END{print sum,nom,1.0*sum/nom}'
+
+
+#srun python scripts/collect_rr_data_orderby_sid.py -csv ./data/wmt15-ende.csv -sys data/en-de_2015/sys/ -ref ./data/newstest2015-ende-ref.de -src ./data/newstest2015-ende-src.en -srclang eng -trglang deu
+
+#srun python scripts/get_valTauLike2.crf.py 
+#srun python scripts/get_valTauLike2.crf3.py 
