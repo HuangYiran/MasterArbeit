@@ -2,6 +2,7 @@
 import torch
 import numpy
 import random
+import os
 
 class DataUtil(object):
     def __init__(self, opt):
@@ -11,64 +12,235 @@ class DataUtil(object):
         self.cur_index = 0
         self.cur_test_index = 0
         self.cur_val_index = 0
+        self.is_splitted = opt.is_splitted # if set, read the splitted data instead
+        self.num_chunk = 1
+        self.num_val_chunk = 1
+        self.num_test_chunk = 1
 
         # read training data
-        with file(opt.src_sys) as fi:
+        if not self.is_splitted:
+            if opt.cross_val:
+                self._load_data_cv(opt.src_sys, opt.src_sys2, opt.src_ref, opt.tgt, opt.rank, opt.sf_output, opt.cv_val_index)
+            else:
+                self._load_data(opt.src_sys, opt.src_sys2, opt.src_ref, opt.tgt, opt.src_val_sys, opt.src_val_sys2, opt.src_val_ref, opt.tgt_val, opt.src_test_sys, opt.src_test_sys2, opt.src_test_ref, opt.tgt_test, opt.rank, opt.sf_output)
+        else: 
+            # is splitted
+            self.ind_chunk = 0
+            self.ind_val_chunk = 0
+            self.ind_test_chunk = 0
+            self.num_chunk = self._get_num_chunk(opt.src_sys)
+            self.num_val_chunk = self._get_num_chunk(opt.src_val_sys)
+            self.num_test_chunk = self._get_num_chunk(opt.src_test_sys)
+            #assert
+            assert(self._get_num_chunk(opt.src_sys) == self._get_num_chunk(opt.src_sys2) and
+                    self._get_num_chunk(opt.src_sys) == self._get_num_chunk(opt.src_ref) and
+                    self._get_num_chunk(opt.src_sys) == self._get_num_chunk(opt.tgt))
+            assert(self._get_num_chunk(opt.src_val_sys) == self._get_num_chunk(opt.src_val_sys2) and
+                    self._get_num_chunk(opt.src_val_sys) == self._get_num_chunk(opt.src_val_ref) and
+                    self._get_num_chunk(opt.src_val_sys) == self._get_num_chunk(opt.tgt_val))
+            assert(self._get_num_chunk(opt.src_test_sys) == self._get_num_chunk(opt.src_test_sys2) and
+                    self._get_num_chunk(opt.src_test_sys) == self._get_num_chunk(opt.src_test_ref) and
+                    self._get_num_chunk(opt.src_test_sys) == self._get_num_chunk(opt.tgt_test))
+            # read first chunk
+            suffix = '_sub_'+str(self.ind_chunk)+'.npy'
+            if opt.cross_val:
+                self._load_data_cv(opt.src_sys+suffix, opt.src_sys2+suffix, opt.src_ref+suffix, opt.tgt+suffix, opt.rank, opt.sf_output, opt.cv_val_index+suffix)
+            else:
+                self._load_data(opt.src_sys+suffix, opt.src_sys2+suffix, opt.src_ref+suffix, opt.tgt+suffix, opt.src_val_sys+suffix, opt.src_val_sys2+suffix, opt.src_val_ref+suffix, opt.tgt_val+suffix, opt.src_test_sys+suffix, opt.src_test_sys2+suffix, opt.src_test_ref+suffix, opt.tgt_test+suffix, opt.rank, opt.sf_output)
+
+        # shuffle
+        self._shuffle2()
+    
+    def _get_num_batch(dat):
+        """
+        check how many files are there with the name of 'dat'+_sub_num
+        """
+        dir_dat = os.path.dirname(dat)
+        dir_basename = os.path.basename(dat)
+        li_files = os.listdir(dir_dat)
+        counter = 0
+        for i in range(li_files):
+            if dir_basename+'_sub_' in i:
+                counter+=1
+        return counter
+
+    def _is_numeric(self, x):
+        return x in ['-', '.', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'e']
+    
+    def _load_data(self, src_sys, src_sys2, src_ref, tgt, src_val_sys, src_val_sys2, src_val_ref, tgt_val, src_test_sys, src_test_sys2, src_test_ref, tgt_test, rank, sf_output):
+        # read training data
+        self._load_training_data(src_sys, src_sys2, src_ref, tgt, rank, sf_output)
+        # read val data
+        self._load_validating_data(src_val_sys, src_val_sys2, src_val_ref, tgt_val, rank, sf_output)
+        # read test data
+        self._load_testing_data(src_test_sys, src_test_sys2, src_test_ref, tgt_test, rank, sf_output)
+        # assert
+        assert(len(self.data_tgt) == len(self.data_in))
+        assert(len(self.data_val_tgt) == len(self.data_val_in))
+        assert(len(self.data_test_tgt)==len(self.data_test_in))
+
+    def _load_training_data(self, src_sys, src_sys2, src_ref, tgt, rank, sf_output):
+        # read training data
+        with file(src_sys) as fi:
             self.data_sys = torch.from_numpy(numpy.load(fi))
-        if opt.rank:
-            with file(opt.src_sys2) as fi:
+        if rank:
+            with file(src_sys2) as fi:
                 self.data_sys2 = torch.from_numpy(numpy.load(fi))
-        with file(opt.src_ref) as fi:
+        with file(src_ref) as fi:
             self.data_ref = torch.from_numpy(numpy.load(fi))
         self.data_in = torch.cat((self.data_sys, self.data_ref), 1)
-        if opt.rank:
+        if rank:
             self.data_in = torch.cat((self.data_sys, self.data_sys2, self.data_ref), 1)
         self.nu_batch = len(self.data_in)/self.batch_size
 
         self.data_tgt = []
-        with open(opt.tgt) as fi:
+        with open(tgt) as fi:
             for line in fi:
-                self.data_tgt.append(float(line.strip()))
-        self.data_tgt = torch.Tensor(self.data_tgt)
+                if sf_output:
+                    self.data_tgt.append(int(line.strip()))
+                else:
+                    tmp = filter(self._is_numeric, line)
+                    if len(tmp) == 0:
+                        continue
+                    try:
+                        self.data_tgt.append(float(tmp))
+                    except ValueError:
+                        print "+++"+tmp+"+++"
+        if sf_output:
+            #self.data_tgt = list(map(self._result_transform_softmax, self.data_tgt))
+            self.data_tgt = torch.LongTensor(self.data_tgt)
+            self.data_tgt = self.data_tgt + 1
+        else:
+            self.data_tgt = torch.FloatTensor(self.data_tgt)
 
+    def _load_validating_data(self, src_val_sys, src_val_sys2, src_val_ref, tgt_val, rank, sf_output):
         # read val data
-        with file(opt.src_val_sys) as fi:
+        with file(src_val_sys) as fi:
             self.data_val_sys = torch.from_numpy(numpy.load(fi))
-        if opt.rank:
-            with file(opt.src_val_sys2) as fi:
+        if rank:
+            with file(src_val_sys2) as fi:
                 self.data_val_sys2 = torch.from_numpy(numpy.load(fi))
-        with file(opt.src_val_ref) as fi:
+        with file(src_val_ref) as fi:
             self.data_val_ref = torch.from_numpy(numpy.load(fi))
         self.data_val_in = torch.cat((self.data_val_sys, self.data_val_ref), 1)
-        if opt.rank:
-            self.data_in = torch.cat((self.data_val_sys, self.data_val_sys2, self.data_ref), 1)
+        if rank:
+            self.data_val_in = torch.cat((self.data_val_sys, self.data_val_sys2, self.data_val_ref), 1)
         self.nu_val_batch = len(self.data_val_in)/self.batch_size
-        self.data_val_tgt = []
-        with open(opt.tgt_val) as fi:
-            for line in fi:
-                self.data_val_tgt.append(float(line.strip()))
-        self.data_val_tgt = torch.Tensor(self.data_val_tgt)
         
+        self.data_val_tgt = []
+        with open(tgt_val) as fi:
+            for line in fi:
+                tmp = filter(self._is_numeric, line)
+                if len(tmp) == 0:
+                        continue
+                if sf_output:
+                    self.data_val_tgt.append(int(line.strip()))
+                else:
+                    self.data_val_tgt.append(float(tmp))
+        if sf_output:
+            #self.data_val_tgt = list(map(self._result_transform_softmax, self.data_val_tgt))
+            self.data_val_tgt = torch.LongTensor(self.data_val_tgt)
+            self.data_val_tgt = self.data_val_tgt + 1
+        else:
+            self.data_val_tgt = torch.FloatTensor(self.data_val_tgt)
+ 
+    def _load_testing_data(self, src_test_sys, src_test_sys2, src_test_ref, tgt_test, rank, sf_output):
         # read test data
-        with file(opt.src_test_sys) as fi:
+        with file(src_test_sys) as fi:
             self.data_test_sys = torch.from_numpy(numpy.load(fi))
-        if opt.rank:
-            with file(opt.src_test_sys2) as fi:
+        if rank:
+            with file(src_test_sys2) as fi:
                 self.data_test_sys2 = torch.from_numpy(numpy.load(fi))
-        with file(opt.src_test_ref) as fi:
+        with file(src_test_ref) as fi:
             self.data_test_ref = torch.from_numpy(numpy.load(fi))
         self.data_test_in = torch.cat((self.data_test_sys, self.data_test_ref), 1)
-        if opt.rank:
-            self.data_test_in = torch.cat((self.data_test_sys, self.data_test_sys1, self.data_test_ref), 1)
+        if rank:
+            self.data_test_in = torch.cat((self.data_test_sys, self.data_test_sys2, self.data_test_ref), 1)
         self.nu_test_batch = len(self.data_test_in)/self.batch_size
-        self.data_test_tgt = []
-        with open(opt.tgt_test) as fi:
-            for line in fi:
-                self.data_test_tgt.append(float(line.strip()))
-        self.data_test_tgt = torch.Tensor(self.data_test_tgt)
         
+        self.data_test_tgt = []
+        with open(tgt_test) as fi:
+            for line in fi:
+                tmp = filter(self._is_numeric, line)
+                if len(tmp) == 0:
+                        continue
+                if sf_output:
+                    self.data_test_tgt.append(int(line.strip()))
+                else:
+                    self.data_test_tgt.append(float(tmp))
+        if sf_output:
+            #self.data_test_tgt = list(map(self._result_transform_softmax, self.data_test_tgt))
+            self.data_test_tgt = torch.LongTensor(self.data_test_tgt)
+            self.data_test_tgt = self.data_test_tgt + 1
+        else:
+            self.data_test_tgt = torch.FloatTensor(self.data_test_tgt)
+
+    def _load_data_cv(self, src_sys, src_sys2, src_ref, src_tgt, rank, sf_output, cv_val_index):
+        """
+        only use the data store in the src docs. distribute the data into 10 chunks. The 'cv_val_index' chunk is the valiation data
+        """
+        # read data
+        tmp_sys = torch.from_numpy(numpy.load(src_sys))
+        if rank:
+            tmp_sys2 = torch.from_numpy(numpy.load(src_sys2))
+        tmp_ref = torch.from_numpy(numpy.load(src_ref))
+        tmp_in = torch.cat((tmp_sys, tmp_ref), 1)
+        if rank:
+            tmp_in = torch.cat((tmp_sys, tmp_sys2, tmp_ref), 1)
+        tmp_tgt = []
+        with open(src_tgt) as fi:
+            for line in fi:
+                tmp = filter(self._is_numeric, line)
+                if len(tmp) == 0:
+                    continue
+                if sf_output:
+                    tmp_tgt.append(int(tmp))
+                else:
+                    tmp_tgt.append(float(tmp))
+        if sf_output:
+            tmp_tgt = torch.LongTensor(tmp_tgt)
+            tmp_tgt = tmp_tgt + 1
+        else:
+            tmp_tgt = torch.FloatTensor(tmp_tgt)
+        assert(len(tmp_tgt) == len(tmp_in))
         # shuffle
-        self._shuffle2()
+#        len_tmp_in = len(tmp_in)
+#        order = range(len_tmp_in)
+#        random.seed(24324)
+#        random.shuffle(order)
+#        order = torch.LongTensor(order)
+#        tmp_in = tmp_in.index_select(0, order)
+#        tmp_tgt = tmp_tgt.index_select(0, order)
+        # distribute the data 
+        len_tmp_in = len(tmp_in)
+        val_begin = int(0.1*cv_val_index*len_tmp_in)
+        val_end = int(0.1*(cv_val_index+1)*len_tmp_in)
+        val_indexes = range(val_begin, val_end)
+        val_indexes = torch.LongTensor(val_indexes)
+        train_indexes = range(0, val_begin)
+        train_indexes2 = range(val_end, len_tmp_in)
+        train_indexes.extend(train_indexes2)
+        train_indexes = torch.LongTensor(train_indexes)
+        # extrac data
+        self.data_in = tmp_in.index_select(0, train_indexes)
+        self.data_tgt = tmp_tgt.index_select(0, train_indexes)
+        self.data_val_in = tmp_in.index_select(0, train_indexes)
+        self.data_val_tgt = tmp_tgt.index_select(0, train_indexes)
+        self.data_test_in = tmp_in.index_select(0, val_indexes)
+        self.data_test_tgt = tmp_tgt.index_select(0, val_indexes)
+        self.nu_batch = len(self.data_in)/self.batch_size
+        self.nu_val_batch =  len(self.data_val_in)/self.batch_size
+        self.nu_test_batch = len(self.data_test_in)/self.batch_size
+
+    def _result_transform_softmax(self, x):
+        if x == -1.0:
+            return [0, 0, 1]
+        elif x == 0.0:
+            return [0, 1, 0]
+        elif x == 1.0:
+            return [1, 0, 0]
+        else:
+            raise("unknown result error")
 
     def _shuffle(self):
         """
@@ -111,6 +283,9 @@ class DataUtil(object):
         order = range(len(self.data_test_in))
         random.shuffle(order)
         order = torch.LongTensor(order)
+        print order.shape
+        print self.data_test_in.shape
+        print self.data_test_tgt.shape
         self.data_test_in = self.data_test_in.index_select(0, order)
         self.data_test_tgt = self.data_test_tgt.index_select(0, order)
 
@@ -159,7 +334,6 @@ class DataUtil(object):
         data_out = data_out.view(data_in_size)
         return data_out
 
-    
     def normalize_minmax2(self, new_min = -1, new_max = 1):
         """
         wrong example
@@ -223,7 +397,14 @@ class DataUtil(object):
             data_tgt: (batch_size, )
 
         """
-        self.cur_index += 1
+        if self.is_splitted:
+            # check the index of the chunk first
+            if self.cur_index == self.nu_batch and self.ind_chunk < self.num_chunk:
+                self.cur_index = 0
+                self.ind_chunk += 1
+                suffix = '_sub_'+str(self.ind_chunk)+'.npy'
+                self._loadidating_data(opt.src_sys+suffix, opt.src_sys2+suffix, opt.src_ref+suffix, opt.tgt+suffix, opt.rank, opt.sf_outptu)
+                self._shuffle2()
         if rep:
             if self.cur_index == self.nu_batch:
                 self.cur_index = 0
@@ -236,7 +417,7 @@ class DataUtil(object):
             return None, None
         elif end > len_data:
             end = len_data
-
+        self.cur_index += 1
         return (self.data_in[start:end, ], 
                     self.data_tgt[start:end,])
     
@@ -252,7 +433,13 @@ class DataUtil(object):
             data_tgt: (batch_size, )
 
         """
-        self.cur_test_index += 1
+        if self.is_splitted:
+            # check the index of the chunk first
+            if self.cur_test_index == self.nu_test_batch and self.ind_test_chunk < self.num_test_chunk:
+                self.cur_test_index = 0
+                self.ind_test_chunk += 1
+                suffix = '_sub_'+str(self.ind_test_chunk) + 'npy'
+                self._load_testidating_data(opt.src_test_sys+suffix, opt.src_test_sys2+suffix, opt.src_test_ref+suffix, opt.tgt_test+suffix, opt.rank, opt.sf_outptu)
         if rep:
             if self.cur_test_index == self.nu_test_batch:
                 self.cur_test_index = 0
@@ -265,7 +452,7 @@ class DataUtil(object):
             return None, None
         elif end > len_data:
             end = len_data
-            
+        self.cur_test_index += 1            
         return (self.data_test_in[start:end, ], 
                     self.data_test_tgt[start:end,])
 
@@ -281,7 +468,13 @@ class DataUtil(object):
             data_tgt: (batch_size, )
 
         """
-        self.cur_val_index += 1
+        if self.is_splitted:
+            # check the index of the chunk first
+            if self.cur_val_index == self.nu_val_batch and self.ind_val_chunk < self.num_val_chunk:
+                self.cur_val_index = 0
+                self.ind_val_chunk += 1
+                suffix = '_sub_'+str(self.ind_val_chunk) + '.npy'
+                self._load_validating_data(opt.src_val_sys+suffix, opt.src_val_sys2+suffix, opt.src_val_ref+suffix, opt.tgt_val+suffix, opt.rank, opt.sf_outptu)
         if rep:
             if self.cur_val_index == self.nu_val_batch:
                 self.cur_val_index = 0
@@ -289,17 +482,27 @@ class DataUtil(object):
         start = self.batch_size * self.cur_val_index
         end = self.batch_size + start
         len_data = len(self.data_val_in)
-        
         if start > len_data:
             print("the data set is empty")
             return None, None
         elif end > len_data:
             end = len_data
+        self.cur_val_index += 1
 
         return (self.data_val_in[start:end, ], 
                     self.data_val_tgt[start:end,])
     
+    def reset_cur_val_index(self):
+        self.cur_val_index = 0
+
+    def reset_cur_test_index(self):
+        self.cur_test_index = 0
+
+    
     def get_random_batch(self):
+        """
+        !!! Aborded
+        """
         rands_src = []
         rands_tgt = []
         for i in range(self.batch_size):
@@ -314,7 +517,49 @@ class DataUtil(object):
         return the number of batch 
         """
         return self.nu_batch, self.nu_val_batch, self.nu_test_batch
-    
+
+    def get_num_chunk(self):
+        return self.num_chunk, self.num_val_chunk, self.num_test_chunk
+
+    def reload_data(self, src_sys, src_sys2, src_ref, tgt, src_val_sys, src_val_sys2, src_val_ref, tgt_val, src_test_sys, src_test_sys2, src_test_ref, tgt_test, rank, sf_output):
+        self.cur_index = 0
+        self.cur_val_index = 0
+        self.cur_test_index = 0
+        self._load_data(src_sys, src_sys2, src_ref, tgt, src_val_sys, src_val_sys2, src_val_ref, tgt_val, src_test_sys, src_test_sys2, src_test_ref, tgt_test, rank, sf_output)
+
+    def split_dataset(self, dat, chunk_size = 5000, cut = None, dim = 1, rm = True):
+        """
+        split the large dataset into small chunck and save it in the same dir with the suffix '_sub_num'
+        input:
+            dat: .npy data
+                the dataset
+            chunk_size:
+                the size of each chunck
+            cut: None or int
+                only get the fisrt 'cut' value in the axis 'dim'
+            remove: 
+                weather remove the origin data or not
+        """
+        # read data and set attribute
+        name_dir = dat
+        suffix = '_sub_'
+        dat = np.load(name_dir)
+        dat = torch.from_numpy(dat)
+        # do the cut
+        if cut is not None:
+            index = torch.arange(0, cut).type(torch.LongTensor)
+            dat = torch.index_select(dat, dim, index)
+        # split the data
+        sp_dat = torch.split(dat, chunk_size)
+        # save chunk data
+        num_chunk = len(sp_dat)
+        name_out = name_dir + 'suffix'
+        for ind, chunk in enumerate(sp_dat):
+            np.save(name_out+str(ind), chunk.numpy())
+        # clean data
+        if rm:
+            os.system('rm '+ dir)
+
 """
     def get_batch_repeatly(self, sep = False):
         if self.cur_index == self.nu_batch:
