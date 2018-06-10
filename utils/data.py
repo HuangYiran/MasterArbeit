@@ -4,6 +4,8 @@ import numpy
 import random
 import os
 
+from sklearn.decomposition import PCA
+
 class DataUtil(object):
     def __init__(self, opt):
         # read data and shuffle
@@ -16,6 +18,7 @@ class DataUtil(object):
         self.num_chunk = 1
         self.num_val_chunk = 1
         self.num_test_chunk = 1
+        self.whiten = True # only for 2D input
 
         # read training data
         if not self.is_splitted:
@@ -44,14 +47,14 @@ class DataUtil(object):
             # read first chunk
             suffix = '_sub_'+str(self.ind_chunk)+'.npy'
             if opt.cross_val:
-                self._load_data_cv(opt.src_sys+suffix, opt.src_sys2+suffix, opt.src_ref+suffix, opt.tgt+suffix, opt.rank, opt.sf_output, opt.cv_val_index+suffix)
+                self._load_data_cv(opt.src_sys+suffix, opt.src_sys2+suffix, opt.src_ref+suffix, opt.tgt+suffix[:-4], opt.rank, opt.sf_output, opt.cv_val_index+suffix)
             else:
-                self._load_data(opt.src_sys+suffix, opt.src_sys2+suffix, opt.src_ref+suffix, opt.tgt+suffix, opt.src_val_sys+suffix, opt.src_val_sys2+suffix, opt.src_val_ref+suffix, opt.tgt_val+suffix, opt.src_test_sys+suffix, opt.src_test_sys2+suffix, opt.src_test_ref+suffix, opt.tgt_test+suffix, opt.rank, opt.sf_output)
+                self._load_data(opt.src_sys+suffix, opt.src_sys2+suffix, opt.src_ref+suffix, opt.tgt+suffix[:-4], opt.src_val_sys+suffix, opt.src_val_sys2+suffix, opt.src_val_ref+suffix, opt.tgt_val+suffix[:-4], opt.src_test_sys+suffix, opt.src_test_sys2+suffix, opt.src_test_ref+suffix, opt.tgt_test+suffix[:-4], opt.rank, opt.sf_output)
 
         # shuffle
         self._shuffle2()
     
-    def _get_num_batch(dat):
+    def _get_num_chunk(self, dat):
         """
         check how many files are there with the name of 'dat'+_sub_num
         """
@@ -59,7 +62,7 @@ class DataUtil(object):
         dir_basename = os.path.basename(dat)
         li_files = os.listdir(dir_dat)
         counter = 0
-        for i in range(li_files):
+        for i in li_files:
             if dir_basename+'_sub_' in i:
                 counter+=1
         return counter
@@ -82,12 +85,21 @@ class DataUtil(object):
     def _load_training_data(self, src_sys, src_sys2, src_ref, tgt, rank, sf_output):
         # read training data
         with file(src_sys) as fi:
-            self.data_sys = torch.from_numpy(numpy.load(fi))
+            self.data_sys = numpy.load(fi)
+            if self.whiten:
+                self.data_sys = self._pca_whiten(self.data_sys)
+            self.data_sys = torch.from_numpy(self.data_sys)
         if rank:
             with file(src_sys2) as fi:
-                self.data_sys2 = torch.from_numpy(numpy.load(fi))
+                self.data_sys2 = numpy.load(fi)
+                if self.whiten:
+                    self.data_sys2 = self._pca_whiten(self.data_sys2)
+                self.data_sys2 = torch.from_numpy(self.data_sys2)
         with file(src_ref) as fi:
-            self.data_ref = torch.from_numpy(numpy.load(fi))
+            self.data_ref = numpy.load(fi)
+            if self.whiten:
+                self.data_ref = self._pca_whiten(self.data_ref)
+            self.data_ref = torch.from_numpy(self.data_ref)
         self.data_in = torch.cat((self.data_sys, self.data_ref), 1)
         if rank:
             self.data_in = torch.cat((self.data_sys, self.data_sys2, self.data_ref), 1)
@@ -116,12 +128,21 @@ class DataUtil(object):
     def _load_validating_data(self, src_val_sys, src_val_sys2, src_val_ref, tgt_val, rank, sf_output):
         # read val data
         with file(src_val_sys) as fi:
-            self.data_val_sys = torch.from_numpy(numpy.load(fi))
+            self.data_val_sys = numpy.load(fi)
+            if self.whiten:
+                self.data_val_sys = self._pca_whiten(self.data_val_sys)
+            self.data_val_sys = torch.from_numpy(self.data_val_sys)
         if rank:
             with file(src_val_sys2) as fi:
-                self.data_val_sys2 = torch.from_numpy(numpy.load(fi))
+                self.data_val_sys2 = numpy.load(fi)
+                if self.whiten:
+                    self.data_val_sys2 = self._pca_whiten(self.data_val_sys2)
+                self.data_val_sys2 = torch.from_numpy(self.data_val_sys2)
         with file(src_val_ref) as fi:
-            self.data_val_ref = torch.from_numpy(numpy.load(fi))
+            self.data_val_ref = numpy.load(fi)
+            if self.whiten:
+                self.data_val_ref = self._pca_whiten(self.data_val_ref)
+            self.data_val_ref = torch.from_numpy(self.data_val_ref)
         self.data_val_in = torch.cat((self.data_val_sys, self.data_val_ref), 1)
         if rank:
             self.data_val_in = torch.cat((self.data_val_sys, self.data_val_sys2, self.data_val_ref), 1)
@@ -147,12 +168,21 @@ class DataUtil(object):
     def _load_testing_data(self, src_test_sys, src_test_sys2, src_test_ref, tgt_test, rank, sf_output):
         # read test data
         with file(src_test_sys) as fi:
-            self.data_test_sys = torch.from_numpy(numpy.load(fi))
+            self.data_test_sys = numpy.load(fi)
+            if self.whiten:
+                self.data_test_sys = self._pca_whiten(self.data_test_sys)
+            self.data_test_sys = torch.from_numpy(self.data_test_sys)
         if rank:
             with file(src_test_sys2) as fi:
-                self.data_test_sys2 = torch.from_numpy(numpy.load(fi))
+                self.data_test_sys2 = numpy.load(fi)
+                if self.whiten:
+                    self.data_test_sys2 = self._pca_whiten(self.data_test_sys2)
+                self.data_test_sys2 = torch.from_numpy(self.data_test_sys2)
         with file(src_test_ref) as fi:
-            self.data_test_ref = torch.from_numpy(numpy.load(fi))
+            self.data_test_ref = numpy.load(fi)
+            if self.whiten:
+                self.data_test_ref = self._pca_whiten(self.data_test_ref)
+            self.data_test_ref = torch.from_numpy(self.data_test_ref)
         self.data_test_in = torch.cat((self.data_test_sys, self.data_test_ref), 1)
         if rank:
             self.data_test_in = torch.cat((self.data_test_sys, self.data_test_sys2, self.data_test_ref), 1)
@@ -231,6 +261,14 @@ class DataUtil(object):
         self.nu_batch = len(self.data_in)/self.batch_size
         self.nu_val_batch =  len(self.data_val_in)/self.batch_size
         self.nu_test_batch = len(self.data_test_in)/self.batch_size
+
+    def _pca_whiten(self, data, n_components = 300, svd_solver = 'auto'):
+        """
+        data set should be 2D and type of numpy
+        """
+        pca = PCA(n_components, svd_solver = svd_solver)
+        pca.fit(data)
+        return pca.transform(data).astype(numpy.float32)
 
     def _result_transform_softmax(self, x):
         if x == -1.0:
@@ -399,13 +437,19 @@ class DataUtil(object):
         """
         if self.is_splitted:
             # check the index of the chunk first
-            if self.cur_index == self.nu_batch and self.ind_chunk < self.num_chunk:
+            if self.cur_index == self.nu_batch and self.ind_chunk < self.num_chunk-1:
                 self.cur_index = 0
                 self.ind_chunk += 1
                 suffix = '_sub_'+str(self.ind_chunk)+'.npy'
-                self._loadidating_data(opt.src_sys+suffix, opt.src_sys2+suffix, opt.src_ref+suffix, opt.tgt+suffix, opt.rank, opt.sf_outptu)
+                self._load_training_data(self.opt.src_sys+suffix, self.opt.src_sys2+suffix, self.opt.src_ref+suffix, self.opt.tgt+suffix[:-4], self.opt.rank, self.opt.sf_output)
                 self._shuffle2()
-        if rep:
+            if rep and self.ind_chunk == self.num_chunk - 1:
+                self.cur_index = 0
+                self.ind_chunk = 0
+                suffix = '_sub_'+str(self.ind_chunk)+'.npy'
+                self._load_training_data(self.opt.src_sys+suffix, self.opt.src_sys2+suffix, self.opt.src_ref+suffix, self.opt.tgt+suffix[:-4], self.opt.rank, self.opt.sf_output)
+                self._shuffle2()
+        elif rep:
             if self.cur_index == self.nu_batch:
                 self.cur_index = 0
         start = self.batch_size * self.cur_index
@@ -435,12 +479,17 @@ class DataUtil(object):
         """
         if self.is_splitted:
             # check the index of the chunk first
-            if self.cur_test_index == self.nu_test_batch and self.ind_test_chunk < self.num_test_chunk:
+            if self.cur_test_index == self.nu_test_batch and self.ind_test_chunk < self.num_test_chunk-1:
                 self.cur_test_index = 0
                 self.ind_test_chunk += 1
-                suffix = '_sub_'+str(self.ind_test_chunk) + 'npy'
-                self._load_testidating_data(opt.src_test_sys+suffix, opt.src_test_sys2+suffix, opt.src_test_ref+suffix, opt.tgt_test+suffix, opt.rank, opt.sf_outptu)
-        if rep:
+                suffix = '_sub_'+str(self.ind_test_chunk) + '.npy'
+                self._load_testing_data(self.opt.src_test_sys+suffix, self.opt.src_test_sys2+suffix, self.opt.src_test_ref+suffix, self.opt.tgt_test+suffix[:-4], self.opt.rank, self.opt.sf_output)
+            if rep and self.ind_test_chunk == self.num_test_chunk - 1:
+                self.cur_test_index = 0
+                self.ind_test_chunk = 0
+                suffix = '_sub_'+str(self.ind_test_chunk) + '.npy'
+                self._load_testing_data(self.opt.src_test_sys+suffix, self.opt.src_test_sys2+suffix, self.opt.src_test_ref+suffix, self.opt.tgt_test+suffix[:-4], self.opt.rank, self.opt.sf_output)
+        elif rep:
             if self.cur_test_index == self.nu_test_batch:
                 self.cur_test_index = 0
         start = self.batch_size * self.cur_test_index
@@ -470,12 +519,17 @@ class DataUtil(object):
         """
         if self.is_splitted:
             # check the index of the chunk first
-            if self.cur_val_index == self.nu_val_batch and self.ind_val_chunk < self.num_val_chunk:
+            if self.cur_val_index == self.nu_val_batch and self.ind_val_chunk < self.num_val_chunk-1:
                 self.cur_val_index = 0
                 self.ind_val_chunk += 1
                 suffix = '_sub_'+str(self.ind_val_chunk) + '.npy'
-                self._load_validating_data(opt.src_val_sys+suffix, opt.src_val_sys2+suffix, opt.src_val_ref+suffix, opt.tgt_val+suffix, opt.rank, opt.sf_outptu)
-        if rep:
+                self._load_validating_data(self.opt.src_val_sys+suffix, self.opt.src_val_sys2+suffix, self.opt.src_val_ref+suffix, self.opt.tgt_val+suffix[:-4], self.opt.rank, self.opt.sf_output)
+            if rep and self.cur_val_index == self.nu_val_batch and self.ind_val_chunk == self.num_val_chunk - 1:
+                self.cur_val_index = 0
+                self.ind_val_chunk = 0
+                suffix = '_sub_'+str(self.ind_val_chunk) + '.npy'
+                self._load_validating_data(self.opt.src_val_sys+suffix, self.opt.src_val_sys2+suffix, self.opt.src_val_ref+suffix, self.opt.tgt_val+suffix[:-4], self.opt.rank, self.opt.sf_output)
+        elif rep:
             if self.cur_val_index == self.nu_val_batch:
                 self.cur_val_index = 0
         #batch_size = 10
@@ -484,6 +538,10 @@ class DataUtil(object):
         len_data = len(self.data_val_in)
         if start > len_data:
             print("the data set is empty")
+            print("nu_val_batch: " + str(self.nu_val_batch))
+            print("num_val_chunk: " + str(self.num_val_chunk))
+            print("cur_val_index: " + str(self.cur_val_index))
+            print("ind_val_chunk: " + str(self.ind_val_chunk))
             return None, None
         elif end > len_data:
             end = len_data
@@ -494,9 +552,11 @@ class DataUtil(object):
     
     def reset_cur_val_index(self):
         self.cur_val_index = 0
+        self.ind_val_chunk = 0
 
     def reset_cur_test_index(self):
         self.cur_test_index = 0
+        self.ind_test_chunk = 0
 
     
     def get_random_batch(self):
@@ -518,7 +578,7 @@ class DataUtil(object):
         """
         return self.nu_batch, self.nu_val_batch, self.nu_test_batch
 
-    def get_num_chunk(self):
+    def get_nu_chunk(self):
         return self.num_chunk, self.num_val_chunk, self.num_test_chunk
 
     def reload_data(self, src_sys, src_sys2, src_ref, tgt, src_val_sys, src_val_sys2, src_val_ref, tgt_val, src_test_sys, src_test_sys2, src_test_ref, tgt_test, rank, sf_output):

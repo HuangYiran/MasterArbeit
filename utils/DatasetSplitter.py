@@ -5,8 +5,9 @@ import random
 import os
 
 class DatasetSplitter(object):
-    def __init__(self, seed = '7777'):
+    def __init__(self, seed = '7777', rm_lack = True):
         self.seed = seed
+        self.rm_lack = rm_lack 
 
     def split(self, names, shuffle = True):
         """
@@ -50,6 +51,7 @@ class DatasetSplitter(object):
             print('> type of value: ' + str(type(value)))
             random.seed(self.seed)
             order = range(len(value))
+            random.shuffle(order)
             if type(value) == np.ndarray:
                 value = torch.from_numpy(value)
                 order = torch.LongTensor(order)
@@ -88,6 +90,8 @@ class DatasetSplitter(object):
                 print('> save data')
                 name_out = name + '_sub_'
                 for ind, chunk in enumerate(sp_dat):
+                    if len(chunk)<chunk_size:
+                        continue
                     np.save(name_out+str(ind), chunk.numpy())
             else:
                 # split
@@ -100,6 +104,8 @@ class DatasetSplitter(object):
                 print('> save data')
                 name_out = name + '_sub_'
                 for ind, chunk in enumerate(sp_dat):
+                    if len(chunk) < chunk_size:
+                        continue
                     with open(name_out+str(ind), 'w') as fi:
                         for li in chunk:
                             fi.write(li+'\n')
