@@ -18,7 +18,10 @@ class DataUtil(object):
         self.num_chunk = 1
         self.num_val_chunk = 1
         self.num_test_chunk = 1
-        self.whiten = True # only for 2D input
+        self.whiten = False# only for 2D input
+        self.whiten_type = 'zero_center'
+        self.noise = True # add noise or not
+        self.noise_type = 'gauss'
 
         # read training data
         if not self.is_splitted:
@@ -50,14 +53,32 @@ class DataUtil(object):
                 self._load_data_cv(opt.src_sys+suffix, opt.src_sys2+suffix, opt.src_ref+suffix, opt.tgt+suffix[:-4], opt.rank, opt.sf_output, opt.cv_val_index+suffix)
             else:
                 self._load_data(opt.src_sys+suffix, opt.src_sys2+suffix, opt.src_ref+suffix, opt.tgt+suffix[:-4], opt.src_val_sys+suffix, opt.src_val_sys2+suffix, opt.src_val_ref+suffix, opt.tgt_val+suffix[:-4], opt.src_test_sys+suffix, opt.src_test_sys2+suffix, opt.src_test_ref+suffix, opt.tgt_test+suffix[:-4], opt.rank, opt.sf_output)
-
         # shuffle
         self._shuffle2()
     
+    def _add_gauss_noise(self, dat, sigma = 0.1):
+        """
+        dat should be type of troch
+        """
+        means = torch.zeros(dat.shape)
+        stds = torch.ones(dat.shape)
+        noise = torch.normal(means, stds * sigma)
+        return dat + noise
+   
+    def _add_noise(self, dat, noise_type):
+        if noise_type == 'gauss':
+            dat = self._add_gauss_noise(dat)
+        else:
+            print('unrecognize noise type, turn off the add noise phase')
+            self.noise = False
+        return dat
+
     def _get_num_chunk(self, dat):
         """
         check how many files are there with the name of 'dat'+_sub_num
         """
+        if not is_splitted:
+            return 1
         dir_dat = os.path.dirname(dat)
         dir_basename = os.path.basename(dat)
         li_files = os.listdir(dir_dat)
@@ -87,19 +108,25 @@ class DataUtil(object):
         with file(src_sys) as fi:
             self.data_sys = numpy.load(fi)
             if self.whiten:
-                self.data_sys = self._pca_whiten(self.data_sys)
+                self.data_sys = self._whiten(self.data_sys, self.whiten_type)
             self.data_sys = torch.from_numpy(self.data_sys)
+            if self.noise:
+                self.data_sys = self._add_noise(self.data_sys, self.noise_type)
         if rank:
             with file(src_sys2) as fi:
                 self.data_sys2 = numpy.load(fi)
                 if self.whiten:
-                    self.data_sys2 = self._pca_whiten(self.data_sys2)
+                    self.data_sys2 = self._whiten(self.data_sys2, self.whiten_type)
                 self.data_sys2 = torch.from_numpy(self.data_sys2)
+                if self.noise:
+                    self.data_sys2 = self._add_noise(self.data_sys2, self.noise_type)
         with file(src_ref) as fi:
             self.data_ref = numpy.load(fi)
             if self.whiten:
-                self.data_ref = self._pca_whiten(self.data_ref)
+                self.data_ref = self._whiten(self.data_ref, self.whiten_type)
             self.data_ref = torch.from_numpy(self.data_ref)
+            if self.noise:
+                self.data_ref = self._add_noise(self.data_ref, self.noise_type)
         self.data_in = torch.cat((self.data_sys, self.data_ref), 1)
         if rank:
             self.data_in = torch.cat((self.data_sys, self.data_sys2, self.data_ref), 1)
@@ -130,19 +157,25 @@ class DataUtil(object):
         with file(src_val_sys) as fi:
             self.data_val_sys = numpy.load(fi)
             if self.whiten:
-                self.data_val_sys = self._pca_whiten(self.data_val_sys)
+                self.data_val_sys = self._whiten(self.data_val_sys, self.whiten_type)
             self.data_val_sys = torch.from_numpy(self.data_val_sys)
+            if self.noise:
+                self.data_val_sys = self._add_noise(self.data_val_sys, self.noise_type)
         if rank:
             with file(src_val_sys2) as fi:
                 self.data_val_sys2 = numpy.load(fi)
                 if self.whiten:
-                    self.data_val_sys2 = self._pca_whiten(self.data_val_sys2)
+                    self.data_val_sys2 = self._whiten(self.data_val_sys2, self.whiten_type)
                 self.data_val_sys2 = torch.from_numpy(self.data_val_sys2)
+                if self.noise:
+                    self.data_val_sys2 = self._add_noise(self.data_val_sys2, self.noise_type)
         with file(src_val_ref) as fi:
             self.data_val_ref = numpy.load(fi)
             if self.whiten:
-                self.data_val_ref = self._pca_whiten(self.data_val_ref)
+                self.data_val_ref = self._whiten(self.data_val_ref, self.whiten_type)
             self.data_val_ref = torch.from_numpy(self.data_val_ref)
+            if self.noise:
+                self.data_val_ref = self._add_noise(self.data_val_ref, self.noise_type)
         self.data_val_in = torch.cat((self.data_val_sys, self.data_val_ref), 1)
         if rank:
             self.data_val_in = torch.cat((self.data_val_sys, self.data_val_sys2, self.data_val_ref), 1)
@@ -170,19 +203,25 @@ class DataUtil(object):
         with file(src_test_sys) as fi:
             self.data_test_sys = numpy.load(fi)
             if self.whiten:
-                self.data_test_sys = self._pca_whiten(self.data_test_sys)
+                self.data_test_sys = self._whiten(self.data_test_sys, self.whiten_type)
             self.data_test_sys = torch.from_numpy(self.data_test_sys)
+            if self.noise:
+                self.data_test_sys = self._add_noise(self.data_test_sys, self.noise_type)
         if rank:
             with file(src_test_sys2) as fi:
                 self.data_test_sys2 = numpy.load(fi)
                 if self.whiten:
-                    self.data_test_sys2 = self._pca_whiten(self.data_test_sys2)
+                    self.data_test_sys2 = self._whiten(self.data_test_sys2, self.whiten_type)
                 self.data_test_sys2 = torch.from_numpy(self.data_test_sys2)
+                if self.noise:
+                    self_test_sys2 = self._add_noise(self.data_test_sys2, self.noise_type)
         with file(src_test_ref) as fi:
             self.data_test_ref = numpy.load(fi)
             if self.whiten:
-                self.data_test_ref = self._pca_whiten(self.data_test_ref)
+                self.data_test_ref = self._whiten(self.data_test_ref, self.whiten_type)
             self.data_test_ref = torch.from_numpy(self.data_test_ref)
+            if self.noise:
+                self.data_test_ref = self._add_noise(self.data_test_ref, self.noise_type)
         self.data_test_in = torch.cat((self.data_test_sys, self.data_test_ref), 1)
         if rank:
             self.data_test_in = torch.cat((self.data_test_sys, self.data_test_sys2, self.data_test_ref), 1)
@@ -326,6 +365,23 @@ class DataUtil(object):
         print self.data_test_tgt.shape
         self.data_test_in = self.data_test_in.index_select(0, order)
         self.data_test_tgt = self.data_test_tgt.index_select(0, order)
+
+    def _whiten(self, data, typ):
+        if typ == 'pca':
+            data = self._pca_whiten(data)
+        elif typ == 'zero_center':
+            data = self._zero_center(data)
+        else:
+            print 'unrecognized whiten type, close the whiten phase'
+            self.whiten = False
+        return data
+
+    def _zero_center(self, data):
+        """
+        data set should be 2D and type of numpy
+        """
+        data -= numpy.mean(data, axis = 0)
+        return data
 
     def normalize_z_score2(self):
         """
