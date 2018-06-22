@@ -11,7 +11,7 @@ from Autoencoder import *
 from nnLoss import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-data', default = '/tmp/2015_sum_ref')
+parser.add_argument('-data', default = '/tmp/out.npy')
 parser.add_argument('-model', default = 'vae')
 parser.add_argument('-batch_size', default = 100)
 parser.add_argument('-save_dir', default = './checkpoints')
@@ -65,7 +65,7 @@ def main():
                 epoch,
                 train_loss/len(dataloader.dataset)
                 ))
-    torch.save(model.state_dict(), opt.save_dir+'/'+opt.model)
+        torch.save(model, opt.save_dir+'/'+opt.model)
 
 class Data(torch.utils.data.Dataset):
     def __init__(self, dir):

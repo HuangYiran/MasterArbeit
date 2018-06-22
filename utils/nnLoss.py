@@ -138,3 +138,16 @@ class PReLUCorrLoss(nn.Module):
         corr = self.corr(o, t)
         loss = prelu + self.gate_rate * corr
         return loss
+
+class VAELoss(nn.Module):
+    """
+    mse + KL
+    """
+    def forward(self, re_x, x, mu, logvar):
+        mse = torch.nn.MSELoss(size_average = True)
+        kld = torch.nn.KLDivLoss(size_average = True)
+        BCE = mse(re_x, x)
+        KLD = kld(re_x, x)
+        #KLD_element = mu.pow(2).add_(logvar.exp()).mul_(-1).add_(logvar)#????????
+        #KLD = torch.sum(KLD_element).mul_(-0.5)
+        return BCE + KLD
