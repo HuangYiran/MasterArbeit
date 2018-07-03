@@ -19,7 +19,8 @@ class ELMoMetric(torch.nn.Module):
         self.upStream = UpStream(opt)
         for params in self.upStream.parameters():
             params.requires_grad = False
-        self.downStream = DS_ELM()
+        #self.downStream = DS_ELM()
+        self.downStream = DS_DecMean()
     
     def forward(self, src, s1, s2, ref):
         # distribute the data
@@ -27,10 +28,6 @@ class ELMoMetric(torch.nn.Module):
         out_s2 = self.upStream(src, s2)
         out_ref = self.upStream(src, ref)
         # combine the data
-        #print '*'*20
-        #print('out_s1[0] shape: %s \nout_s2[0] shape: %s \nout_ref[0] shape %s'%(str(out_s1[0].shape), str(out_s2[0].shape), str(out_ref[0].shape)))
-        #print '#'*20
-        #print('out_s1_decOut shape: %s \nout_s1_decHidden shape: %s \nout_decCeil shape: %s \nout_decEmbd shape: %s'%(str(out_s1[0].shape), str(out_s1[1].shape), str(out_s1[2].shape), str(out_s1[3].shape)))
         assert(len(out_s1) == len(out_s2) and
               len(out_s1) == len(out_ref))
         
@@ -78,7 +75,7 @@ class UpStream(torch.nn.Module):
         self.model = model
         # enter evaluation mode
         self.model.eval()
-        self.seq_len = 40
+        self.seq_len = opt.seq_len
 
     def forward(self, srcBatch, goldBatch):
         dataset = self.buildData(srcBatch, goldBatch)
@@ -91,8 +88,11 @@ class UpStream(torch.nn.Module):
         for i in range(nu_batch):
             #print("processing batch %s/%s" %(i, nu_batch))
             src, tgt, indices = dataset[i]
+            #print '*'*10
+            #print len(src[0]), len(tgt), len(indices)
             # 扔到translateBatch方法里面进行翻译, 这里src，tgt都是tensor类型维度为batchSize*numWord
             decOut, decHS, decCS = self.get_decoder_states(src, tgt)
+            #print decOut.shape, decHS.shape, decCS.shape
             # 把次序调整回改变之前，还没有测试，所以并不清楚tmp最后的类型，按道理应该是list类型，
             # 所以这个数据应该还要进行处理，这个留到测试的时候再做了、、、、、、、、、、、、、、？？
             tmp = list(zip(*sorted(zip(decOut, decHS, decCS, indices), key = lambda x: x[-1])))[:-1] 
@@ -105,6 +105,7 @@ class UpStream(torch.nn.Module):
             decOut = torch.stack(tmp[0])
             decHS = torch.stack(tmp[1])
             decCS = torch.stack(tmp[2])
+            #print decOut.shape, decHS.shape, decCS.shape
             #indices = torch.LongTensor(indices)
             #tmp = tmp.index_select(0, indices) # can not be used here the indices here is the order of the original range
             #print(tmp.data.size())
@@ -161,9 +162,10 @@ class UpStream(torch.nn.Module):
             tgtEmb.append(torch.index_select(decoder_embeddings, 0, Idx))
         # padding:
         tgtEmb = torch.stack(tgtEmb) # ==> (seq_len, batch_size, 500)
-        print('decEmbd shape befor padding: %s'%(str(tgtEmb.shape)))
-        out = self._pad_sequence(tgtEmb, batch_first = False, padding_value = 0, max_len = self.seq_len).transpose(0,1)
-        print('decEmbd shape after padding: %s'%(str(tgtEmb.shape)))
+        #print('decEmbd shape befor padding: %s'%(str(tgtEmb.shape)))
+        tgtEmb = tgtEmb.transpose(0,1)
+        out = self._pad_sequence(tgtEmb, batch_first = True, padding_value = 0, max_len = self.seq_len)
+        #print('decEmbd shape after padding: %s'%(str(tgtEmb.shape)))
         # return the data
         return out
     
@@ -217,12 +219,12 @@ class UpStream(torch.nn.Module):
         # 而且返回的时候的维度大小真的没有受影响吗？？？？？？？？？？、、、、、、、、？？？？？
         
         decOut, decStates, attn = self.model.decoder(tgtBatch[:-1], decStates, context, initOutput)
-        decOut = decOut.data
-        decHiddenStates = decStates[0].data
-        decCeilStates = decStates[1].data
-        decOut = self._pad_sequence(decOut, batch_first = False, padding_value = 0, max_len = self.seq_len).transpose(0,1)
-        decHiddenStates = self._pad_sequence(decHiddenStates, batch_first = False, padding_value = 0, max_len = self.seq_len).transpose(0,1)
-        decCeilStates = self._pad_sequence(decCeilStates, batch_first = False, padding_value = 0, max_len = self.seq_len).transpose(0,1)
+        decOut = decOut.data.transpose(0,1) # ==> (batch_size, seq_len, num_dim)
+        decHiddenStates = decStates[0].data.transpose(0,1)
+        decCeilStates = decStates[1].data.transpose(0,1)
+        decOut = self._pad_sequence(decOut, batch_first = True, padding_value = 0, max_len = self.seq_len)
+        decHiddenStates = self._pad_sequence(decHiddenStates, batch_first = True, padding_value = 0, max_len = self.seq_len)
+        decCeilStates = self._pad_sequence(decCeilStates, batch_first = True, padding_value = 0, max_len = self.seq_len)
         return decOut, decHiddenStates, decCeilStates # tuple: batch_size, seq_len, num_layers, num_dim
     
     def get_decoder_hidden_states(self, srcBatch, tgtBatch):
@@ -241,6 +243,7 @@ class UpStream(torch.nn.Module):
             return batch.size(0)
     def _pad_sequence(self, sequences, batch_first=False, padding_value=0, max_len = None):
         """
+        应该在transpose后进行pad操作，因为循环是用sequences长度的次数，batch_first值影响输出
         ??? why we need to sort the sequence before we use this function????
         code from pytorch and change a bit.
         """
@@ -266,9 +269,9 @@ class UpStream(torch.nn.Module):
             #prev_l = length
             # use index notation to prevent duplicate references to the tensor
             if batch_first:
-                out_tensor[i, :length, ...] = tensor
+                out_tensor[i, :length, ...] = tensor[:length]
             else:
-                out_tensor[:length, i, ...] = tensor
+                out_tensor[:length, i, ...] = tensor[:length]
         return out_tensor
 
 ######################################
@@ -296,10 +299,11 @@ class DS_ELM(torch.nn.Module):
     
     def forward(self, out_s1, out_s2, out_ref):
         # only use decoder hidden states
+        #print('out_s1[1] %s \nout_s2[1] %s \nout_ref[1] %s'%(str(out_s1[1].shape), str(out_s2[1].shape), str(out_ref[1].shape)))
         input = [out_s1[1], out_s2[1], out_ref[1]]
         input = torch.cat(input, 3) # (batch, seq_len, num_layer, num_dims)
         input = torch.autograd.Variable(input, requires_grad = False)
-        print input.data.shape
+        #print input.data.shape
         # expand weight so that it can do the bmm later, include self.weight_layers and self.weight_seq
         # get shape
         batch_size, seq_len, num_layers, num_dim = input.data.shape
@@ -321,3 +325,62 @@ class DS_ELM(torch.nn.Module):
         ss_data = torch.bmm(exp_weight_seq, ls_data).squeeze() # ==> (batch_size, num_dim)
         out = self.mlp(ss_data)
         return out
+
+class DS_DecMean(torch.nn.Module):
+    def __init__(self, seq_len = 40, num_layers = 2, num_dim = 500):
+        super(DS_DecMean, self).__init__()
+        self.seq_len = seq_len
+        self.num_layers = num_layers
+        self.num_dim = num_dim
+        # build a mlp model
+        self.mlp = nn.Sequential(
+            torch.nn.Linear(1500, 500),
+            torch.nn.Dropout(0.5),
+            torch.nn.ReLU(),
+            torch.nn.Linear(500, 3),
+            torch.nn.LogSoftmax()
+        )
+        # softmax
+        self.sf = torch.nn.Softmax()
+    
+    def forward(self, out_s1, out_s2, out_ref):
+        # only use decoder output value 
+        #print('out_s1[1] %s \nout_s2[1] %s \nout_ref[1] %s'%(str(out_s1[1].shape), str(out_s2[1].shape), str(out_ref[1].shape)))
+        inp_s1 = out_s1[0]
+        inp_s2 = out_s2[0]
+        inp_ref = out_ref[0]
+        # get sent lengths
+        len_s1 = self._get_sent_length(inp_s1)
+        len_s2 = self._get_sent_length(inp_s2)
+        len_ref = self._get_sent_length(inp_ref)
+        # get the num_dim
+        batch_size, seq_len, num_dim = inp_s1.data.shape
+        # expand the len data, so it can be divide by torch
+        len_s1 = len_s1.expand(batch_size, num_dim)
+        len_s2 = len_s2.expand(batch_size, num_dim)
+        len_ref = len_ref.expand(batch_size, num_dim)
+        # calculate the mean of the input through the seq_len dimmension
+        inp_s1 = inp_s1.sum(1)/len_s1
+        inp_s2 = inp_s2.sum(1)/len_s2
+        inp_ref = inp_ref.sum(1)/len_ref
+        # combine the input data
+        input = [inp_s1, inp_s2, inp_ref] # (batch_size, num_dim) * 3
+        input = torch.cat(input, 1) # (batch, 3 * num_dims)
+        input = torch.autograd.Variable(input, requires_grad = False)
+        # run the mlp
+        out = self.mlp(ss_data)
+        return out
+        
+    def _get_sent_length(self, dat):
+        pad = 0
+        lengths = []
+        for li in dat:
+            tmp = (li == pad).nonzero()
+            if tmp:
+                tmp = tmp[0]
+            else:
+                tmp = len(li)
+            lengths.append(tmp)
+        lengths = torch.stack(lengths)
+        return lengths
+    
