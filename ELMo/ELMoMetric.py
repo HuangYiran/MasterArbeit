@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 import sys
-sys.path.append("../OpenNMT-py/")
+sys.path.append("/Users/ihuangyiran/Documents/Workplace_Python/OpenNMT-py/")
 import onmt
 import onmt.modules
 import torch.nn as nn
@@ -76,8 +76,11 @@ class UpStream(torch.nn.Module):
         # enter evaluation mode
         self.model.eval()
         self.seq_len = opt.seq_len
+        self.tgt_lengths = torch.zeros(opt.batch_size).view(-1,1)
 
     def forward(self, srcBatch, goldBatch):
+        for index, li in enumerate(goldBatch):
+            self.tgt_lengths[index] = len(li)
         dataset = self.buildData(srcBatch, goldBatch)
         nu_batch = len(dataset) # should be one here
         # get decoder hidden states
@@ -115,11 +118,13 @@ class UpStream(torch.nn.Module):
         out_decOut = torch.cat(out_decOut, 0)
         out_decHS = torch.cat(out_decHS, 0)
         out_decCS = torch.cat(out_decCS, 0)
-        #print out.data.shape
         # get decoder embeddings
         out_decEmbd = self.get_decoder_embedding(tgt)
-        #print(out.data.size())
-        return out_decOut, out_decHS, out_decCS, out_decEmbd
+        # out_decOut (batch_size, seq_len, num_dim)
+        # out_decHS (batch_size, seq_len, num_layer, num_dim)
+        # out_decCS (batch_size, seq_len, num_layer, num_dim)
+        # self.tgt_lengths (batch_size)
+        return out_decOut, out_decHS, out_decCS, out_decEmbd, self.tgt_lengths
     
     def buildData(self, srcBatch, goldBatch):
         # This needs to be the same as preprocess.py.
@@ -303,7 +308,7 @@ class DS_ELM(torch.nn.Module):
         input = [out_s1[1], out_s2[1], out_ref[1]]
         input = torch.cat(input, 3) # (batch, seq_len, num_layer, num_dims)
         input = torch.autograd.Variable(input, requires_grad = False)
-        #print input.data.shape
+        # print input.data.shape
         # expand weight so that it can do the bmm later, include self.weight_layers and self.weight_seq
         # get shape
         batch_size, seq_len, num_layers, num_dim = input.data.shape
@@ -342,6 +347,7 @@ class DS_DecMean(torch.nn.Module):
         )
         # softmax
         self.sf = torch.nn.Softmax()
+        self.dsf = torch.autograd.Variable(torch.ones(123))
     
     def forward(self, out_s1, out_s2, out_ref):
         # only use decoder output value 
@@ -350,15 +356,20 @@ class DS_DecMean(torch.nn.Module):
         inp_s2 = out_s2[0]
         inp_ref = out_ref[0]
         # get sent lengths
-        len_s1 = self._get_sent_length(inp_s1)
-        len_s2 = self._get_sent_length(inp_s2)
-        len_ref = self._get_sent_length(inp_ref)
+        len_s1 = out_s1[-1]
+        len_s2 = out_s2[-1]
+        len_ref = out_ref[-1]
         # get the num_dim
-        batch_size, seq_len, num_dim = inp_s1.data.shape
+        batch_size, seq_len, num_dim = inp_s1.shape
         # expand the len data, so it can be divide by torch
-        len_s1 = len_s1.expand(batch_size, num_dim)
-        len_s2 = len_s2.expand(batch_size, num_dim)
-        len_ref = len_ref.expand(batch_size, num_dim)
+        assert(len(len_s1) == len(len_s2), len(len_s1) == len(len_ref))
+        if len(len_s1) > batch_size:
+            len_s1 = len_s1[:batch_size]
+            len_s2 = len_s2[:batch_size]
+            len_ref = len_ref[:batch_size]
+        len_s1 = len_s1.expand(batch_size, num_dim).type(torch.FloatTensor)
+        len_s2 = len_s2.expand(batch_size, num_dim).type(torch.FloatTensor)
+        len_ref = len_ref.expand(batch_size, num_dim).type(torch.FloatTensor)
         # calculate the mean of the input through the seq_len dimmension
         inp_s1 = inp_s1.sum(1)/len_s1
         inp_s2 = inp_s2.sum(1)/len_s2
@@ -368,19 +379,7 @@ class DS_DecMean(torch.nn.Module):
         input = torch.cat(input, 1) # (batch, 3 * num_dims)
         input = torch.autograd.Variable(input, requires_grad = False)
         # run the mlp
-        out = self.mlp(ss_data)
+        out = self.mlp(input)
         return out
         
-    def _get_sent_length(self, dat):
-        pad = 0
-        lengths = []
-        for li in dat:
-            tmp = (li == pad).nonzero()
-            if tmp:
-                tmp = tmp[0]
-            else:
-                tmp = len(li)
-            lengths.append(tmp)
-        lengths = torch.stack(lengths)
-        return lengths
     
