@@ -25,7 +25,7 @@ parser.add_argument('-batch_size', type = int, default = 30, help = 'batch size'
 parser.add_argument('-max_sent_length', type = int, default = 100, help = 'maximum sentence length')
 parser.add_argument('-replace_unk', action='store_true', help = """...""")
 parser.add_argument('-verbose', action = 'store_true', help = 'Print scores and predictions for each sentence')
-
+parser.add_argument('-num_dim', type = int, default = 500)
 
 def addone(f):
     for line in f:
@@ -63,7 +63,37 @@ def main():
         embs = pipeline.get_encoder_output(srcBatch)
     elif opt.type == 'decoder_hidden':
         if opt.tgt:
+            embs = pipeline.get_hidden_full(srcBatch, tgtBatch)
+        else:
+            print 'tgt file not set'
+            embs = None
+    elif opt.type == 'decoder_hidden_last':
+        if opt.tgt:
             embs = pipeline.get_hidden(srcBatch, tgtBatch)
+        else:
+            print 'tgt file not set'
+            embs = None
+    elif opt.type == 'decoder_hidden_mean':
+        if opt.tgt:
+            embs = pipeline.get_hidden_mean(srcBatch, tgtBatch)
+        else:
+            print 'tgt file not set'
+            embs = None
+    elif opt.type == 'decoder_hidden_sum':
+        if opt.tgt:
+            embs = pipeline.get_hidden_sum(srcBatch, tgtBatch)
+        else:
+            print ' tgt file not set'
+            embs = None
+    elif opt.type == 'decoder_states':
+        if opt.tgt:
+            embs = pipeline.get_hidden_states(srcBatch, tgtBatch)
+        else:
+            print 'tgt file not set'
+            embs = None
+    elif opt.type == 'decoder_ceil':
+        if opt.tgt:
+            embs = pipeline.get_hidden_ceils(srcBatch, tgtBatch)
         else:
             print 'tgt file not set'
             embs = None
