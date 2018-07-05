@@ -107,6 +107,7 @@ class Pipeline_hidden(object):
 
     def get_decoder_embedding(self, tgtBatch):
         """
+        好像之前的错了， 第一维应该是seq_len而不是batc_size
         input:
             tgtBatch: list of list of string
         output:
@@ -122,12 +123,115 @@ class Pipeline_hidden(object):
         tgtEmb = []
         for Idx in tgtData:
             tgtEmb.append(torch.index_select(decoder_embeddings, 0, Idx))
-        # padding: out (batch_size, max_len, 500)
+        # padding: out (batch_size, max_len, 500) 
+        tgtEmb.transpose(0,1)
         out = self._pad_sequence(tgtEmb, batch_first = True)
         print out.shape
         # return the data
         return out
 
+    def get_decCeil(self, srcBatch, goldBatch):
+        """
+        !!! Aborted, the way of padding is old here
+        """
+        dataset = self.buildData(srcBatch, goldBatch)
+        nu_batch = len(dataset)
+        out = []
+        for i in range(nu_batch):
+            #print("processing batch %s/%s" %(i, nu_batch))
+            src, tgt, indices = dataset[i]
+            tmp = self._get_decCeil(src, tgt)
+            tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x:x[-1])))[:-1]
+            tmp = [tmp[0][i] for i, j in enumerate(tmp[0])]
+            tmp = torch.stack(tmp)
+            # indices = torch.LongTensor(indices)
+            # tmp = tmp.index_select(0, indices) # can not be used here
+            print(tmp.data.size())
+            out.append(tmp)
+        out = torch.cat(out, 0)
+        print(out.data.size())
+        return out.data
+    
+    def _get_decCeil(self, srcBatch, tgtBatch):
+        """
+        !!! Aborted, the way of padding is old here
+        """
+        encStates, context = self.model.encoder(srcBatch)
+        # 这里的srcBatch原本是dataset的输出，所以应该是(src, lengths)，下面这一步取出其中src的内容。
+        srcBatch = srcBatch[0]
+        batchSize = self._getBatchSize(srcBatch)
+        # 获得RNN每层的节点数
+        rnnSize = context.size(2)
+        # 转换encState的维度为：[layers * batch * (directions * dim)]
+        encStates = (self.model._fix_enc_hidden(encStates[0]), self.model._fix_enc_hidden(encStates[1]))
+        decoder = self.model.decoder
+        attentionLayer = decoder.attn
+        useMasking = (self._type == 'text' and batchSize > 1)
+        padMask = None
+        if useMasking:
+            padMask = srcBatch.data.eq(onmt.Constants.PAD).t() #标记pad的内容
+        def mask(padMask):
+            if useMasking:
+                attentionLayer.applyMask(padMask)
+        decStates = encStates
+        # 初始化一个decoder的输出，
+        decOut = self.model.make_init_decoder_output(context)
+        mask(padMask)
+        initOutput = self.model.make_init_decoder_output(context)
+        decOut, decStates, attn = self.model.decoder(tgtBatch[:-1], decStates, context, initOutput)
+        return decStates[1].transpose(0,1).contiguous()
+    
+    def get_decStates(self, srcBatch, goldBatch):
+        """
+        !!! Aborted, the way of padding is old here
+        """
+        dataset = self.buildData(srcBatch, goldBatch)
+        nu_batch = len(dataset)
+        out = []
+        for i in range(nu_batch):
+            #print("processing batch %s/%s" %(i, nu_batch))
+            src, tgt, indices = dataset[i]
+            tmp = self._get_decStates(src, tgt)
+            tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x:x[-1])))[:-1]
+            tmp = [tmp[0][i] for i, j in enumerate(tmp[0])]
+            tmp = torch.stack(tmp)
+            # indices = torch.LongTensor(indices)
+            # tmp = tmp.index_select(0, indices) # can not be used here
+            print(tmp.data.size())
+            out.append(tmp)
+        out = torch.cat(out, 0)
+        print(out.data.size())
+        return out.data
+    
+    def _get_decStates(self, srcBatch, tgtBatch):
+        """
+        !!! Aborted, the way of padding is old here
+        """
+        encStates, context = self.model.encoder(srcBatch)
+        # 这里的srcBatch原本是dataset的输出，所以应该是(src, lengths)，下面这一步取出其中src的内容。
+        srcBatch = srcBatch[0]
+        batchSize = self._getBatchSize(srcBatch)
+        # 获得RNN每层的节点数
+        rnnSize = context.size(2)
+        # 转换encState的维度为：[layers * batch * (directions * dim)]
+        encStates = (self.model._fix_enc_hidden(encStates[0]), self.model._fix_enc_hidden(encStates[1]))
+        decoder = self.model.decoder
+        attentionLayer = decoder.attn
+        useMasking = (self._type == 'text' and batchSize > 1)
+        padMask = None
+        if useMasking:
+            padMask = srcBatch.data.eq(onmt.Constants.PAD).t() #标记pad的内容
+        def mask(padMask):
+            if useMasking:
+                attentionLayer.applyMask(padMask)
+        decStates = encStates
+        # 初始化一个decoder的输出，
+        decOut = self.model.make_init_decoder_output(context)
+        mask(padMask)
+        initOutput = self.model.make_init_decoder_output(context)
+        decOut, decStates, attn = self.model.decoder(tgtBatch[:-1], decStates, context, initOutput)
+        return decStates[0].transpose(0,1).contiguous()
+    
     def get_encoder_output(self, srcBatch):
         """
         input:
@@ -139,7 +243,7 @@ class Pipeline_hidden(object):
         nu_batch = len(dataset)
         out = []
         for i in range(nu_batch):
-            print("processing batch %s/%s"%(i, nu_batch))
+            #print("processing batch %s/%s"%(i, nu_batch))
             src, tgt, indices = dataset[i]
             # encStates is a tuple:
             #  -h_0 (num_layers * num_directions, batch, hidden_size): tensor containing hidden state of encoder for t = seq_len
@@ -187,7 +291,7 @@ class Pipeline_hidden(object):
         return lengths
                     
 
-    def get_hidden_batch(self, srcBatch, tgtBatch):
+    def get_hidden_batch(self, srcBatch, tgtBatch, full = False):
         # 原则上encoder的部分应该提到前面的，因为对每个句子这个操作是相同的，放在这里纯粹就是因为懒得改而已
         # 1) run the encoder on the src
         # 其中encoder的输入的size是：[seq_len, batch, input_size], 这里seq_len即是numWords
@@ -232,13 +336,17 @@ class Pipeline_hidden(object):
         # globalAttention的参数是input: batch x hidden_size，context: batch x seq_len x hidden_size。
         # 对应输出的attn是batch X seq_len
         # 所以decoder的输出output, hidden, attn的size应该分别是：
-        # [seq_len X batch X hidden_size], [num_layers X batch X hidden_size], [batch X seq_len]
+        # [seq_len X batch X hidden_size], [num_layers X batch X hidden_size](已改!!), [batch X seq_len]
         # 不懂这个-1在这里是什么意思，tgtBatch的维度是[batch_size, seq_len]，也就是说要少看一个句子的意思吗？这么做有什么意义，
         # 而且返回的时候的维度大小真的没有受影响吗？？？？？？？？？？、、、、、、、、？？？？？
         decOut, decStates, attn = self.model.decoder(tgtBatch[:-1], decStates, context, initOutput)
         decOut = decOut.transpose(0, 1).contiguous()
-
-        return decOut
+        if full:
+            decHiddenStates = decStates[0].transpose(0,1)
+            decCeilStates = decStates[1].transpose(0,1)
+            return decOut, decHiddenStates, decCeilStates
+        else:
+            return decOut
 
     def _get_last_hidden(self, src, tgt):
         pred = self.get_hidden_batch(src, tgt) # 输出pred维度为[batch_size, seq_len, hidden_size]
@@ -253,6 +361,7 @@ class Pipeline_hidden(object):
         for counter, item in enumerate(pred):
             # item 是[seq_len, hidden_size]，得到的tmp是list其中每一项为[1, hidden_size]
             tmp.append(item[lengths_tgt[counter]])
+            #tmp.append(item[-1])
         # 把list转化为[batch, hidden_size]
         tmp = torch.stack(tmp,0)
         #print(tmp)
@@ -289,7 +398,7 @@ class Pipeline_hidden(object):
         out = []
         #for i in range(3):
         for i in range(nu_batch):
-            print("processing batch %s/%s" %(i, nu_batch))
+            #print("processing batch %s/%s" %(i, nu_batch))
             src, tgt, indices = dataset[i]
             # 扔到translateBatch方法里面进行翻译, 这里src，tgt都是tensor类型维度为batchSize*numWord
             tmp = self._get_last_hidden(src, tgt)
@@ -300,7 +409,7 @@ class Pipeline_hidden(object):
             # so dimension of tmp is (1,30,500)
             # here i want to squezze the the fist dimension, but it is a list, therefore i process in a stupy way.
             # tmp[0] should have the same result
-            print len(tmp[0][0])
+            #print len(tmp[0][0])
             tmp = [tmp[0][i] for i, j in enumerate(tmp[0])]
             tmp = torch.stack(tmp)
             #indices = torch.LongTensor(indices)
@@ -308,7 +417,7 @@ class Pipeline_hidden(object):
             #print(tmp.data.size())
             out.append(tmp)
         out = torch.cat(out, 0)
-        print(out.data.size())
+        #print(out.data.size())
         return out.data
     
     def get_hidden_full(self, srcBatch, goldBatch):
@@ -321,7 +430,7 @@ class Pipeline_hidden(object):
         nu_batch = len(dataset)
         out = []
         for i in range(nu_batch):
-            print("processing batch %s/%s" %(i, nu_batch))
+            #print("processing batch %s/%s" %(i, nu_batch))
             src, tgt, indices = dataset[i]
             tmp = self._get_full_hidden(src, tgt)
             tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x:x[-1])))[:-1]
@@ -329,18 +438,142 @@ class Pipeline_hidden(object):
             tmp = torch.stack(tmp)
             # indices = torch.LongTensor(indices)
             # tmp = tmp.index_select(0, indices) # can not be used here
-            print(tmp.data.size())
+            #print(tmp.data.size())
             out.append(tmp)
         out = torch.cat(out, 0)
         print(out.data.size())
-        return out
+        return out.data
 
-    def _pad_sequence(self, sequences, batch_first=False, padding_value=0):
+    def get_hidden_sum(self, srcBatch, goldBatch):
+        tgt_lengths = torch.zeros([len(goldBatch)]).view(-1,1)
+        for index, li in enumerate(goldBatch):
+            tgt_lengths[index] = len(li)
+        dataset = self.buildData(srcBatch, goldBatch)
+        nu_batch = len(dataset)
+        li_out = []
+        for i in range(nu_batch):
+            #print("processing batch %s/%s" %(i, nu_batch))
+            src, tgt, indices = dataset[i]
+            tmp = self.get_hidden_batch(src, tgt)
+            tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x:x[-1])))[:-1]
+            tmp = tmp[0]
+            #tmp = torch.stack(tmp)
+            # indices = torch.LongTensor(indices)
+            # tmp = tmp.index_select(0, indices) # can not be used here
+            #print(tmp.data.size())
+            li_out.extend(tmp)
+        out = []
+        for index, li in enumerate(li_out):
+            #print tgt_lengths[index]
+            #print li.data.shape
+            out.append(li[:int(tgt_lengths[index][0])].sum(0))
+        out = torch.stack(out, 0) # (batch_size, num_dim)
+        #print out.data.shape
+        print(out.data.size())
+        return out.data
+
+    def get_hidden_mean(self, srcBatch, goldBatch):
+        tgt_lengths = torch.zeros([len(goldBatch)]).view(-1,1)
+        for index, li in enumerate(goldBatch):
+            tgt_lengths[index] = len(li)+1 # plus 1 for BOS
+        dataset = self.buildData(srcBatch, goldBatch)
+        nu_batch = len(dataset)
+        li_out = []
+        for i in range(nu_batch):
+            #print("processing batch %s/%s" %(i, nu_batch))
+            src, tgt, indices = dataset[i]
+            tmp = self.get_hidden_batch(src, tgt)
+            tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x:x[-1])))[:-1]
+            tmp = tmp[0]
+            #tmp = torch.stack(tmp)
+            # indices = torch.LongTensor(indices)
+            # tmp = tmp.index_select(0, indices) # can not be used here
+            #print(tmp.data.size())
+            li_out.extend(tmp)
+        out = []
+        for index, li in enumerate(li_out):
+            #print tgt_lengths[index]
+            #print li.data.shape
+            out.append(li[:int(tgt_lengths[index][0])].sum(0))
+        out = torch.stack(out, 0) # (batch_size, num_dim)
+        #print out.data.shape
+        batch_size, num_dim = out.data.shape
+        tgt_lengths = tgt_lengths.expand(batch_size, num_dim).float()
+        #print out[0]
+        #print tgt_lengths[0]
+        out = out.data/tgt_lengths
+        print(out.size())
+        return out
+    
+    def get_hidden_wr(self, srcBatch, goldBatch):
         """
-        ??? why we need to sort the sequence before we use this function????
+        implement the idea of wr
+        """
+        pass
+    
+    def get_hidden_states(self, srcBatch, goldBatch):
+        tgt_lengths = torch.zeros([len(goldBatch)]).view(-1,1)
+        for index, li in enumerate(goldBatch):
+            tgt_lengths[index] = len(li)+1 # plus 1 for BOS
+        dataset = self.buildData(srcBatch, goldBatch)
+        nu_batch = len(dataset)
+        li_out = []
+        for i in range(nu_batch):
+            #print("processing batch %s/%s" %(i, nu_batch))
+            src, tgt, indices = dataset[i]
+            decOut, decHS, decCS = self.get_hidden_batch(src, tgt, full = True)
+            decHS = decHS.data
+            assert(len(decOut) == len(decHS) and len(decOut) == len(decCS))
+            decOut, decHS, decCS = list(zip(*sorted(zip(decOut, decHS, decCS, indices), key = lambda x:x[-1])))[:-1]
+            tmp = decHS # ==> (batch_size, seq_len, num_layers, num_dim)
+            #tmp = torch.stack(tmp)
+            # indices = torch.LongTensor(indices)
+            # tmp = tmp.index_select(0, indices) # can not be used here
+            #print(tmp.data.size())
+            li_out.extend(tmp)
+        out = []
+        for index, li in enumerate(li_out):
+            out.append(li[:int(tgt_lengths[index][0])])
+        out = self._pad_sequence(out, batch_first = True, padding_value = 0, max_len = 50)
+        print(out.size())
+        return out
+    
+    def get_hidden_ceils(self, srcBatch, goldBatch):
+        tgt_lengths = torch.zeros([len(goldBatch)]).view(-1,1)
+        for index, li in enumerate(goldBatch):
+            tgt_lengths[index] = len(li)+1 # plus 1 for BOS
+        dataset = self.buildData(srcBatch, goldBatch)
+        nu_batch = len(dataset)
+        li_out = []
+        for i in range(nu_batch):
+            #print("processing batch %s/%s" %(i, nu_batch))
+            src, tgt, indices = dataset[i]
+            decOut, decHS, decCS = self.get_hidden_batch(src, tgt, full = True)
+            decCS = decCS.data
+            assert(len(decOut) == len(decHS) and len(decOut) == len(decCS))
+            decOut, decHS, decCS = list(zip(*sorted(zip(decOut, decHS, decCS, indices), key = lambda x:x[-1])))[:-1]
+            tmp = decCS.data # ==> (batch_size, seq_len, num_layers, num_dim)
+            #tmp = torch.stack(tmp)
+            # indices = torch.LongTensor(indices)
+            # tmp = tmp.index_select(0, indices) # can not be used here
+            #print(tmp.data.size())
+            li_out.extend(tmp)
+        out = []
+        for index, li in enumerate(li_out):
+            out.append(li[:int(tgt_lengths[index][0])])
+        out = self._pad_sequence(out, batch_first = True, padding_value = 0, max_len = 50)
+        print(out.size())
+        return out
+    
+    def _pad_sequence(self, sequences, batch_first=False, padding_value=0, max_len = None):
+        """
+        ??? why we need to sort the sequence before we use this function ???
         code from pytorch and change a bit.
         """
-        max_len = max([x.size(0) for x in sequences])
+        if max_len:
+            max_len = max_len
+        else:
+            max_len = max([x.size(0) for x in sequences])
         trailing_dims = sequences[0].size()[1:]
         #max_size = sequences[0].size()
         #max_len, trailing_dims = max_size[0], max_size[1:]
@@ -355,7 +588,8 @@ class Pipeline_hidden(object):
             length = tensor.size(0)
             # temporary sort check, can be removed when we handle sorting internally
             if prev_l < length:
-                raise ValueError("lengths array has to be sorted in decreasing order")
+                # raise ValueError("lengths array has to be sorted in decreasing order")
+                length = max_len
             #prev_l = length
             # use index notation to prevent duplicate references to the tensor
             if batch_first:
