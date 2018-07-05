@@ -1,5 +1,5 @@
 """
-Used to get the Attention distance
+use attention to get the most important words that appear in the sys sentence according to the words in the ref sentence 
 """
 import argparse
 import gensim
@@ -52,17 +52,18 @@ def _get_attn_dist(hyp, ref):
     hyp = torch.autograd.Variable(hyp, requires_grad = False)
     ref = torch.autograd.Variable(ref, requires_grad = False)
     # get atten
-    thres = torch.nn.Threshold(0.6, 0)
+    thres = torch.nn.Threshold(0.2, 0)
     softmax = torch.nn.Softmax()
-    #attn = torch.bmm(ref, hyp.transpose(1,2)) # (num_batch, num_q, num_v)
-    attn = torch.bmm(hyp, ref.transpose(1,2))
+    attn = torch.bmm(ref, hyp.transpose(1,2)) # (num_batch, num_q, num_v)
+    #attn = torch.bmm(hyp, ref.transpose(1,2))
     num_batch, num_q, num_v = attn.size()
     attn = attn.view(-1, num_v)
     attn = softmax(attn)
-    #attn = thres(attn)
+#    attn = thres(attn)
+    #attn = torch.round(attn)
     attn = attn.view(num_batch, -1, num_v)
-    print attn[1333]
-    attn = torch.max(attn, dim = 1)[0] # (num_batch, num_v)
+    attn = torch.max(attn, dim = 1)[0] # (num_batch, num_v)??? should be second dimension???
+    #attn = torch.max(attn, dim = 2)[0]
     out = torch.sum(attn, dim = 1)
     return out.data.numpy()
 
