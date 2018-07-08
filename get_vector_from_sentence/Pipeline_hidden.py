@@ -104,6 +104,10 @@ class Pipeline_hidden(object):
         print out.shape
         # return the data
         return out
+    
+    def get_encoder_embedding_sum(self, srcBatch):
+        out = self.get_encoder_embedding(srcBatch)
+        return out.sum(1)
 
     def get_decoder_embedding(self, tgtBatch):
         """
@@ -124,11 +128,43 @@ class Pipeline_hidden(object):
         for Idx in tgtData:
             tgtEmb.append(torch.index_select(decoder_embeddings, 0, Idx))
         # padding: out (batch_size, max_len, 500) 
-        tgtEmb.transpose(0,1)
         out = self._pad_sequence(tgtEmb, batch_first = True)
         print out.shape
         # return the data
         return out
+    
+    def get_decoder_embedding_mixture(self, tgtBatch):
+        # convert to idx: tgtBatch is list of LongTensor
+        tgtData = [self.tgt_dict.convertToIdx(b,
+                       onmt.Constants.UNK_WORD,
+                       onmt.Constants.BOS_WORD,
+                       onmt.Constants.EOS_WORD) for b in tgtBatch]
+        # get lengths
+        tgt_lengths = [len(li) for li in tgtData]
+        # get the decoder embedding
+        decoder_embeddings = self.decoder.word_lut.weight.data # type of Float Tensor (n_of_w, 500)
+        tgtEmb = [] # ==> (batch_size, seq_len*, num_dim)
+        for Idx in tgtData:
+            tgtEmb.append(torch.index_select(decoder_embeddings, 0, Idx))
+        out_sum = [] # ==> list of (num_dim)
+        out_max = []
+        for li in tgtEmb:
+            out_sum.append(li.sum(0))
+            out_max.append(li.max(0))
+        out_sum = torch.stack(out_sum, 0)
+        out_max = torch.stack(out_max, 0)
+        out_mean = []
+        for index, li in enumerate(out_sum):
+            out_mean.append(li*1./tgt_lengths[index])
+        out_mean = torch.stack(out_mean, 0)
+        # combine
+        out_mixture = torch.cat([out_sum, out_max, out_mean], 1)
+        return out_mixture # (batch_size, 3, num_dim)
+        
+    
+    def get_decoder_embedding_sum(self, tgtBatch):
+        out = self.get_decoder_embedding_mean()
+        return out.sum(1)
 
     def get_decCeil(self, srcBatch, goldBatch):
         """
@@ -505,11 +541,84 @@ class Pipeline_hidden(object):
         print(out.size())
         return out
     
-    def get_hidden_wr(self, srcBatch, goldBatch):
+    def get_hidden_mixture(self, srcBatch, goldBatch):
+        tgt_lengths = torch.zeros([len(goldBatch)]).view(-1,1)
+        for index, li in enumerate(goldBatch):
+            tgt_lengths[index] = len(li)+1 # plus 1 for BOS
+        dataset = self.buildData(srcBatch, goldBatch)
+        nu_batch = len(dataset)
+        li_out = []
+        for i in range(nu_batch):
+            #print("processing batch %s/%s" %(i, nu_batch))
+            src, tgt, indices = dataset[i]
+            tmp = self.get_hidden_batch(src, tgt)
+            tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x:x[-1])))[:-1]
+            tmp = tmp[0]
+            li_out.extend(tmp)
+        out_sum = [] # ==> list of (num_dim)
+        out_max = [] # ==> list of (num_dim)
+        for index, li in enumerate(li_out):
+            out_sum.append(li[:int(tgt_lengths[index][0])].sum(0))
+            out_sum.append(li[:int(tgt_lengths[index][0])].max(0)) 
+        out_sum = torch.stack(out_sum, 0)
+        out_max = torch.stack(out_max, 0)
+        # print out.data.shape
+        out_mean = []
+        for index, li in enumerate(out_sum):
+            out_mean.append(li*1./tgt_lengths[index][0])
+        out_mean = torch.stack(out_mean, 0)
+        # combine 
+        out_mixture = torch.stack([out_sum, out_max, out_mean], 1)
+        print(out.size())
+        return out # ==> (batch_size, 3, num_dim)
+    
+    def get_hidden_wr(self, srcBatch, goldBatch, alpha = 1e-4):
         """
         implement the idea of wr
         """
-        pass
+        # get the tgt sentence length
+        tgt_lengths = torch.zeros([len(goldBatch)]).view(-1,1)
+        for index, li in enumerate(goldBatch):
+            tgt_lengths[index] = len(li)+1 # plus 1 for BOS
+        # convert to idx: tgtBatch is list of LongTensor
+        tgtData = [self.tgt_dict.convertToIdx(b,
+                       onmt.Constants.UNK_WORD,
+                       onmt.Constants.BOS_WORD) for b in goldBatch]
+        # get the frequencies of the words from the dict
+        tgt_frequencies = self.tgt_dict.frequencies
+        # cal the total number of words
+        total_words = sum(tgt_frequencies)
+        # cal the p(w) and change the type to list of torch.FloatTensor
+        pw = [] 
+        for li in tgtData:
+            tmp = []
+            for i in li:
+                tmp.append(tgt_frequencies[i]*1./total_words)
+            pw.append(torch.FloatTensor(tmp))
+        # pad the pw and change its type to torch.FloatTensor of size (batch_size, seq_len)
+        pw = self._pad_sequence(pw, batch_first = True, padding_value = 0, max_len = 50)
+        # get the decoder output 
+        dataset = self.buildData(srcBatch, goldBatch)
+        nu_batch = len(dataset)
+        li_out = []
+        for i in range(nu_batch):
+            src, tgt, indices = dataset[i]
+            tmp = self.get_hidden_batch(src, tgt).data
+            tmp = list(zip(*sorted(zip(tmp, indices), key = lambda x:x[-1])))[:-1]
+            tmp = tmp[0]
+            li_out.extend(tmp)
+        out = []
+        for index, li in enumerate(li_out):
+            out.append(li[:int(tgt_lengths[index][0])])
+        out = self._pad_sequence(out, batch_first = True, padding_value = 0, max_len = 50)
+        # cal wr
+        pw = pw.unsqueeze(1) # ==> (batch_size, 1, seq_len)
+        pref = alpha/(alpha + pw)
+        out = torch.bmm(pref, out).squeeze() # ==> (batch_size, num_dim)
+        # expand tgt_lengths, so it can be divided 
+        exp_tgt_lengths = tgt_lengths.expand_as(out)
+        out = exp_tgt_lengths/out
+        return out
     
     def get_hidden_states(self, srcBatch, goldBatch):
         tgt_lengths = torch.zeros([len(goldBatch)]).view(-1,1)
@@ -535,8 +644,46 @@ class Pipeline_hidden(object):
         for index, li in enumerate(li_out):
             out.append(li[:int(tgt_lengths[index][0])])
         out = self._pad_sequence(out, batch_first = True, padding_value = 0, max_len = 50)
-        print(out.size())
+        print(out.size()) # ==> (batch_size, seq_len, num_layers, num_dim)
         return out
+    
+    def get_hidden_states_mixture(self, srcBatch, goldBatch):
+        tgt_lengths = torch.zeros([len(goldBatch)]).view(-1,1)
+        for index, li in enumerate(goldBatch):
+            tgt_lengths[index] = len(li)+1 # plus 1 for BOS
+        dataset = self.buildData(srcBatch, goldBatch)
+        nu_batch = len(dataset)
+        li_out = []
+        for i in range(nu_batch):
+            #print("processing batch %s/%s" %(i, nu_batch))
+            src, tgt, indices = dataset[i]
+            decOut, decHS, decCS = self.get_hidden_batch(src, tgt, full = True)
+            decHS = decHS.data
+            assert(len(decOut) == len(decHS) and len(decOut) == len(decCS))
+            decOut, decHS, decCS = list(zip(*sorted(zip(decOut, decHS, decCS, indices), key = lambda x:x[-1])))[:-1]
+            tmp = decHS # ==> (batch_size, seq_len, num_layers, num_dim)
+            li_out.extend(tmp)
+        out = [] # ==> (batch_size, seq_len*, num_layers, num_dim)
+        for index, li in enumerate(li_out):
+            out.append(li[:int(tgt_lengths[index][0])])
+        out_sum = [] # ==> list of (num_layers, num_dim)
+        out_max = [] # ==> list of (num_layers, num_dim)
+        for index, li in enumerate(out):
+            out_sum.append(li.sum(0))
+            out_max.append(li.max(0))
+        out_sum = torch.stack(out_sum, 0)
+        out_max = torch.stack(out_max, 0)
+        out_mean = [] # ==> list of(num_layers, num_dim)
+        for index, li in enumerate(out):
+            out_mean.append(li*1./tgt_lengths[index][0])
+        out_mean = torch.stack(out_mean, 0)
+        # combien 
+        out_mixture = torch.cat([out_sum, out_max, out_mean], 1)
+        return out_mixture # ==> (batch_size, num_layers * 3, num_dim)
+    
+    def get_hidden_states_sum(self, srcBatch, tgtBatch):
+        out = self.get_hidden_states(srcBatch, tgtBatch)
+        return out.sum(1) # ==> (batch_size, num_layers, num_dim)
     
     def get_hidden_ceils(self, srcBatch, goldBatch):
         tgt_lengths = torch.zeros([len(goldBatch)]).view(-1,1)
@@ -565,6 +712,81 @@ class Pipeline_hidden(object):
         print(out.size())
         return out
     
+    def get_hidden_ceils_mixture(self, srcBatch, tgtBatch):
+        tgt_lengths = torch.zeros([len(goldBatch)]).view(-1,1)
+        for index, li in enumerate(goldBatch):
+            tgt_lengths[index] = len(li)+1 # plus 1 for BOS
+        dataset = self.buildData(srcBatch, goldBatch)
+        nu_batch = len(dataset)
+        li_out = []
+        for i in range(nu_batch):
+            #print("processing batch %s/%s" %(i, nu_batch))
+            src, tgt, indices = dataset[i]
+            decOut, decHS, decCS = self.get_hidden_batch(src, tgt, full = True)
+            decCS = decCS.data
+            assert(len(decOut) == len(decHS) and len(decOut) == len(decCS))
+            decOut, decHS, decCS = list(zip(*sorted(zip(decOut, decHS, decCS, indices), key = lambda x:x[-1])))[:-1]
+            tmp = decCS.data # ==> (batch_size, seq_len, num_layers, num_dim)
+            #tmp = torch.stack(tmp)
+            # indices = torch.LongTensor(indices)
+            # tmp = tmp.index_select(0, indices) # can not be used here
+            #print(tmp.data.size())
+            li_out.extend(tmp)
+        out = []
+        for index, li in enumerate(li_out):
+            out.append(li[:int(tgt_lengths[index][0])])
+        out_sum = [] # ==> list of (num_layers, num_dim)
+        out_max = [] # ==> list of (num_layers, num_dim)
+        for index, li in enumerate(out):
+            out_sum.append(li.sum(0))
+            out_max.append(li.max(0))
+        out_sum = torch.stack(out_sum, 0)
+        out_max = torch.stack(out_max, 0)
+        out_mean = [] # ==> list of (num_layers, num_dim)
+        for index, li in enumerate(out_sum):
+            out_mean.append(li*1./tgt_lengths[index][0])
+        out_mean = torch.stack(out_mean, 0)
+        # combien 
+        out_mixture = torch.cat([out_sum, out_max, out_mean], 1)
+        return out_mixture # ==> (batch_size, num_layers * 3, num_dim)
+            
+    def get_hidden_ceils_sum(self, srcBatch, tgtBatch):
+        out = self.get_hidden_ceils_mean(srcBatch, tgtBatch)
+        return out.sum(1)  # ==> (batch_size, num_layers, num_dim)
+    
+    def get_mixture_sentbd(self, srcBatch, tgtBatch):
+        """
+        To be continue...
+        the data include:
+        0. decEmbd sum
+        1. decEmbd max
+        2. decEmbd mean
+        3. decOut sum
+        4. decOut max
+        5. decOut mean
+        6. decStates sum 1
+        7. decStates sum 2
+        8. decStates max 1
+        9. decStates max 2
+        10. decStates mean 1
+        11. decStates mean 2
+        12. decCeils sum 1
+        13. decCeils sum 2
+        14. decCeils max 1
+        15. decCeils max 2
+        16. decCeils mean 1
+        17. decCeils mean 2
+        .
+        .
+        .
+        """
+        decEmbd = get_decoder_embeddings_mixture(self, tgtBatch) # ==> (batch_size, 3, num_dim)
+        decOut = get_decoder_mixture(self, srcBatch, tgtBatch) # ==> (batch_size, num_layers * 3, num_dim)
+        decStates = get_decoder_states_mixture(self, srcBatch, tgtBatch) # ==> (batch_size, num_layers * 3, num_dim)
+        decCeils = get_decoder_ceils_mixture(self, srcBatch, tgtBatch) # ==> (batch_size, num_layers * 3, num_dim)
+        out = torch.cat([decEmbd, decOut, decStates, decCeils], 1)
+        
+        
     def _pad_sequence(self, sequences, batch_first=False, padding_value=0, max_len = None):
         """
         ??? why we need to sort the sequence before we use this function ???
@@ -593,8 +815,8 @@ class Pipeline_hidden(object):
             #prev_l = length
             # use index notation to prevent duplicate references to the tensor
             if batch_first:
-                out_tensor[i, :length, ...] = tensor
+                out_tensor[i, :length, ...] = tensor[:length]
             else:
-                out_tensor[:length, i, ...] = tensor
+                out_tensor[:length, i, ...] = tensor[:length]
 
         return out_tensor
