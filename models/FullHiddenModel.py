@@ -10,52 +10,105 @@ from Attention import ScaledDotProductAttention, MultiHeadAttention
 
 seq_len = 100
 class Conv2dMlpModel_rank(nn.Module):
-    def __init__(self, dim2 = 16, act_func = "LeakyReLU", softmax = True):
+    """
+    to be continue...
+    """
+    def __init__(self, dim2 = 64, act_func = "LeakyReLU", softmax = True):
         super(Conv2dMlpModel_rank, self).__init__()
         dim_w = 300
-        dim_h = 30
+        dim_h = 50
         # conv_layer1 for one word feature
         self.conv_layer = nn.Sequential()
-        self.conv_layer.add_module('conv1', nn.Conv2d(3, 16, (2,500), stride = (1,500)))
+        self.conv_layer.add_module('conv1', nn.Conv2d(6, 16, (1,500), stride = (1,1)))
         self.conv_layer.add_module('dp1', nn.Dropout2d(0.1))
         self.conv_layer.add_module('af1', nnActi.get_acti('ReLU'))
         #self.conv_layer.add_module('mp1', nn.MaxPool2d((1,1)))
         # conv_layer2 for two words feature
         self.conv_layer2 = nn.Sequential()
-        self.conv_layer2.add_module('conv2', nn.Conv2d(3, 16, (2,500), stride = (1,500), padding = (1,0)))
+        self.conv_layer2.add_module('conv2', nn.Conv2d(6, 16, (2,500), stride = (1,500), padding = (1,0)))
         self.conv_layer2.add_module('dp2', nn.Dropout2d(0.1))
         self.conv_layer2.add_module('af2', nnActi.get_acti('ReLU'))
         #self.conv_layer.add_module('mp2', nn.MaxPool2d((2,1)))
         # conv_layer3 for three words feature
         self.conv_layer3 = nn.Sequential()
-        self.conv_layer3.add_module('conv3', nn.Conv2d(3, 16, (3,500), stride = (1,500), padding = (1,0)))
+        self.conv_layer3.add_module('conv3', nn.Conv2d(6, 16, (4,500), stride = (1,500), padding = (1,0)))
         self.conv_layer3.add_module('dp3', nn.Dropout2d(0.1))
         self.conv_layer3.add_module('af3', nnActi.get_acti('ReLU'))
         #self.conv_layer.add_module('mp3', nn.MaxPool2d((2,5)))
         self.mlp = nn.Sequential()
-        self.mlp.add_module('li1', nn.Linear(480, 16))
+        self.mlp = torch.nn.Sequential(
+                torch.nn.Linear(1616, dim2),
+                torch.nn.Dropout(0.5),
+#                torch.nn.BatchNorm1d(dim2),
+#                torch.nn.Tanh(),
+                torch.nn.ReLU(),
+                torch.nn.Linear(dim2, 3),
+                torch.nn.LogSoftmax()
+                )
+
+    def forward(self, s1, s2, ref):
+        seq_len = 50
+        #shapes = data_in.data.shape
+        #data_in_chunks = torch.split(data_in, seq_len, dim = 1)
+        data_in_s1 = s1.transpose(1,2) # ==> (batch_size, num_layers, seq_len, num_dim)
+        data_in_s2 = s2.transpose(1,2)
+        data_in_ref = ref.transpose(1,2)
+        # shape of conv2d input is: (batch_size, channels, height, width)
+        data_in = torch.cat((data_in_s1, data_in_s2, data_in_ref), 1)
+        num_batch = data_in.size()[0]
+        out_conv1 = self.conv_layer(data_in).view(num_batch, -1)
+        out_conv2 = self.conv_layer2(data_in).view(num_batch, -1)
+        #out_conv3 = self.conv_layer3(data_in).view(num_batch, -1)
+        out_conv = torch.cat((out_conv1,out_conv2), 1)
+        out = self.mlp(out_conv)
+        return out
+
+class Conv2dMlpModel_slim(nn.Module):
+    def __init__(self, dim2 = 16, act_func = "LeakyReLU", softmax = True):
+        super(Conv2dMlpModel_rank, self).__init__()
+        dim_w = 300
+        dim_h = 50
+        # conv_layer1 for one word feature
+        self.conv_layer = nn.Sequential()
+        self.conv_layer.add_module('conv1', nn.Conv2d(6, 32, (1,500), stride = (1,500)))
+        self.conv_layer.add_module('dp1', nn.Dropout2d(0.1))
+        self.conv_layer.add_module('af1', nnActi.get_acti('ReLU'))
+        #self.conv_layer.add_module('mp1', nn.MaxPool2d((1,1)))
+        # conv_layer2 for two words feature
+        self.conv_layer2 = nn.Sequential()
+        self.conv_layer2.add_module('conv2', nn.Conv2d(6, 32, (2,500), stride = (1,500), padding = (1,0)))
+        self.conv_layer2.add_module('dp2', nn.Dropout2d(0.1))
+        self.conv_layer2.add_module('af2', nnActi.get_acti('ReLU'))
+        #self.conv_layer.add_module('mp2', nn.MaxPool2d((2,1)))
+        # conv_layer3 for three words feature
+        self.conv_layer3 = nn.Sequential()
+        self.conv_layer3.add_module('conv3', nn.Conv2d(6, 16, (4,500), stride = (1,500), padding = (1,0)))
+        self.conv_layer3.add_module('dp3', nn.Dropout2d(0.1))
+        self.conv_layer3.add_module('af3', nnActi.get_acti('ReLU'))
+        #self.conv_layer.add_module('mp3', nn.MaxPool2d((2,5)))
+        self.mlp = nn.Sequential()
+        self.mlp.add_module('li1', nn.Linear(1952, 16))
         if softmax:
             self.mlp.add_module('li2', nn.Linear(16, 3))
         else:
             self.mlp.add_module('li2', nn.Linear(16, 3))
 
-    def forward(self, data_in):
-        seq_len = 10
+    def forward(self, s1, s2, ref):
+        seq_len = 50
         shapes = data_in.data.shape
-        data_in_chunks = torch.split(data_in, seq_len, dim = 1)
-        data_in_s1 = data_in_chunks[0].unsqueeze(dim = 1)
-        data_in_s2 = data_in_chunks[1].unsqueeze(dim = 1)
-        data_in_ref = data_in_chunks[2].unsqueeze(dim = 1)
+        #data_in_chunks = torch.split(data_in, seq_len, dim = 1)
+        data_in_s1 = s1.transpose(1,2) # ==> (batch_size, num_layers, seq_len, num_dim)
+        data_in_s2 = s2.transpose(1,2)
+        data_in_ref = ref.transpose(1,2)
         # shape of conv2d input is: (batch_size, channels, height, width)
         data_in = torch.cat((data_in_s1, data_in_s2, data_in_ref), 1)
         num_batch = shapes[0]
         out_conv1 = self.conv_layer(data_in).view(num_batch, -1)
         out_conv2 = self.conv_layer2(data_in).view(num_batch, -1)
-        out_conv3 = self.conv_layer3(data_in).view(num_batch, -1)
-        out_conv = torch.cat((out_conv1,out_conv2, out_conv3), 1)
+        #out_conv3 = self.conv_layer3(data_in).view(num_batch, -1)
+        out_conv = torch.cat((out_conv1,out_conv2), 1)
         out = self.mlp(out_conv)
         return out
-
 class Conv3dMlpModel_rank(nn.Module):
     def __init__(self, dim2 = 15, act_func = "LeakyReLU", softmax = True):
         super(Conv3MlpModel_rank, self).__init__()
@@ -63,7 +116,7 @@ class Conv3dMlpModel_rank(nn.Module):
         dim_h = 30
         self.conv_layer = nn.Sequential()
         self.conv_layer.add_module('conv1', nn.Conv3d(1,128, (1,2)))
-        self.conv_layer.add_module('np1', nn.Dropout3d(0.1))
+        self.conv_layer.add_module('dp1', nn.Dropout3d(0.1))
         self.conv_layer.add_module('af1', nnActi.get_acti('ReLU'))
         self.conv_layer.add_module('mp1', nn.MaxPool3d((1,1,2)))
         self.conv_layer.add_module('conv2', nn.Conv3d(128, 16, (2,2)))
