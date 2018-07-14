@@ -63,8 +63,8 @@ class ELMo(torch.nn.Module):
         self.num_layers = num_layers
         self.num_dim = num_dim
         #self.weight = torch.autograd.Variable(torch.FloatTensor(self.num_layers, self.seq_len), requires_grad = True)
-        self.weight_layers = torch.autograd.Variable(torch.FloatTensor(self.num_layers), requires_grad = True)
-        self.weight_seq = torch.autograd.Variable(torch.FloatTensor(self.seq_len), requires_grad = True)
+        self.weight_layers = torch.nn.Parameter(torch.FloatTensor(self.num_layers), requires_grad = True)
+        self.weight_seq = torch.nn.Parameter(torch.FloatTensor(self.seq_len), requires_grad = True)
         # build a mlp model
         self.mlp = torch.nn.Sequential(
             torch.nn.Linear(1500, 500),
@@ -104,17 +104,16 @@ class ELMo(torch.nn.Module):
         out = self.mlp(ss_data)
         return out
 
-class ELMo_simplified(torch.nn.Module):
+class ELMo_modified(torch.nn.Module):
     """
-    simplifiy Elmo, use sum to get the sentence level embedding
+    modifiy Elmo, use cand to choose the features 
     """
-    def __init__(self, seq_len = 50, num_layers = 2, num_dim = 500):
-        super(ELMo_simplified, self).__init__()
-        self.seq_len = seq_len
-        self.num_layers = num_layers
+    def __init__(self, cand = [], num_dim = 500):
+        super(ELMo_modified, self).__init__()
+        self.cand = torch.LongTensor(cand) #  cand should be list of int
+        self.num_layers = len(cand)
         self.num_dim = num_dim
-        #self.weight = torch.autograd.Variable(torch.FloatTensor(self.num_layers, self.seq_len), requires_grad = True)
-        self.weight_layers = torch.autograd.Variable(torch.FloatTensor(self.num_layers), requires_grad = True)
+        self.weight_layers = torch.nn.Parameter(torch.FloatTensor(self.num_layers), requires_grad = True)
         # build a mlp model
         self.mlp = torch.nn.Sequential(
             torch.nn.Linear(1500, 500),
@@ -128,19 +127,60 @@ class ELMo_simplified(torch.nn.Module):
      
     def forward(self, out_s1, out_s2, out_ref):
         input = [out_s1, out_s2, out_ref]
-        input = torch.cat(input, 3) # (batch, seq_len, num_layer, num_dims): (bs, 50, 2, 1500)
+        input = torch.cat(input, 2) # for mixture data ==> (batch_size, num_layer, num_dim)
+        # extract the layers that stay in self.cand
+        input = input.select(1, self.cand)
+        batch_size, num_layers, num_dim = input.data.shape # for mixture data
+        assert(num_layers == self.num_layers)
+        exp_weight_layers =self.weight_layers.expand(batch_size, self.num_layers) # ==> (batch_size, num_layers)
+        # do the softmax for self.weight_layers, self.weight_seq
+        exp_weight_layers = self.sf(exp_weight_layers).unsqueeze(1) # ==> (batch_size, 1, num_layers)
+        # weighted sum layer
+        #ls_data = torch.bmm(exp_weight_layers, data).squeeze() # ==> (batch_size, num_dim)
+        ls_data = torch.bmm(exp_weight_layers, input).squeeze() # for mixture data
+        out = self.mlp(ls_data)
+        return out
+    
+class ELMo_simplified(torch.nn.Module):
+    """
+    simplifiy Elmo, use sum to get the sentence level embedding
+    """
+    def __init__(self, seq_len = 50, num_layers = 18, num_dim = 500):
+        super(ELMo_simplified, self).__init__()
+        self.seq_len = seq_len
+        self.num_layers = num_layers
+        self.num_dim = num_dim
+        #self.weight = torch.autograd.Variable(torch.FloatTensor(self.num_layers, self.seq_len), requires_grad = True)
+        self.weight_layers = torch.nn.Parameter(torch.FloatTensor(self.num_layers), requires_grad = True)
+        # build a mlp model
+        self.mlp = torch.nn.Sequential(
+            torch.nn.Linear(1500, 500),
+            torch.nn.Dropout(0.5),
+            torch.nn.ReLU(),
+            torch.nn.Linear(500, 3),
+            torch.nn.LogSoftmax()
+        )
+        # softmax
+        self.sf = torch.nn.Softmax()
+     
+    def forward(self, out_s1, out_s2, out_ref):
+        input = [out_s1, out_s2, out_ref]
+        #input = torch.cat(input, 3) # (batch, seq_len, num_layer, num_dims): (bs, 50, 2, 1500)
+        input = torch.cat(input, 2) # for mixture data
         #print input.data.shape
         # expand weight so that it can do the bmm later, include self.weight_layers and self.weight_seq
         # get shape
-        batch_size, seq_len, num_layers, num_dim = input.data.shape
-        assert(seq_len == self.seq_len and num_layers == self.num_layers)
+        #batch_size, seq_len, num_layers, num_dim = input.data.shape
+        batch_size, num_layers, num_dim = input.data.shape # for mixture data
+        assert(num_layers == self.num_layers)
         exp_weight_layers =self.weight_layers.expand(batch_size, self.num_layers) # ==> (batch_size, num_layers)
         # do the softmax for self.weight_layers, self.weight_seq
         exp_weight_layers = self.sf(exp_weight_layers).unsqueeze(1) # ==> (batch_size, 1, num_layers)
         # mul input
-        data = input.sum(1).contiguous() # ==> (batch_size, num_layer, num_dim * 3)
+        #data = input.sum(1).contiguous() # ==> (batch_size, num_layer, num_dim * 3)
         # weighted sum layer
-        ls_data = torch.bmm(exp_weight_layers, data).squeeze() # ==> (batch_size, num_dim)
+        #ls_data = torch.bmm(exp_weight_layers, data).squeeze() # ==> (batch_size, num_dim)
+        ls_data = torch.bmm(exp_weight_layers, input).squeeze() # for mixture data
         out = self.mlp(ls_data)
         return out
 
@@ -241,9 +281,10 @@ class TwoLayerRank3(torch.nn.Module):
 class Regress(torch.nn.Module):
     def __init__(self):
         super(Regress, self).__init__()
-        self.num_types = 17
+        self.num_types = 18
         self.sf = torch.nn.Softmax()
-        self.weight = torch.autograd.Variable(torch.FloatTensor(self.num_types), requires_grad = True)
+        self.weight = torch.nn.Parameter(torch.FloatTensor(self.num_types), requires_grad = True)
+        self.mlp = torch.nn.Sequential(torch.nn.Linear(2,3), torch.nn.LogSoftmax())
     
     def forward(self, s1, s2, ref):
         """
@@ -258,7 +299,9 @@ class Regress(torch.nn.Module):
         #data_in_s2 = data_in_chunks[1]
         #data_in_ref = data_in_chunks[2]
         # expand
-        exp_weight =self.weight_layers.expand(batch_size, self.num_layers) # ==> (batch_size, num_layers)
+        batch_size, num_types, num_dim = s1.size()
+        assert(self.num_types == num_types)
+        exp_weight =self.weight.expand(batch_size, self.num_types) # ==> (batch_size, num_types)
         # do the softmax for self.weight_layers, self.weight_seq
         exp_weight = self.sf(exp_weight).unsqueeze(1) # ==> (batch_size, 1, num_layers)
         # weight the input
@@ -268,8 +311,12 @@ class Regress(torch.nn.Module):
         # calculate the l1 distance
         dis1 = torch.abs(w_ref - w_s1).sum(1)
         dis2 = torch.abs(w_ref - w_s2).sum(1)
-        dis = dis1 -dis2
-        return dis/(torch.abs(dis) + 1e-5) +  1
+        dis = torch.stack([dis1,dis2]).t()
+        return self.mlp(dis)
+        #dis = dis1 -dis2
+        #dis = dis.view(-1,1)
+        #print dis.size()
+        #return dis/(torch.abs(dis) + 1e-5) +  1 这样好像就没办法训练了
 
 class MLPRank(torch.nn.Module):
     """
