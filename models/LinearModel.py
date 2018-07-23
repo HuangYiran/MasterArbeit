@@ -318,18 +318,71 @@ class Simple5(torch.nn.Module):
         out = out.squeeze()
         return out
 
-class Simple5(torch.nn.Module):
+class Simple6(torch.nn.Module):
     """
-    more layers input distance base
+    more layers input distance base 1: with nn
+    讨论一下，是什么原因造成的testset的结果比trainingset的差那么多，如果是同一年的数据，是否这种差距会缩小，如果是的话，是否可以通过一部分数据的预训练来提升结果。
     """
     def __init__(self, num_layers = 2):
-        super(Simple5, self).__init__()
+        """
+        当li输出为1维时效果很差，说明一个维度并不足以表达足够的信息。。
+        """
+        super(Simple6, self).__init__()
         dim2 = 500
         act_func = 'ReLU'
         self.num_layers = num_layers
         self.num_dim = 500
         self.weight_layers = torch.nn.Parameter(torch.FloatTensor(self.num_layers), requires_grad = True)
-        self.weight_dimension = torch.n.Parameter(torch.FloatTensor(self.num_layers), requires_grad = True)
+        #self.weight_dimension = torch.nn.Parameter(torch.FloatTensor(self.num_dim), requires_grad = True)
+        self.weight_dimension = torch.nn.Parameter(torch.ones(self.num_dim), requires_grad = True)
+        self.sf = torch.nn.Softmax()
+        self.li = torch.nn.Linear(500,500)
+
+    def forward(self, s1, s2, ref):
+        """
+        input1: sent Embeddings
+        input2: original target
+        """
+        # expand the weight parameter
+        batch_size, num_layers, num_dim = s1.data.shape
+        assert(self.num_layers == num_layers and self.num_dim == num_dim)
+        ewl = self.weight_layers.expand(batch_size, self.num_layers) # ==> (batch_size, num_layer)
+        ewl = self.sf(ewl).unsqueeze(1) # ==> (batch_size, 1, num_layer)
+        #ewd = self.weight_dimension.expand(batch_size, self.num_dim) # ==> (batch_size, num_dim)
+        #ewd = self.sf(ewd) # ==> (batch_size, num_dim)
+        # process the data with ewl
+        s1 = torch.bmm(ewl, s1).squeeze() # ==> (batch_size, num_dim)
+        s2 = torch.bmm(ewl, s2).squeeze()
+        ref = torch.bmm(ewl, ref).squeeze()
+        # process the data with ewd
+        #s1 = s1 * ewd
+        #s2 = s2 * ewd
+        #ref = ref * ewd
+        s1 = self.li(s1)
+        s2 = self.li(s2)
+        ref = self.li(ref)
+        # compute the distance 
+        d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 1)
+        d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 1)
+        # d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 2)
+        # d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 2)
+        #d1 = torch.nn.functional.cosine_similarity(s1, ref)
+        #d2 = torch.nn.functional.cosine_similarity(s2, ref)
+        out = d2 - d1
+        return out
+
+class Simple7(torch.nn.Module):
+    """
+    more layers input distance base
+    """
+    def __init__(self, num_layers = 2):
+        super(Simple7, self).__init__()
+        dim2 = 500
+        act_func = 'ReLU'
+        self.num_layers = num_layers
+        self.num_dim = 500
+        self.weight_layers = torch.nn.Parameter(torch.FloatTensor(self.num_layers), requires_grad = True)
+        #self.weight_dimension = torch.n.Parameter(torch.FloatTensor(self.num_layers), requires_grad = True)
         self.sf = torch.nn.Softmax()
 
     def forward(self, s1, s2, ref):
@@ -342,23 +395,17 @@ class Simple5(torch.nn.Module):
         assert(self.num_layers == num_layers and self.num_dim == num_dim)
         ewl = self.weight_layers.expand(batch_size, self.num_layers) # ==> (batch_size, num_layer)
         ewl = self.sf(ewl).unsqueeze(1) # ==> (batch_size, 1, num_layer)
-        ewd = self.weith_dimension.expand(batach_size, self.num_dim) # ==> (batch_size, num_dim)
-        ewd = self.sf(ewd).unsqueeze(1) # ==> (batch_size, 1, num_dim)
         # process the data with ewl
         s1 = torch.bmm(ewl, s1).squeeze() # ==> (batch_size, num_dim)
         s2 = torch.bmm(ewl, s2).squeeze()
         ref = torch.bmm(ewl, ref).squeeze()
-        # process the data with ewd
-        s1 = s1 * ewd
-        s2 = s2 * ewd
-        ref = ref * ewd
         # compute the distance 
-        # d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 1)
-        # d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 1)
-        # d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 2)
-        # d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 2)
-        d1 = torch.nn.functional.cosine_similarity(s1, ref)
-        d2 = torch.nn.functional.cosine_similarity(s2, ref)
+        #d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 1)
+        #d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 1)
+        d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 2)
+        d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 2)
+        #d1 = torch.nn.functional.cosine_similarity(s1, ref)
+        #d2 = torch.nn.functional.cosine_similarity(s2, ref)
         out = d2 - d1
         return out
 
