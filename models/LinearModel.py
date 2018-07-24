@@ -1,10 +1,12 @@
 # -*- coding: UTF-8 -*-
 import sys
 sys.path.append('../utils/')
+sys.path.append('./models/')
 import torch
 import numpy
 import nnActi
 
+from Layers import CapsLayer
 from scipy.spatial.distance import braycurtis, canberra, chebyshev, cityblock, correlation, mahalanobis, minkowski, seuclidean, sqeuclidean, wminkowski
 
 class TwoLayerLinear(torch.nn.Module):
@@ -145,9 +147,34 @@ class BiLinear(torch.nn.Module):
         out = self.layers(acted_sum_in)
         return out
 
-class Simple(torch.nn.Module):
+class Simple0(torch.nn.Module):
     def __init__(self):
-        super(Simple, self).__init__()
+        super(Simple0, self).__init__()
+        dim2 = 500
+        act_func = 'Tanh'
+        self.mlp = torch.nn.Sequential()
+        self.mlp.add_module('fc1', torch.nn.Linear(1000, dim2))
+        self.mlp.add_module('act_func1', nnActi.get_acti(act_func))
+        self.mlp.add_module('dp1', torch.nn.Dropout(0.5))
+        self.mlp.add_module('fc2', torch.nn.Linear(dim2, 1))
+        self.li = torch.nn.Linear(2,3)
+        self.sf = torch.nn.LogSoftmax()
+
+    def forward(self, s1, s2, ref):
+        """
+        input1: sent Embeddings
+        input2: original target
+        """
+        inp1 = torch.cat([s1, ref], 1)
+        inp2 = torch.cat([s2, ref], 1)
+        out1 = self.mlp(inp1)
+        out2 = self.mlp(inp2)
+        out = self.sf(self.li(torch.cat([out1, out2], 1)))
+        return out
+
+class Simple1(torch.nn.Module):
+    def __init__(self):
+        super(Simple1, self).__init__()
         dim2 = 500
         act_func = 'Tanh'
         self.mlp = torch.nn.Sequential()
@@ -328,15 +355,21 @@ class Simple6(torch.nn.Module):
         当li输出为1维时效果很差，说明一个维度并不足以表达足够的信息。。
         """
         super(Simple6, self).__init__()
-        dim2 = 500
+        dim2 = 128
         act_func = 'ReLU'
         self.num_layers = num_layers
         self.num_dim = 500
-        self.weight_layers = torch.nn.Parameter(torch.FloatTensor(self.num_layers), requires_grad = True)
+        self.weight_layers = torch.nn.Parameter(torch.ones(self.num_layers), requires_grad = True)
         #self.weight_dimension = torch.nn.Parameter(torch.FloatTensor(self.num_dim), requires_grad = True)
-        self.weight_dimension = torch.nn.Parameter(torch.ones(self.num_dim), requires_grad = True)
+        self.weight_dimension = torch.nn.Parameter(torch.randn(self.num_dim), requires_grad = True)
         self.sf = torch.nn.Softmax()
-        self.li = torch.nn.Linear(500,500)
+        self.mlp = torch.nn.Sequential()
+        self.mlp.add_module('fc1', torch.nn.Linear(500, dim2))
+        self.mlp.add_module('act_func1', nnActi.get_acti(act_func))
+#        self.mlp.add_module('bn1', torch.nn.BatchNorm1d(dim2))
+        self.mlp.add_module('dp1', torch.nn.Dropout(0.5))
+        self.mlp.add_module('fc2', torch.nn.Linear(dim2, 64))
+ 
 
     def forward(self, s1, s2, ref):
         """
@@ -358,9 +391,9 @@ class Simple6(torch.nn.Module):
         #s1 = s1 * ewd
         #s2 = s2 * ewd
         #ref = ref * ewd
-        s1 = self.li(s1)
-        s2 = self.li(s2)
-        ref = self.li(ref)
+        s1 = self.mlp(s1)
+        s2 = self.mlp(s2)
+        ref = self.mlp(ref)
         # compute the distance 
         d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 1)
         d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 1)
@@ -381,9 +414,10 @@ class Simple7(torch.nn.Module):
         act_func = 'ReLU'
         self.num_layers = num_layers
         self.num_dim = 500
-        self.weight_layers = torch.nn.Parameter(torch.FloatTensor(self.num_layers), requires_grad = True)
-        #self.weight_dimension = torch.n.Parameter(torch.FloatTensor(self.num_layers), requires_grad = True)
-        self.sf = torch.nn.Softmax()
+        #self.weight_layers = torch.nn.Parameter(torch.FloatTensor(self.num_layers), requires_grad = True)
+        self.weight_layers = torch.nn.Parameter(torch.randn(self.num_layers), requires_grad = True)
+        self.weight_dimension = torch.nn.Parameter(torch.randn(self.num_dim), requires_grad = True)
+        self.sf = torch.nn.Softmax(1)
 
     def forward(self, s1, s2, ref):
         """
@@ -395,18 +429,73 @@ class Simple7(torch.nn.Module):
         assert(self.num_layers == num_layers and self.num_dim == num_dim)
         ewl = self.weight_layers.expand(batch_size, self.num_layers) # ==> (batch_size, num_layer)
         ewl = self.sf(ewl).unsqueeze(1) # ==> (batch_size, 1, num_layer)
+        ewd = self.weight_dimension.expand(batch_size, self.num_dim) # ==> (batch_size, num_dim)
+        #ewd = self.sf(ewd) # ==> (batch_size, num_dim)
         # process the data with ewl
         s1 = torch.bmm(ewl, s1).squeeze() # ==> (batch_size, num_dim)
         s2 = torch.bmm(ewl, s2).squeeze()
         ref = torch.bmm(ewl, ref).squeeze()
+        # process the data with ewd
+        #s1 = s1 * ewd
+        #s2 = s2 * ewd
+        #ref = ref * ewd
         # compute the distance 
-        #d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 1)
-        #d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 1)
-        d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 2)
-        d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 2)
+        d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 1)
+        d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 1)
+        #d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 2)
+        #d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 2)
         #d1 = torch.nn.functional.cosine_similarity(s1, ref)
         #d2 = torch.nn.functional.cosine_similarity(s2, ref)
+        #print '*'*39
+        #print self.weight_dimension[:4]
         out = d2 - d1
         return out
 
+class Simple8(torch.nn.Module):
+    """
+    more layers input distance base 1: with nn
+    use capsure in the network
+    """
+    def __init__(self, num_layers = 2):
+        """
+        当li输出为1维时效果很差，说明一个维度并不足以表达足够的信息。。
+        """
+        super(Simple8, self).__init__()
+        dim2 = 16
+        act_func = 'ReLU'
+        self.num_layers = num_layers
+        self.num_dim = 500
+        self.sf = torch.nn.Softmax()
+        self.cap = CapsLayer(self.num_layers, 1, self.num_dim, 64)
+        self.mlp = torch.nn.Sequential()
+        self.mlp.add_module('fc1', torch.nn.Linear(128, dim2))
+        self.mlp.add_module('act_func1', nnActi.get_acti(act_func))
+        self.mlp.add_module('dp1', torch.nn.Dropout(0.5))
+        self.mlp.add_module('fc2', torch.nn.Linear(dim2, 1))
+
+
+    def forward(self, s1, s2, ref):
+        """
+        input1: sent Embeddings
+        input2: original target
+        """
+        # expand the weight parameter
+        batch_size, num_layers, num_dim = s1.data.shape
+        assert(self.num_layers == num_layers and self.num_dim == num_dim)
+        s1 = self.cap(s1)
+        s2 = self.cap(s2)
+        ref = self.cap(ref)
+        d1 = self.mlp(torch.cat([s1, ref], dim = 1))
+        d2 = self.mlp(torch.cat([s2, ref], dim = 1))
+        # compute the distance 
+        d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 1)
+        d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 1)
+        # d1 = torch.nn.functional.pairwise_distance(s1, ref, p = 2)
+        # d2 = torch.nn.functional.pairwise_distance(s2, ref, p = 2)
+        #d1 = torch.nn.functional.cosine_similarity(s1, ref)
+        #d2 = torch.nn.functional.cosine_similarity(s2, ref)
+        out = d2 - d1
+        #out = out.squeeze()
+        #print out[:5]
+        return out
 
