@@ -1,0 +1,183 @@
+<elist>
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/train_result</tgt>
+		<src_sys type  = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/train_s1_hidden</src_sys>
+		<src_sys2 type  = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/train_s2_hidden</src_sys2>
+		<src_ref type  = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/train_ref_hidden</src_ref>
+		<tgt_val type  = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/test_result</tgt_val>
+		<src_val_sys type  = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/test_s1_hidden</src_val_sys>
+		<src_val_sys2 type  = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/test_s2_hidden</src_val_sys2>
+		<src_val_ref type  = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/test_ref_hidden</src_val_ref>
+		<tgt_test type  = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/test_result</tgt_test>
+		<src_test_sys type  = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/test_s1_hidden</src_test_sys>
+		<src_test_sys2 type  = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/test_s2_hidden</src_test_sys2>
+		<src_test_ref type  = 'string'>../data/MasterArbeit/plan_c_rank_de.en/decoder_hidden/test_ref_hidden</src_test_ref>
+		<model type = 'string'>TwoLayerRank</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>400</batch_size>
+		<dim2 type = 'int'>500</dim2>
+		<dim3 type = 'int'>16</dim3>
+		<dim4 type = 'int'>16</dim4>
+		<momentum type = 'float'>0.01</momentum>
+		<weight_decay type = 'float'>1e-5</weight_decay>
+		<lr type = 'float'>1e-3</lr>
+		<optim type = 'string'>Adam</optim>
+		<act_func type = 'string'>Tanh</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0</drop_out_rate3>
+		<loss_fn type = 'string'>NLLLoss</loss_fn>
+	</e>
+<!--
+	<e>
+		<tgt type = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2015/data_scores_5000</tgt>
+		<src_sys type  = 'string'>/tmp/de.en2015decoder_hidden_sub.s1.npy</src_sys>
+		<src_sys2 type  = 'string'>/tmp/de.en2015decoder_hidden_sub.s2.npy</src_sys2>
+		<src_ref type  = 'string'>/tmp/de.en2015decoder_hidden_sub.ref.npy</src_ref>
+		<tgt_val type  = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2015/data_scores_5000</tgt_val>
+		<src_val_sys type  = 'string'>/tmp/de.en2015decoder_hidden_sub.s1.npy</src_val_sys>
+		<src_val_sys2 type  = 'string'>/tmp/de.en2015decoder_hidden_sub.s2.npy</src_val_sys2>
+		<src_val_ref type  = 'string'>/tmp/de.en2015decoder_hidden_sub.ref.npy</src_val_ref>
+		<tgt_test type  = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2016/data_scores_5000</tgt_test>
+		<src_test_sys type  = 'string'>/tmp/de.en2016decoder_hidden_sub.s1.npy</src_test_sys>
+		<src_test_sys2 type  = 'string'>/tmp/de.en2016decoder_hidden_sub.s2.npy</src_test_sys2>
+		<src_test_ref type  = 'string'>/tmp/de.en2016decoder_hidden_sub.ref.npy</src_test_ref>
+
+		<model type = 'string'>Conv2dMlpModel_rank</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>400</batch_size>
+		<dim2 type = 'int'>64</dim2>
+		<dim3 type = 'int'>64</dim3>
+		<dim4 type = 'int'>64</dim4>
+		<act_func type = 'string'>Tanh</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0</drop_out_rate3>
+		<loss_fn type = 'string'>CrossEntropyLoss</loss_fn>
+	</e>
+<e>
+		<tgt type = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2015/data_scores_sum</tgt>
+		<src_sys type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s1.npy_af_autoencoder_auto.npy</src_sys>
+		<src_sys2 type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s2.npy_af_autoencoder_auto.npy</src_sys2>
+		<src_ref type  = 'string'>/tmp/_sumde.en2015decoder_hidden.ref.npy_af_autoencoder_auto.npy</src_ref>
+		<tgt_val type  = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2015/data_scores_sum</tgt_val>
+		<src_val_sys type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s1.npy_af_autoencoder_auto.npy</src_val_sys>
+		<src_val_sys2 type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s2.npy_af_autoencoder_auto.npy</src_val_sys2>
+		<src_val_ref type  = 'string'>/tmp/_sumde.en2015decoder_hidden.ref.npy_af_autoencoder_auto.npy</src_val_ref>
+		<tgt_test type  = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2016/data_scores</tgt_test>
+		<src_test_sys type  = 'string'>/tmp/_sumde.en2016decoder_hidden.s1.npy_af_autoencoder_auto.npy</src_test_sys>
+		<src_test_sys2 type  = 'string'>/tmp/_sumde.en2016decoder_hidden.s2.npy_af_autoencoder_auto.npy</src_test_sys2>
+		<src_test_ref type  = 'string'>/tmp/_sumde.en2016decoder_hidden.ref.npy_af_autoencoder_auto.npy</src_test_ref>
+		<model type = 'string'>Regress</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>400</batch_size>
+		<dim2 type = 'int'>500</dim2>
+		<dim3 type = 'int'>16</dim3>
+		<dim4 type = 'int'>16</dim4>
+		<momentum type = 'float'>0.01</momentum>
+		<weight_decay type = 'float'>1e-5</weight_decay>
+		<lr type = 'float'>1e-3</lr>
+		<optim type = 'string'>Adam</optim>
+		<act_func type = 'string'>Tanh</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0</drop_out_rate3>
+		<loss_fn type = 'string'>L1Loss</loss_fn>
+	</e>
+	-->
+<!--
+<e>
+		<tgt type = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2015/data_scores_sum</tgt>
+		<src_sys type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s1.npy_af_vae_auto.npy</src_sys>
+		<src_sys2 type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s2.npy_af_vae_auto.npy</src_sys2>
+		<src_ref type  = 'string'>/tmp/_sumde.en2015decoder_hidden.ref.npy_af_vae_auto.npy</src_ref>
+		<tgt_val type  = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2015/data_scores_sum</tgt_val>
+		<src_val_sys type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s1.npy_af_vae_auto.npy</src_val_sys>
+		<src_val_sys2 type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s2.npy_af_vae_auto.npy</src_val_sys2>
+		<src_val_ref type  = 'string'>/tmp/_sumde.en2015decoder_hidden.ref.npy_af_vae_auto.npy</src_val_ref>
+		<tgt_test type  = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2016/data_scores</tgt_test>
+		<src_test_sys type  = 'string'>/tmp/_sumde.en2016decoder_hidden.s1.npy_af_vae_auto.npy</src_test_sys>
+		<src_test_sys2 type  = 'string'>/tmp/_sumde.en2016decoder_hidden.s2.npy_af_vae_auto.npy</src_test_sys2>
+		<src_test_ref type  = 'string'>/tmp/_sumde.en2016decoder_hidden.ref.npy_af_vae_auto.npy</src_test_ref>
+		<model type = 'string'>TwoLayerRank3</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>400</batch_size>
+		<dim2 type = 'int'>500</dim2>
+		<dim3 type = 'int'>16</dim3>
+		<dim4 type = 'int'>16</dim4>
+		<momentum type = 'float'>0.01</momentum>
+		<weight_decay type = 'float'>1e-5</weight_decay>
+		<lr type = 'float'>1e-3</lr>
+		<optim type = 'string'>Adam</optim>
+		<act_func type = 'string'>Tanh</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0</drop_out_rate3>
+		<loss_fn type = 'string'>NLLLoss</loss_fn>
+	</e>
+<e>
+		<tgt type = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2015/data_scores_sum</tgt>
+		<src_sys type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s1.npy_af_autoencoder_auto.npy</src_sys>
+		<src_sys2 type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s2.npy_af_autoencoder_auto.npy</src_sys2>
+		<src_ref type  = 'string'>/tmp/_sumde.en2015decoder_hidden.ref.npy_af_autoencoder_auto.npy</src_ref>
+		<tgt_val type  = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2015/data_scores_sum</tgt_val>
+		<src_val_sys type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s1.npy_af_autoencoder_auto.npy</src_val_sys>
+		<src_val_sys2 type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s2.npy_af_autoencoder_auto.npy</src_val_sys2>
+		<src_val_ref type  = 'string'>/tmp/_sumde.en2015decoder_hidden.ref.npy_af_autoencoder_auto.npy</src_val_ref>
+		<tgt_test type  = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2016/data_scores</tgt_test>
+		<src_test_sys type  = 'string'>/tmp/_sumde.en2016decoder_hidden.s1.npy_af_autoencoder_auto.npy</src_test_sys>
+		<src_test_sys2 type  = 'string'>/tmp/_sumde.en2016decoder_hidden.s2.npy_af_autoencoder_auto.npy</src_test_sys2>
+		<src_test_ref type  = 'string'>/tmp/_sumde.en2016decoder_hidden.ref.npy_af_autoencoder_auto.npy</src_test_ref>
+		<model type = 'string'>EinLayerRank</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>400</batch_size>
+		<dim2 type = 'int'>500</dim2>
+		<dim3 type = 'int'>16</dim3>
+		<dim4 type = 'int'>16</dim4>
+		<momentum type = 'float'>0.01</momentum>
+		<weight_decay type = 'float'>1e-5</weight_decay>
+		<lr type = 'float'>1e-3</lr>
+		<optim type = 'string'>Adam</optim>
+		<act_func type = 'string'>Tanh</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0</drop_out_rate3>
+		<loss_fn type = 'string'>NLLLoss</loss_fn>
+	</e>
+<e>
+		<tgt type = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2015/data_scores_sum</tgt>
+		<src_sys type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s1.npy_af_vae_auto.npy</src_sys>
+		<src_sys2 type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s2.npy_af_vae_auto.npy</src_sys2>
+		<src_ref type  = 'string'>/tmp/_sumde.en2015decoder_hidden.ref.npy_af_vae_auto.npy</src_ref>
+		<tgt_val type  = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2015/data_scores_sum</tgt_val>
+		<src_val_sys type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s1.npy_af_vae_auto.npy</src_val_sys>
+		<src_val_sys2 type  = 'string'>/tmp/_sumde.en2015decoder_hidden.s2.npy_af_vae_auto.npy</src_val_sys2>
+		<src_val_ref type  = 'string'>/tmp/_sumde.en2015decoder_hidden.ref.npy_af_vae_auto.npy</src_val_ref>
+		<tgt_test type  = 'string'>/Users/ihuangyiran/Documents/Workplace_Python/data/MasterArbeit/plan_c_source_rank_de.en/extracted_data_2016/data_scores</tgt_test>
+		<src_test_sys type  = 'string'>/tmp/_sumde.en2016decoder_hidden.s1.npy_af_vae_auto.npy</src_test_sys>
+		<src_test_sys2 type  = 'string'>/tmp/_sumde.en2016decoder_hidden.s2.npy_af_vae_auto.npy</src_test_sys2>
+		<src_test_ref type  = 'string'>/tmp/_sumde.en2016decoder_hidden.ref.npy_af_vae_auto.npy</src_test_ref>
+		<model type = 'string'>EinLayerRank</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>400</batch_size>
+		<dim2 type = 'int'>500</dim2>
+		<dim3 type = 'int'>16</dim3>
+		<dim4 type = 'int'>16</dim4>
+		<momentum type = 'float'>0.01</momentum>
+		<weight_decay type = 'float'>1e-5</weight_decay>
+		<lr type = 'float'>1e-3</lr>
+		<optim type = 'string'>Adam</optim>
+		<act_func type = 'string'>Tanh</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0</drop_out_rate3>
+		<loss_fn type = 'string'>NLLLoss</loss_fn>
+	</e>
+-->
+</elist>

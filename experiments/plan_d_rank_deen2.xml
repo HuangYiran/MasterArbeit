@@ -1,0 +1,193 @@
+<!--with softmax output-->
+
+<elist>
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt>
+		<src_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_sys>
+		<src_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_sys2>
+		<src_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_ref>
+		<tgt_val type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt_val>
+		<src_val_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_val_sys>
+		<src_val_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_val_sys2>
+		<src_val_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_val_ref>
+		<tgt_test type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_scores</tgt_test>
+		<src_test_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s1</src_test_sys>
+		<src_test_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s2</src_test_sys2>
+		<src_test_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_ref</src_test_ref>
+		<model type = 'string'>TwoLayerRank</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>100</batch_size>
+		<dim2 type = 'int'>16</dim2>
+		<dim3 type = 'int'>128</dim3>
+		<dim4 type = 'int'>64</dim4>
+		<act_func type = 'string'>SELU</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0</drop_out_rate3>
+		<loss_fn type = 'string'>CrossEntropyLoss</loss_fn>
+		<dir_mid_result type = 'string'>../data/MasterArbeit/mid_result/TwoLayerRank_'</dir_mid_result>
+	</e>
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt>
+		<src_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_sys>
+		<src_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_sys2>
+		<src_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_ref>
+		<tgt_val type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt_val>
+		<src_val_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_val_sys>
+		<src_val_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_val_sys2>
+		<src_val_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_val_ref>
+		<tgt_test type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_scores</tgt_test>
+		<src_test_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s1</src_test_sys>
+		<src_test_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s2</src_test_sys2>
+		<src_test_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_ref</src_test_ref>
+		<model type = 'string'>TwoLayerRank</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>100</batch_size>
+		<dim2 type = 'int'>32</dim2>
+		<dim3 type = 'int'>128</dim3>
+		<dim4 type = 'int'>64</dim4>
+		<act_func type = 'string'>SELU</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0.5</drop_out_rate3>
+		<loss_fn type = 'string'>CrossEntropyLoss</loss_fn>
+		<dir_mid_result type = 'string'>../data/MasterArbeit/mid_result/TwoLayerRank_'</dir_mid_result>
+	</e>
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt>
+		<src_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_sys>
+		<src_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_sys2>
+		<src_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_ref>
+		<tgt_val type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt_val>
+		<src_val_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_val_sys>
+		<src_val_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_val_sys2>
+		<src_val_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_val_ref>
+		<tgt_test type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_scores</tgt_test>
+		<src_test_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s1</src_test_sys>
+		<src_test_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s2</src_test_sys2>
+		<src_test_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_ref</src_test_ref>
+		<model type = 'string'>TwoLayerRank</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>100</batch_size>
+		<dim2 type = 'int'>64</dim2>
+		<dim3 type = 'int'>128</dim3>
+		<dim4 type = 'int'>64</dim4>
+		<act_func type = 'string'>SELU</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0.5</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0.5</drop_out_rate3>
+		<loss_fn type = 'string'>CrossEntropyLoss</loss_fn>
+		<dir_mid_result type = 'string'>../data/MasterArbeit/mid_result/TwoLayerRank_'</dir_mid_result>
+	</e>
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt>
+		<src_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_sys>
+		<src_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_sys2>
+		<src_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_ref>
+		<tgt_val type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt_val>
+		<src_val_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_val_sys>
+		<src_val_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_val_sys2>
+		<src_val_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_val_ref>
+		<tgt_test type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_scores</tgt_test>
+		<src_test_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s1</src_test_sys>
+		<src_test_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s2</src_test_sys2>
+		<src_test_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_ref</src_test_ref>
+		<model type = 'string'>TwoLayerRank</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>100</batch_size>
+		<dim2 type = 'int'>128</dim2>
+		<dim3 type = 'int'>128</dim3>
+		<dim4 type = 'int'>64</dim4>
+		<act_func type = 'string'>SELU</act_func>
+		<drop_out_rate type = 'float'>0.5</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0.5</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0.5</drop_out_rate3>
+		<loss_fn type = 'string'>CrossEntropyLoss</loss_fn>
+		<dir_mid_result type = 'string'>../data/MasterArbeit/mid_result/TwoLayerRank_'</dir_mid_result>
+	</e>
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt>
+		<src_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_sys>
+		<src_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_sys2>
+		<src_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_ref>
+		<tgt_val type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt_val>
+		<src_val_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_val_sys>
+		<src_val_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_val_sys2>
+		<src_val_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_val_ref>
+		<tgt_test type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_scores</tgt_test>
+		<src_test_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s1</src_test_sys>
+		<src_test_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s2</src_test_sys2>
+		<src_test_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_ref</src_test_ref>
+		<model type = 'string'>TwoLayerRank</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>100</batch_size>
+		<dim2 type = 'int'>256</dim2>
+		<dim3 type = 'int'>128</dim3>
+		<dim4 type = 'int'>64</dim4>
+		<act_func type = 'string'>SELU</act_func>
+		<drop_out_rate type = 'float'>0.8</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0.8</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0.4</drop_out_rate3>
+		<loss_fn type = 'string'>CrossEntropyLoss</loss_fn>
+		<dir_mid_result type = 'string'>../data/MasterArbeit/mid_result/TwoLayerRank_'</dir_mid_result>
+	</e>
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt>
+		<src_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_sys>
+		<src_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_sys2>
+		<src_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_ref>
+		<tgt_val type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt_val>
+		<src_val_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_val_sys>
+		<src_val_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_val_sys2>
+		<src_val_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_val_ref>
+		<tgt_test type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_scores</tgt_test>
+		<src_test_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s1</src_test_sys>
+		<src_test_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s2</src_test_sys2>
+		<src_test_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_ref</src_test_ref>
+		<model type = 'string'>TwoLayerRank</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>100</batch_size>
+		<dim2 type = 'int'>518</dim2>
+		<dim3 type = 'int'>128</dim3>
+		<dim4 type = 'int'>64</dim4>
+		<act_func type = 'string'>SELU</act_func>
+		<drop_out_rate type = 'float'>0.4</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0.6</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0.8</drop_out_rate3>
+		<loss_fn type = 'string'>CrossEntropyLoss</loss_fn>
+		<dir_mid_result type = 'string'>../data/MasterArbeit/mid_result/TwoLayerRank_'</dir_mid_result>
+	</e>
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt>
+		<src_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_sys>
+		<src_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_sys2>
+		<src_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_ref>
+		<tgt_val type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt_val>
+		<src_val_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_val_sys>
+		<src_val_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_val_sys2>
+		<src_val_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_val_ref>
+		<tgt_test type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_scores</tgt_test>
+		<src_test_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s1</src_test_sys>
+		<src_test_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s2</src_test_sys2>
+		<src_test_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_ref</src_test_ref>
+		<model type = 'string'>TwoLayerRank</model>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>100</batch_size>
+		<dim2 type = 'int'>8</dim2>
+		<dim3 type = 'int'>128</dim3>
+		<dim4 type = 'int'>64</dim4>
+		<act_func type = 'string'>SELU</act_func>
+		<drop_out_rate type = 'float'>0.5</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0</drop_out_rate3>
+		<loss_fn type = 'string'>CrossEntropyLoss</loss_fn>
+		<dir_mid_result type = 'string'>../data/MasterArbeit/mid_result/TwoLayerRank_'</dir_mid_result>
+	</e>
+</elist>

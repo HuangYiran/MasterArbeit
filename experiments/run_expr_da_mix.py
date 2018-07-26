@@ -11,7 +11,7 @@ parser.add_argument('-doc', default = 'fullHiddenModelTestList',
         help = "file to extract the parameter")
 parser.add_argument('-getLast', action = 'store_true',
         help = "when set, only get the data of last hidden value")
-parser.add_argument('-expr', default = 'plan_a_en.de',
+parser.add_argument('-expr', default = 'plan_c_da_de.en',
         help = "the name of the experiment, it deside the data of the experiment")
 
 opt = parser.parse_args()
@@ -90,15 +90,15 @@ elif opt.expr == 'plan_c_rank_en.de':
             }
 elif opt.expr == 'plan_c_da_de.en':
     params_data = {
-          'tgt': '../data/MasterArbeit/plan_c_da_de.en/testing_scores',
-          'src_sys': '../data/MasterArbeit/plan_c_da_de.en/hidden_testing_sys',
-          'src_ref': '../data/MasterArbeit/plan_c_da_de.en/hidden_testing_ref',
-          'tgt_val': '../data/MasterArbeit/plan_c_da_de.en/testing_scores',
-          'src_val_sys': '../data/MasterArbeit/plan_c_da_de.en/hidden_testing_sys',
-          'src_val_ref': '../data/MasterArbeit/plan_c_da_de.en/hidden_testing_ref',
-          'tgt_test': '../data/MasterArbeit/plan_c_da_de.en/training_scores',
-          'src_test_sys': '../data/MasterArbeit/plan_c_da_de.en/hidden_training_sys',
-          'src_test_ref': '../data/MasterArbeit/plan_c_da_de.en/hidden_training_ref',
+          'tgt': '../data/MasterArbeit/plan_c_da_de.en/training_scores',
+          'src_sys': '../data/MasterArbeit/plan_c_da_de.en/hidden_training_sys',
+          'src_ref': '../data/MasterArbeit/plan_c_da_de.en/hidden_training_ref',
+          'tgt_val': '../data/MasterArbeit/plan_c_da_de.en/training_scores',
+          'src_val_sys': '../data/MasterArbeit/plan_c_da_de.en/hidden_training_sys',
+          'src_val_ref': '../data/MasterArbeit/plan_c_da_de.en/hidden_training_ref',
+          'tgt_test': '../data/MasterArbeit/plan_c_da_de.en/testing_scores',
+          'src_test_sys': '../data/MasterArbeit/plan_c_da_de.en/hidden_testing_sys',
+          'src_test_ref': '../data/MasterArbeit/plan_c_da_de.en/hidden_testing_ref',
             }
 elif opt.expr == 'word2vec':
     params_data = {

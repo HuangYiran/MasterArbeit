@@ -1,0 +1,99 @@
+<!-- experiments to find out the error hidden in the code??-->
+
+<elist>
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt>
+		<src_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_sys>
+		<src_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_sys2>
+		<src_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_ref>
+		<tgt_val type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/pretrain-google-news/training_scores</tgt_val>
+		<src_val_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/pretrain-google-news/training_s1</src_val_sys>
+		<src_val_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/pretrain-google-news/training_s2</src_val_sys2>
+		<src_val_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/pretrain-google-news/training_ref</src_val_ref>
+		<tgt_test type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_scores</tgt_test>
+		<src_test_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s1</src_test_sys>
+		<src_test_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s2</src_test_sys2>
+		<src_test_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_ref</src_test_ref>
+		<model type = 'string'>TwoLayerRank</model>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.1</momentum>
+		<weight_decay type = 'float'>1e-5</weight_decay>
+		<cross_val type = 'boolean'>False</cross_val>
+		<cv_val_index type = 'int'>9</cv_val_index>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>100</batch_size>
+		<dim2 type = 'int'>64</dim2>
+		<dim3 type = 'int'>32</dim3>
+		<dim4 type = 'int'>16</dim4>
+		<act_func type = 'string'>SELU</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0</drop_out_rate3>
+		<loss_fn type = 'string'>CrossEntropyLoss</loss_fn>
+		<dir_mid_result type = 'string'>../data/MasterArbeit/mid_result/ed4m1_'</dir_mid_result>
+	</e>
+<!--
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_1314_scores</tgt>
+		<src_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_1314_s1</src_sys>
+		<src_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_1314_s2</src_sys2>
+		<src_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_1314_ref</src_ref>
+		<tgt_val type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_1314_scores</tgt_val>
+		<src_val_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_1314_s1</src_val_sys>
+		<src_val_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_1314_s2</src_val_sys2>
+		<src_val_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_1314_ref</src_val_ref>
+		<tgt_test type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/val_15_scores</tgt_test>
+		<src_test_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/val_15_s1</src_test_sys>
+		<src_test_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/val_15_s2</src_test_sys2>
+		<src_test_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/val_15_ref</src_test_ref>
+		<model type = 'string'>TwoLayerRank</model>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.1</momentum>
+		<weight_decay type = 'float'>1e-5</weight_decay>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>100</batch_size>
+		<dim2 type = 'int'>64</dim2>
+		<dim3 type = 'int'>64</dim3>
+		<dim4 type = 'int'>64</dim4>
+		<act_func type = 'string'>SELU</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0</drop_out_rate3>
+		<loss_fn type = 'string'>CrossEntropyLoss</loss_fn>
+		<dir_mid_result type = 'string'>../data/MasterArbeit/mid_result/ed4m2_'</dir_mid_result>
+	</e>
+<e>
+		<tgt type = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt>
+		<src_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_sys>
+		<src_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_sys2>
+		<src_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_ref>
+		<tgt_val type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_scores</tgt_val>
+		<src_val_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s1</src_val_sys>
+		<src_val_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_s2</src_val_sys2>
+		<src_val_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/training_ref</src_val_ref>
+		<tgt_test type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_scores</tgt_test>
+		<src_test_sys type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s1</src_test_sys>
+		<src_test_sys2 type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_s2</src_test_sys2>
+		<src_test_ref type  = 'string'>../data/MasterArbeit/plan_d_rank_de.en/testing_ref</src_test_ref>
+		<model type = 'string'>TwoLayerRank</model>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.1</momentum>
+		<weight_decay type = 'float'>1e-5</weight_decay>
+		<rank type = 'boolean'>True</rank>
+		<sf_output type = 'boolean'>True</sf_output>
+		<batch_size type = 'int'>100</batch_size>
+		<dim2 type = 'int'>64</dim2>
+		<dim3 type = 'int'>64</dim3>
+		<dim4 type = 'int'>64</dim4>
+		<act_func type = 'string'>SELU</act_func>
+		<drop_out_rate type = 'float'>0</drop_out_rate>
+		<drop_out_rate2 type = 'float'>0</drop_out_rate2>
+		<drop_out_rate3 type = 'float'>0</drop_out_rate3>
+		<loss_fn type = 'string'>CrossEntropyLoss</loss_fn>
+		<dir_mid_result type = 'string'>../data/MasterArbeit/mid_result/ed4m3_'</dir_mid_result>
+	</e>
+-->
+
+</elist>

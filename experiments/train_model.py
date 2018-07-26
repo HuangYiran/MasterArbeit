@@ -37,13 +37,24 @@ parser.add_argument('-output', default = '/tmp/decState_params', help = 'path to
 parser.add_argument('-seq_len', type = int, default = 40, help = 'set the max length of the sequence')
 parser.add_argument('-batch_size', type = int, default = 100, help = 'batch size')
 parser.add_argument('-combine_data', default = False, help = 'combine the data before input to the model')
+parser.add_argument('-resume', default = False, help = 'set true, to load a existed model and continue training')
+parser.add_argument('-checkpoint', help = 'only work when resume setted true, point to the address of the model')
+# only for model: ELMo_modified
+parser.add_argument('-cand', nargs = '+', type = int, help = 'list of int, store the code of the features that will be used in the model')
 
 
 def main():
     opt = parser.parse_args()
     # set models and loss
-    model = ELMo()
+    if opt.resume:
+        model = torch.load(opt.checkpoint)
+    #model = ELMo()
+    model = ELMo_modified(opt.cand)
+    #model = ELMo_simplified()
+    #model = Conv2dMlpModel_rank()
+    #model = Regress() # for L1Loss
     loss = torch.nn.NLLLoss()
+    #loss = torch.nn.L1Loss() # for L1Loss
     # set optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr = 1e-3)
     # set lr scheduler
@@ -53,17 +64,20 @@ def main():
     train = Data(opt.tgt_s1, opt.tgt_s2, opt.tgt_ref, opt.scores)
     dl_train = DataLoader(train, batch_size = opt.batch_size, shuffle = True)
     # train the model 
-    num_epochs = 100
+    num_epochs = 30
     for epoch in range(num_epochs):
         scheduler.step()
         model.train()
         train_loss = 0
         train_taul = 0
+        counter = 0
         for batch_idx, dat in enumerate(dl_train):
+            counter += 1
             tgt_s1 = torch.autograd.Variable(dat[0], requires_grad = False)
             tgt_s2 = torch.autograd.Variable(dat[1], requires_grad = False)
             tgt_ref = torch.autograd.Variable(dat[2], requires_grad = False)
             scores = torch.autograd.Variable(dat[3], requires_grad = False)
+            #scores = scores.float() # for L1Loss
             if opt.combine_data:
                 inp = torch.cat([tgt_s1, tgt_s2, tgt_ref], 1)
             optimizer.zero_grad()
@@ -80,23 +94,16 @@ def main():
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tTaul: {:.6f}'.format(
                     epoch,
                     batch_idx * opt.batch_size,
-                    len(train), 1.*opt.batch_size*batch_idx/len(train),
+                    len(train), 100.*opt.batch_size*batch_idx/len(train),
                     lo.data[0],
                     taul
                     ))
         print('====> Epoch: {} Average loss: {:.4f}\tAverage Taul: {:.4f}'.format(
                 epoch,
-                train_loss/len(dl_train),
-                train_taul/len(dl_train),
+                train_loss/counter,
+                train_taul/counter,
                 ))
-        test_loss, test_taul = test_model(dl_test, model, loss)
-        print('====> Epoch: {} Average test loss: {:.4f}\tAverage test taul: {:.4f}'.format(
-                epoch,
-                test_loss,
-                test_taul
-                ))
-        
-    torch.save(model, opt.output+'/'+opt.model)
+        torch.save(model, opt.output)
 
 
 
@@ -122,6 +129,7 @@ def evaluate_tau_like(arr1, arr2):
     a1 = a1.data.numpy()
     a2 = a2.data.numpy()
     a1 = list(map(result_transform_sf_to_score, a1))
+    #a1 = a1 - 1 # for L1Loss
     a2 = a2 - 1
     taul = valTauLike(a2, a1) # a2 should go first
     return taul

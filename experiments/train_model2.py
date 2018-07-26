@@ -19,7 +19,7 @@ import nnPlot
 from torch.utils.data import DataLoader
 from scipy import stats
 from data import DataUtil
-from LinearModel import BasicLinear, BasicLinear_dropout, BiLinear, TwoLayerLinear, Simple, Simple2
+from LinearModel import BasicLinear, BasicLinear_dropout, BiLinear, TwoLayerLinear, Simple1, Simple2, Simple3, Simple4, Simple5, Simple6, Simple7, Simple8
 from MaskedModel import MaskedModel1, MaskedModel2, MaskedModel3
 from FullHiddenModel import *
 from RankModel import *
@@ -46,9 +46,9 @@ parser.add_argument('-seq_len', type = int, default = 40, help = 'set the max le
 parser.add_argument('-batch_size', type = int, default = 100, help = 'batch size')
 parser.add_argument('-combine_data', default = False, help = 'combine the data before input to the model')
 parser.add_argument('-resume', default = False, help = 'set true, to load a existed model and continue training')
-parser.add_argument('-checkpoint', help = 'only work when resume setted true, point to the address of the model')
-# only for model: ELMo_modified
+parser.add_argument('-checkpoint', help = 'only work when resume setted true, point to the address of the model') # only for model: ELMo_modified
 parser.add_argument('-cand', nargs = '+', type = int, help = 'list of int, store the code of the features that will be used in the model')
+parser.add_argument('-verbose', action='store_true')
 
 
 def main():
@@ -56,21 +56,25 @@ def main():
     # set models and loss
     if opt.resume:
         model = torch.load(opt.checkpoint)
-    model = Simple2()
-    loss = torch.nn.MSELoss()
-    #loss = torch.nn.L1Loss() # for L1Loss
+    model = Simple8(len(opt.cand))
+    #loss = torch.nn.MSELoss()
+    #loss = torch.nn.SoftMarginLoss() #0.35/0.43
+    #loss = torch.nn.HingeEmbeddingLoss() #.34
+    #loss = torch.nn.SmoothL1Loss() #-.35/0.44
+    loss = torch.nn.L1Loss() # for L1Loss
+    #loss = nnLoss.CorrLoss()
     # set optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr = 1e-3)
     # set lr scheduler
     lamb1 = lambda x: .1**(x//30)
     scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda = lamb1)
     # read data
-    train = Data(opt.tgt_s1, opt.tgt_s2, opt.tgt_ref, opt.scores)
-    test = Data(opt.test_s1, opt.test_s2, opt.test_ref, opt.test_scores)
+    train = Data(opt.tgt_s1, opt.tgt_s2, opt.tgt_ref, opt.scores, opt.cand)
+    test = Data(opt.test_s1, opt.test_s2, opt.test_ref, opt.test_scores, opt.cand)
     dl_train = DataLoader(train, batch_size = opt.batch_size, shuffle = True)
     dl_test = DataLoader(test, batch_size = opt.batch_size, shuffle = True)
     # train the model 
-    num_epochs = 100
+    num_epochs = 10
     for epoch in range(num_epochs):
         scheduler.step()
         model.train()
@@ -90,35 +94,42 @@ def main():
             if opt.combine_data:
                 out = model(inp)
             out = model(tgt_s1, tgt_s2, tgt_ref)
-            target = torch.autograd.Variable(torch.ones(out.data.shape)*100, requires_grad = False)
-            out1 = out*scores.float()
-            lo = loss(out1, target)
+            target = torch.autograd.Variable(torch.ones(out.data.shape)*10, requires_grad = False)
+            #out1 = out*scores.float()
+            #lo = loss(out1, target)
+            lo = loss(out,scores.float()) # for margin loss
             lo.backward()
-            train_loss += lo.data[0]
+            train_loss += lo.data
             optimizer.step()
             taul = evaluate_tau_like(out, scores)
             train_taul += taul
-            if batch_idx % 100 == 0:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tTaul: {:.6f}'.format(
+            if opt.verbose:
+                if batch_idx % 100 == 0:
+                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tTaul: {:.6f}'.format(
+                        epoch,
+                        batch_idx * opt.batch_size,
+                        len(train), 100.*opt.batch_size*batch_idx/len(train),
+                        lo.data,
+                        taul
+                        ))
+        if opt.verbose:
+            print('====> Epoch: {} Average train loss: {:.4f}\tAverage Taul: {:.4f}'.format(
                     epoch,
-                    batch_idx * opt.batch_size,
-                    len(train), 100.*opt.batch_size*batch_idx/len(train),
-                    lo.data[0],
-                    taul
+                    train_loss/counter,
+                    train_taul/counter,
                     ))
-        print('====> Epoch: {} Average train loss: {:.4f}\tAverage Taul: {:.4f}'.format(
-                epoch,
-                train_loss/counter,
-                train_taul/counter,
-                ))
         # cal loss
         test_loss, test_taul = test_model(dl_test, model, loss)
         # print result
-        print('====> Epoch: {} Average test loss: {:.4f}\tAverage Taul: {:.4f}'.format(
-                    epoch,
-                    test_loss,
-                    test_taul,
-                    ))
+        if opt.verbose:
+            print('====> Epoch: {} Average test loss: {:.4f}\tAverage Taul: {:.4f}'.format(
+                        epoch,
+                        test_loss,
+                        test_taul,
+                        ))
+        else:
+            if epoch == num_epochs-1:
+                print 'Average test loss: ' + str(test_taul)
         torch.save(model, opt.output)
 
 def test_model(dl_test, model, loss):
@@ -135,10 +146,11 @@ def test_model(dl_test, model, loss):
         tgt_ref = torch.autograd.Variable(dat[2], requires_grad = False)
         scores = torch.autograd.Variable(dat[3], requires_grad = False)
         out = model(tgt_s1, tgt_s2, tgt_ref)
-        target = torch.autograd.Variable(torch.ones(out.data.shape)*100, requires_grad = False)
-        out1 = out*scores.float()
-        lo = loss(out1, target)
-        test_loss += lo.data[0]
+        target = torch.autograd.Variable(torch.ones(out.data.shape)*10, requires_grad = False)
+        #out1 = out*scores.float()
+        #lo = loss(out1, target)
+        lo = loss(out, scores.float()) #for margin loss
+        test_loss += lo.data
         taul = evaluate_tau_like(out, scores)
         test_taul += taul
     return test_loss/counter, test_taul/counter
@@ -169,12 +181,13 @@ def evaluate_tau_like(arr1, arr2):
     return taul
 
 class Data:
-    def __init__(self, tgt_s1, tgt_s2, tgt_ref, scores):
+    def __init__(self, tgt_s1, tgt_s2, tgt_ref, scores, cand):
         """ 
         这个方法被我用崩了，原来的作用一点都没有体现出来，
         it may be beter to use array list??? 
         """
         #super(Data, self).__init__()
+        self.cand = cand
         self.data = {}
         self.data['tgt_s1'] = self.add_file(tgt_s1)
         self.data['tgt_s2'] = self.add_file(tgt_s2)
@@ -189,7 +202,10 @@ class Data:
         """
         return Variable of torch.FloatTensor
         """
-        return torch.from_numpy(np.load(path))
+        if self.cand:
+            return torch.from_numpy(np.load(path))[:,self.cand, :]
+        else:
+            return torch.from_numpy(np.load(path))
     
     def add_scores(self, path):
         # for softmax output, so we add one for each score

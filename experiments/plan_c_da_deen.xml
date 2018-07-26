@@ -10,6 +10,17 @@
      -->
 <elist>
 	<e>
+		<model type = 'string'>TwoLayerLinear</model>
+		<batch_size type = 'int'>100</batch_size>
+		<optim type = 'string'>Adam</optim>
+		<momentum type = 'float'>0.2</momentum>
+		<act_func type = 'string'>LeakyReLU</act_func>
+		<act_func_out type = 'string'>None</act_func_out>
+		<dir_mid_result type = 'string'>
+			../data/MasterArbeit/mid_result/plan_c_da_deen_TwoLayerLinear
+		</dir_mid_result>
+       	</e>
+	<e>
 		<model type = 'string'>BasicLinearDropout</model>
 		<batch_size type = 'int'>100</batch_size>
 		<optim type = 'string'>Adam</optim>

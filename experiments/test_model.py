@@ -34,9 +34,9 @@ parser.add_argument('-scores', required= True, help = 'the target')
 # output file
 parser.add_argument('-output', default = '/tmp/decState_params', help = 'path to save the output')
 # others
-parser = argparse.ArgumentParser()
 parser.add_argument('-model', default = 'autoencoder')
 parser.add_argument('-checkpoint', default = './checkpoints/autoencoder')
+parser.add_argument('-batch_size', default = 100)
 
 def main():
     opt = parser.parse_args()
@@ -46,30 +46,30 @@ def main():
     test = Data(opt.tgt_s1, opt.tgt_s2, opt.tgt_ref, opt.scores)
     dl_test = DataLoader(test, batch_size = opt.batch_size, shuffle = True)
     # set loss
-    loss = torch.nn.NLLoss()
+    loss = torch.nn.NLLLoss()
     # cal loss
     test_loss, test_taul = test_model(dl_test, model, loss)
     # print result
     print('====> Average loss: {:.4f}\tAverage Taul: {:.4f}'.format(
-                train_loss/len(dl_train),
-                train_taul/len(dl_train),
+                test_loss,
+                test_taul,
                 ))
+    print("test_taul {}".format(test_taul))
     
 def test_model(dl_test, model, loss):
     model.eval()
     test_loss = 0
     test_taul = 0
     counter = 0
-    for batch_idx, dat in enumerate(dl_test()):
+    for batch_idx, dat in enumerate(dl_test):
         #if counter == 20:
         #    break;
         counter += 1
-        src = dat[0]
-        tgt_s1 = dat[1]
-        tgt_s2 = dat[2]
-        tgt_ref = dat[3]
-        scores = dat[4]
-        out = model(src, tgt_s1, tgt_s2, tgt_ref)
+        tgt_s1 = torch.autograd.Variable(dat[0], requires_grad = False)
+        tgt_s2 = torch.autograd.Variable(dat[1], requires_grad = False)
+        tgt_ref = torch.autograd.Variable(dat[2], requires_grad = False)
+        scores = torch.autograd.Variable(dat[3], requires_grad = False)
+        out = model(tgt_s1, tgt_s2, tgt_ref)
         lo = loss(out, scores)
         test_loss += lo.data[0]
         taul = evaluate_tau_like(out, scores)
