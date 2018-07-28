@@ -57,8 +57,8 @@ def main():
 
     # run test to get process the word embeddings
     print (">>> start getting the chrF scores")
-    chrF1= "python code/NNMetric/test5.py -hyp " + o_s1 + " -ref " + o_ref + " > /tmp/tmp1"
-    chrF2= "python code/NNMetric/test5.py -hyp " + o_s2 + " -ref " + o_ref + " >  /tmp/tmp2"
+    chrF1= "python code/NNMetric/test6.py -hyp " + o_s1 + " -ref " + o_ref + " > /tmp/tmp1"
+    chrF2= "python code/NNMetric/test6.py -hyp " + o_s2 + " -ref " + o_ref + " >  /tmp/tmp2"
     print (chrF1)
     print (chrF2)
     os.system(chrF1)

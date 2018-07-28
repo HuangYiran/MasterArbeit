@@ -1,0 +1,6 @@
+
+from SegementLevelData import SegementLevelData
+data = SegementLevelData()
+data.add_human_data("data/jugdements.20150817.csv.gz")
+data.extract_paris("de-en")
+data.extract_paris("end-en")

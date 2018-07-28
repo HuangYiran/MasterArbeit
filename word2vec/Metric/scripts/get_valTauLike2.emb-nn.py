@@ -106,7 +106,6 @@ def main():
     os.system(chrF3)
     print('train the model')
     #TODO assert
-    # extract the score from the file and remove the last three line of the tmp file, it contains the total valuation infos
     o_png = '/tmp/'+lanp+date+opt.type+opt.mode+'_'
     commd = 'python /Users/ihuangyiran/Documents/Workplace_Python/MasterArbeit/experiments/run_expr_try.py  -doc /Users/ihuangyiran/Documents/Workplace_Python/MasterArbeit/experiments/plan_c_rank_deen.xml -train_scores ' + opt.scores + ' -train_s1 /tmp/tmp1.npy -train_s2 /tmp/tmp2.npy -train_ref /tmp/tmp3.npy -test_scores ' + opt.test_scores + ' -test_s1 /tmp/test1.npy -test_s2 /tmp/test2.npy -test_ref /tmp/test3.npy -o_dir ' + o_png
     print(commd)

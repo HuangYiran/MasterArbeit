@@ -1,0 +1,23 @@
+from __future__ import division
+
+import sys
+import numpy
+parser = argparse.ArgumentParser(description='compare_hidden.py')
+
+
+parser.add_argument('-s1', default="",
+                    help="""Path to vector for s1""")
+parser.add_argument('-s2', default="",
+                    help="""Path to vector for s2""")
+parser.add_argument('-ref', default="",
+                    help="""Path to vector for ref""")
+
+def main():
+    opt = parser.parse_args()
+    numpy.load(opt.s1,s1);
+    print(s1.shape())
+    
+
+if __name__ == "__main__":
+    main()
+

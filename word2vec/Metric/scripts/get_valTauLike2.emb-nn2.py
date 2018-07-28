@@ -7,7 +7,7 @@ import re
 from valuation import valTauLike
 #from normalize import normalize_minmax
 """
-remember to clean the data after runing the script, it takes lots of space
+compare to one, here can use difference join method to ref and system output data
 """
 
 parser = argparse.ArgumentParser()
