@@ -37,7 +37,6 @@ class MarginLoss(nn.Module):
         loss = torch.sum(t*L + lamb*(1-t)*R, dim = 1)
         return loss.mean()
 
-
 class CorrLoss(nn.Module):
     """
     use 1 - correlational coefficience between the output of the network and the target as the loss
@@ -69,6 +68,10 @@ class CorrLoss(nn.Module):
         corr = tmp.mean(dim = 0)
         #print corr.size()
         return  1 - corr
+
+class Product(nn.Module):
+    def forward(self, o, t):
+        return torch.mean(-1*o*t)
 
 class MSECorrLoss(nn.Module):
     """

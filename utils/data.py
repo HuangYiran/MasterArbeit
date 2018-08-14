@@ -18,9 +18,9 @@ class DataUtil(object):
         self.num_chunk = 1
         self.num_val_chunk = 1
         self.num_test_chunk = 1
-        self.whiten = False# only for 2D input
-        self.whiten_type = 'zero_center'
-        self.noise = True # add noise or not
+        self.whiten = True # only for 2D input
+        self.whiten_type = 'pca3'
+        self.noise = False # add noise or not
         self.noise_type = 'gauss'
 
         # read training data
@@ -56,7 +56,7 @@ class DataUtil(object):
         # shuffle
         self._shuffle2()
     
-    def _add_gauss_noise(self, dat, sigma = 0.1):
+    def _add_gauss_noise(self, dat, sigma = 0.05):
         """
         dat should be type of troch
         """
@@ -102,28 +102,25 @@ class DataUtil(object):
         assert(len(self.data_tgt) == len(self.data_in))
         assert(len(self.data_val_tgt) == len(self.data_val_in))
         assert(len(self.data_test_tgt)==len(self.data_test_in))
+        # whiten
+        if self.whiten:
+            self._whiten(self.whiten_type)
 
     def _load_training_data(self, src_sys, src_sys2, src_ref, tgt, rank, sf_output):
         # read training data
         with file(src_sys) as fi:
             self.data_sys = numpy.load(fi)
-            if self.whiten:
-                self.data_sys = self._whiten(self.data_sys, self.whiten_type)
             self.data_sys = torch.from_numpy(self.data_sys)
             if self.noise:
                 self.data_sys = self._add_noise(self.data_sys, self.noise_type)
         if rank:
             with file(src_sys2) as fi:
                 self.data_sys2 = numpy.load(fi)
-                if self.whiten:
-                    self.data_sys2 = self._whiten(self.data_sys2, self.whiten_type)
                 self.data_sys2 = torch.from_numpy(self.data_sys2)
                 if self.noise:
                     self.data_sys2 = self._add_noise(self.data_sys2, self.noise_type)
         with file(src_ref) as fi:
             self.data_ref = numpy.load(fi)
-            if self.whiten:
-                self.data_ref = self._whiten(self.data_ref, self.whiten_type)
             self.data_ref = torch.from_numpy(self.data_ref)
             if self.noise:
                 self.data_ref = self._add_noise(self.data_ref, self.noise_type)
@@ -156,23 +153,17 @@ class DataUtil(object):
         # read val data
         with file(src_val_sys) as fi:
             self.data_val_sys = numpy.load(fi)
-            if self.whiten:
-                self.data_val_sys = self._whiten(self.data_val_sys, self.whiten_type)
             self.data_val_sys = torch.from_numpy(self.data_val_sys)
             if self.noise:
                 self.data_val_sys = self._add_noise(self.data_val_sys, self.noise_type)
         if rank:
             with file(src_val_sys2) as fi:
                 self.data_val_sys2 = numpy.load(fi)
-                if self.whiten:
-                    self.data_val_sys2 = self._whiten(self.data_val_sys2, self.whiten_type)
                 self.data_val_sys2 = torch.from_numpy(self.data_val_sys2)
                 if self.noise:
                     self.data_val_sys2 = self._add_noise(self.data_val_sys2, self.noise_type)
         with file(src_val_ref) as fi:
             self.data_val_ref = numpy.load(fi)
-            if self.whiten:
-                self.data_val_ref = self._whiten(self.data_val_ref, self.whiten_type)
             self.data_val_ref = torch.from_numpy(self.data_val_ref)
             if self.noise:
                 self.data_val_ref = self._add_noise(self.data_val_ref, self.noise_type)
@@ -202,23 +193,17 @@ class DataUtil(object):
         # read test data
         with file(src_test_sys) as fi:
             self.data_test_sys = numpy.load(fi)
-            if self.whiten:
-                self.data_test_sys = self._whiten(self.data_test_sys, self.whiten_type)
             self.data_test_sys = torch.from_numpy(self.data_test_sys)
             if self.noise:
                 self.data_test_sys = self._add_noise(self.data_test_sys, self.noise_type)
         if rank:
             with file(src_test_sys2) as fi:
                 self.data_test_sys2 = numpy.load(fi)
-                if self.whiten:
-                    self.data_test_sys2 = self._whiten(self.data_test_sys2, self.whiten_type)
                 self.data_test_sys2 = torch.from_numpy(self.data_test_sys2)
                 if self.noise:
                     self_test_sys2 = self._add_noise(self.data_test_sys2, self.noise_type)
         with file(src_test_ref) as fi:
             self.data_test_ref = numpy.load(fi)
-            if self.whiten:
-                self.data_test_ref = self._whiten(self.data_test_ref, self.whiten_type)
             self.data_test_ref = torch.from_numpy(self.data_test_ref)
             if self.noise:
                 self.data_test_ref = self._add_noise(self.data_test_ref, self.noise_type)
@@ -301,13 +286,92 @@ class DataUtil(object):
         self.nu_val_batch =  len(self.data_val_in)/self.batch_size
         self.nu_test_batch = len(self.data_test_in)/self.batch_size
 
-    def _pca_whiten(self, data, n_components = 300, svd_solver = 'auto'):
+    def _pca_whiten2(self, n_components = 500, svd_solver = 'auto'):
         """
-        data set should be 2D and type of numpy
+        因为，每个单词的dimension是500，所以可以这样做pca
         """
+        # combine data
+        if self.opt.rank:
+            data = torch.cat([self.data_sys, self.data_sys2, self.data_ref,
+                self.data_val_sys, self.data_val_sys2, self.data_val_ref,
+                self.data_test_sys, self.data_test_sys2, self.data_test_ref])
+        else:
+            data = torch.cat([self.data_sys, self.data_ref,
+                self.data_val_sys, self.data_val_ref,
+                self.data_test_sys, self.data_test_ref])
+        data = data.numpy()
+        # pca
         pca = PCA(n_components, svd_solver = svd_solver)
         pca.fit(data)
-        return pca.transform(data).astype(numpy.float32)
+        data = pca.transform(data).astype(numpy.float32)
+        data = torch.from_numpy(data)
+        # overwrite
+        if self.opt.rank:
+            t1 = self.data_sys.shape[0]
+            t2 = t1 + self.data_sys2.shape[0]
+            t3 = t2 + self.data_ref.shape[0]
+            t4 = t3 + self.data_val_sys.shape[0]
+            t5 = t4 + self.data_val_sys2.shape[0]
+            t6 = t5 + self.data_val_ref.shape[0]
+            t7 = t6 + self.data_test_sys.shape[0]
+            t8 = t7 + self.data_test_sys2.shape[0]
+            t9 = t8 + self.data_test_ref.shape[0]
+            assert(t9 == data.shape[0])
+            self.data_sys = data[:t1]
+            self.data_sys2 = data[t1:t2]
+            self.data_ref = data[t2:t3]
+            self.data_val_sys = data[t3:t4]
+            self.data_val_sys2 = data[t4:t5]
+            self.data_val_ref = data[t5:t6]
+            self.data_test_sys = data[t6:t7]
+            self.data_test_sys2 = data[t7:t8]
+            self.data_test_ref =data[t8:t9]
+            self.data_in = torch.cat([self.data_sys, self.data_sys2, self.data_ref], 1)
+            self.data_val_in = torch.cat([self.data_val_sys, self.data_val_sys2, self.data_val_ref], 1)
+            self.data_test_in = torch.cat([self.data_test_sys, self.data_test_sys2, self.data_test_ref], 1)
+        else:
+            t1 = self.data_sys.shape[0]
+            t2 = t1 + self.data_ref.shape[0]
+            t3 = t2 + self.data_val_sys.shape[0]
+            t4 = t3 + self.data_val_ref.shape[0]
+            t5 = t4 + self.data_test_sys.shape[0]
+            t6 = t5 + self.data_test_ref.shape[0]
+            assert(t6 == data.shape[0])
+            self.data_sys = data[:t1]
+            self.data_ref = data[t1:t2]
+            self.data_val_sys = data[t2:t3]
+            self.data_val_ref = data[t3:t4]
+            self.data_test_sys = data[t4:t5]
+            self.data_test_ref = data[t5:t6]
+            self.data_in = torch.cat([self.data_sys, self.data_ref], 1)
+            self.data_val_in = torch.cat([self.data_val_sys, self.data_val_ref], 1)
+            self.data_test_in = torch.cat([self.data_test_sys, self.data_test_ref], 1)
+
+    def _pca_whiten(self, n_components = 1500, svd_solver = 'auto'):
+        """
+        因为1500是神经网络的输入，所以可以直接对data_in做pca
+        data set should be 2D and type of numpy
+        Attention: only change self.data_in, self.data_val_in, self.data_test_in
+        did not change: self.data_sys, data_val_sys, data_test_sys, data_ref, data_val_ref ...
+        """
+        # distribute data
+        bs = self.data_in
+        bs_val = self.data_val_in
+        bs_test = self.data_test_in
+        data = torch.cat([bs, bs_val, bs_test], 0).numpy()
+        print data.shape
+        # pca
+        pca = PCA(n_components, svd_solver = svd_solver)
+        pca.fit(data)
+        data = pca.transform(data).astype(numpy.float32)
+        data = torch.from_numpy(data)
+        # overwrite
+        bs = bs.shape[0]
+        bs_val = bs_val.shape[0]
+        bs_test = bs_test.shape[0]
+        self.data_in = data[:bs]
+        self.data_val_in = data[bs: bs + bs_val]
+        self.data_test_in = data[bs + bs_val:]
 
     def _result_transform_softmax(self, x):
         if x == -1.0:
@@ -366,22 +430,40 @@ class DataUtil(object):
         self.data_test_in = self.data_test_in.index_select(0, order)
         self.data_test_tgt = self.data_test_tgt.index_select(0, order)
 
-    def _whiten(self, data, typ):
+    def _whiten(self, typ):
+        """
+        data include self.data_in, self.data_val_in, self.data_test_in
+        """
         if typ == 'pca':
-            data = self._pca_whiten(data)
+            print('whiten with pca')
+            self._pca_whiten()
+        elif typ == 'pca2':
+            print('whiten with pca2')
+            self._pca_whiten2()
         elif typ == 'zero_center':
-            data = self._zero_center(data)
+            print('whiten with zero center')
+            self._zero_center()
         else:
             print 'unrecognized whiten type, close the whiten phase'
             self.whiten = False
-        return data
 
-    def _zero_center(self, data):
+    def _zero_center(self):
         """
         data set should be 2D and type of numpy
+        Attention: only change self.data_in, self.data_val_in, self.data_test_in
+        did not change: self.data_sys, data_val_sys, data_test_sys, data_ref, data_val_ref ...
         """
+        bs = self.data_in
+        bs_val = self.data_val_in
+        bs_test = self.data_test_in
+        data = torch.cat([bs, bs_val, bs_test], 0).numpy()
         data -= numpy.mean(data, axis = 0)
-        return data
+        data = torch.from_numpy(data)
+        bs = self.data_in.shape[0]
+        bs_val = self.data_in.shape[0]
+        self.data_in = data[:bs]
+        self.data_val_in = data[bs: bs + bs_val]
+        self.data_test_in = data[bs + bs_val:]
 
     def normalize_z_score2(self):
         """

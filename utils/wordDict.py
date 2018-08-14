@@ -25,7 +25,7 @@ class WordDict:
             else:
                 self.sents = path
             print('num of sentences: %d'%(len(self.sents)))
-            self.dict = self._get_num()
+            self.dict = self._get_num() # based on self.sents
             if add_signs:
                 self.dict['BOS'] = len(self.sents)
                 self.dict['EOS'] = len(self.sents)
@@ -73,9 +73,12 @@ class WordDict:
         print('-- finish')
 
     def _get_freq(self):
+        """
+        here we instead of div len(words), we div number of sentence ?????
+        """
         tmp = self.dict.copy()
         for key in self.dict.keys():
-            tmp[key] = tmp[key]*.1/len(self.sents)
+            tmp[key] = tmp[key]*1./len(self.sents)
         return tmp
 
     def _get_num(self):

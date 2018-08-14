@@ -62,6 +62,8 @@ def _create_file_node(doc, item):
     namenode.appendChild(doc.createTextNode(item.name))
     typenode = doc.createElement('type')
     typenode.appendChild(doc.createTextNode('parallel'))
+    formatnode = doc.createElement('formate')
+    formatnode.appendChild(doc.createTextNode('plain'))
     locationnode = doc.createElement('location')
     locationnode.appendChild(doc.createTextNode(item.location))
     sourcenode = doc.createElement('sourceLanguage')

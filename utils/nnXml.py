@@ -17,9 +17,12 @@ def read_exp_list(doc):
         for item in e:
             value = item.text.strip()
             if 'type' not in item.attrib:
-                print "type attib is not set, set the value to string type"
+                print "type attrib is not set, set the value to string type"
             if item.attrib['type'] == "int":
-                value = int(value)
+                if value == "0":
+                    value = None
+                else:
+                    value = int(value)
             elif item.attrib['type'] == "float":
                 value = float(value)
             elif item.attrib['type'] == "string":

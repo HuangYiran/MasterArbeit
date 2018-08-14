@@ -19,9 +19,9 @@ def horToVer(li, threshold = 25, index = 0):
     for i in range(length):
         j = i + 1
         while j < length:
-            if float(li[i]) - float(li[j]) >= threshold:
+            if float(li[i]) - float(li[j]) > threshold:
                 rr = 1
-            elif float(li[i]) - float(li[j]) <= -threshold:
+            elif float(li[i]) - float(li[j]) < -threshold:
                 rr = -1
             else:
                 rr = 0

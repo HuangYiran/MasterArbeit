@@ -66,7 +66,7 @@ class WR:
     
     def forward2(self, sents_li, wordEs_li):
         """
-        compare with forward, this function works when more then one dataset are gegeben 
+        compare with forward, this function works when more then one dataset are given
         doesn't accept the path
         only work for nn hidden layer data, it has the following specialities:
             1. start with a start sign
@@ -98,6 +98,8 @@ class WR:
             sents = [self._append(li, 'EOS') for li in sents] # add EOS sign
             freq_sents = [map(lambda x: self.dict.get_freq_of_word(x), sent) for sent in sents] # get the freq
             freq_sents = [torch.FloatTensor(li) for li in freq_sents]
+            print "*"*10
+            print freq_sents[:10]
             #freq_sents.append(torch.FloatTensor(seq_len)) # should be the max length
             padded_freq_sents = self._pad_sequence(freq_sents).unsqueeze(1) # (batch_size, 1, seq_len)
             pref = self.alpha/(self.alpha + padded_freq_sents)
@@ -107,12 +109,16 @@ class WR:
             unit.append(bmm)
         unit = torch.cat(unit, 0) # (batch_size, num_dim)
         # pca
+        type(unit)
+        unit = unit
         unit = unit.numpy()
         pca = PCA(unit.shape[1], svd_solver = 'auto')
         pca.fit(unit)
-        out = unit - np.dot(np.dot(unit, pca.components_.T), pca.components_)
+        #out = unit - np.dot(np.dot(unit, pca.components_.T), pca.components_)
+        out = pca.transform(unit)
+        #out = unit
         print out.shape
-        return out
+        return out.astype(np.float32)
 
     def _append(self, li, string):
         tmp = li
@@ -125,7 +131,7 @@ class WR:
         return tmp
 
     def _pad_sequence(self, data, max_length = 100):
-        PAD = 1
+        PAD = 10
         max_length = max_length
         out = data[0].new(len(data), max_length).fill_(PAD)
         for i in range(len(data)):
