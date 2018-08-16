@@ -150,15 +150,19 @@ class Pipeline_hidden(object):
         out_max = []
         for li in tgtEmb:
             out_sum.append(li.sum(0))
-            out_max.append(li.max(0))
+            out_max.append(li.max(0)[0])
         out_sum = torch.stack(out_sum, 0)
         out_max = torch.stack(out_max, 0)
         out_mean = []
         for index, li in enumerate(out_sum):
             out_mean.append(li*1./tgt_lengths[index])
         out_mean = torch.stack(out_mean, 0)
+        out_sum = out_sum.unsqueeze(1)
+        out_max = out_max.unsqueeze(1)
+        out_mean = out_mean.unsqueeze(1)
         # combine
         out_mixture = torch.cat([out_sum, out_max, out_mean], 1)
+        print out_mixture.size()
         return out_mixture # (batch_size, 3, num_dim)
         
     
@@ -559,7 +563,7 @@ class Pipeline_hidden(object):
         out_max = [] # ==> list of (num_dim)
         for index, li in enumerate(li_out):
             out_sum.append(li[:int(tgt_lengths[index][0])].sum(0))
-            out_sum.append(li[:int(tgt_lengths[index][0])].max(0)) 
+            out_max.append(li[:int(tgt_lengths[index][0])].max(0)[0]) 
         out_sum = torch.stack(out_sum, 0)
         out_max = torch.stack(out_max, 0)
         # print out.data.shape
@@ -569,8 +573,8 @@ class Pipeline_hidden(object):
         out_mean = torch.stack(out_mean, 0)
         # combine 
         out_mixture = torch.stack([out_sum, out_max, out_mean], 1)
-        print(out.size())
-        return out # ==> (batch_size, 3, num_dim)
+        print(out_mixture.size())
+        return out_mixture.data # ==> (batch_size, 3, num_dim)
     
     def get_hidden_wr(self, srcBatch, goldBatch, alpha = 1e-4):
         """
@@ -593,10 +597,22 @@ class Pipeline_hidden(object):
         for li in tgtData:
             tmp = []
             for i in li:
-                tmp.append(tgt_frequencies[i]*1./total_words)
+                if i == 0 or i == 1 or i == 2 or i == 3:
+                    """
+                    PAD:0
+                    UNK:1
+                    BOS:2
+                    EOS:3
+                    """
+                    tmp.append(1)
+                else:
+                    tmp.append(tgt_frequencies[i]*1./total_words)
             pw.append(torch.FloatTensor(tmp))
         # pad the pw and change its type to torch.FloatTensor of size (batch_size, seq_len)
         pw = self._pad_sequence(pw, batch_first = True, padding_value = 0, max_len = 50)
+        #print total_words
+        print pw[0]
+        print pw[100]
         # get the decoder output 
         dataset = self.buildData(srcBatch, goldBatch)
         nu_batch = len(dataset)
@@ -670,15 +686,16 @@ class Pipeline_hidden(object):
         out_max = [] # ==> list of (num_layers, num_dim)
         for index, li in enumerate(out):
             out_sum.append(li.sum(0))
-            out_max.append(li.max(0))
+            out_max.append(li.max(0)[0])
         out_sum = torch.stack(out_sum, 0)
         out_max = torch.stack(out_max, 0)
         out_mean = [] # ==> list of(num_layers, num_dim)
-        for index, li in enumerate(out):
+        for index, li in enumerate(out_sum):
             out_mean.append(li*1./tgt_lengths[index][0])
         out_mean = torch.stack(out_mean, 0)
         # combien 
         out_mixture = torch.cat([out_sum, out_max, out_mean], 1)
+        print out_mixture.size()
         return out_mixture # ==> (batch_size, num_layers * 3, num_dim)
     
     def get_hidden_states_sum(self, srcBatch, tgtBatch):
@@ -699,7 +716,7 @@ class Pipeline_hidden(object):
             decCS = decCS.data
             assert(len(decOut) == len(decHS) and len(decOut) == len(decCS))
             decOut, decHS, decCS = list(zip(*sorted(zip(decOut, decHS, decCS, indices), key = lambda x:x[-1])))[:-1]
-            tmp = decCS.data # ==> (batch_size, seq_len, num_layers, num_dim)
+            tmp = decCS # ==> (batch_size, seq_len, num_layers, num_dim)
             #tmp = torch.stack(tmp)
             # indices = torch.LongTensor(indices)
             # tmp = tmp.index_select(0, indices) # can not be used here
@@ -712,7 +729,7 @@ class Pipeline_hidden(object):
         print(out.size())
         return out
     
-    def get_hidden_ceils_mixture(self, srcBatch, tgtBatch):
+    def get_hidden_ceils_mixture(self, srcBatch, goldBatch):
         tgt_lengths = torch.zeros([len(goldBatch)]).view(-1,1)
         for index, li in enumerate(goldBatch):
             tgt_lengths[index] = len(li)+1 # plus 1 for BOS
@@ -726,7 +743,7 @@ class Pipeline_hidden(object):
             decCS = decCS.data
             assert(len(decOut) == len(decHS) and len(decOut) == len(decCS))
             decOut, decHS, decCS = list(zip(*sorted(zip(decOut, decHS, decCS, indices), key = lambda x:x[-1])))[:-1]
-            tmp = decCS.data # ==> (batch_size, seq_len, num_layers, num_dim)
+            tmp = decCS # ==> (batch_size, seq_len, num_layers, num_dim)
             #tmp = torch.stack(tmp)
             # indices = torch.LongTensor(indices)
             # tmp = tmp.index_select(0, indices) # can not be used here
@@ -739,7 +756,7 @@ class Pipeline_hidden(object):
         out_max = [] # ==> list of (num_layers, num_dim)
         for index, li in enumerate(out):
             out_sum.append(li.sum(0))
-            out_max.append(li.max(0))
+            out_max.append(li.max(0)[0])
         out_sum = torch.stack(out_sum, 0)
         out_max = torch.stack(out_max, 0)
         out_mean = [] # ==> list of (num_layers, num_dim)
@@ -748,6 +765,7 @@ class Pipeline_hidden(object):
         out_mean = torch.stack(out_mean, 0)
         # combien 
         out_mixture = torch.cat([out_sum, out_max, out_mean], 1)
+        print out_mixture.size()
         return out_mixture # ==> (batch_size, num_layers * 3, num_dim)
             
     def get_hidden_ceils_sum(self, srcBatch, tgtBatch):
@@ -780,11 +798,13 @@ class Pipeline_hidden(object):
         .
         .
         """
-        decEmbd = get_decoder_embeddings_mixture(self, tgtBatch) # ==> (batch_size, 3, num_dim)
-        decOut = get_decoder_mixture(self, srcBatch, tgtBatch) # ==> (batch_size, num_layers * 3, num_dim)
-        decStates = get_decoder_states_mixture(self, srcBatch, tgtBatch) # ==> (batch_size, num_layers * 3, num_dim)
-        decCeils = get_decoder_ceils_mixture(self, srcBatch, tgtBatch) # ==> (batch_size, num_layers * 3, num_dim)
-        out = torch.cat([decEmbd, decOut, decStates, decCeils], 1)
+        decEmbd = self.get_decoder_embedding_mixture(tgtBatch) # ==> (batch_size, 3, num_dim)
+        decOut = self.get_hidden_mixture(srcBatch, tgtBatch) # ==> (batch_size, num_layers * 3, num_dim)
+        decStates = self.get_hidden_states_mixture(srcBatch, tgtBatch) # ==> (batch_size, num_layers * 3, num_dim)
+        decCeils = self.get_hidden_ceils_mixture(srcBatch, tgtBatch) # ==> (batch_size, num_layers * 3, num_dim)
+        print(type(decEmbd), type(decOut), type(decStates), type(decCeils))
+        out = torch.cat([decEmbd.float(), decOut.float(), decStates.float(), decCeils.float()], 1)
+        return out
         
         
     def _pad_sequence(self, sequences, batch_first=False, padding_value=0, max_len = None):

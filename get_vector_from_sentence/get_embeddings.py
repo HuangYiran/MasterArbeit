@@ -58,7 +58,9 @@ def main():
     if opt.type == 'encoder_embd':
         embs = pipeline.get_encoder_embedding(srcBatch)
     elif opt.type == 'decoder_embd':
-        embs = pipeline.get_decoder_embedding(srcBatch)
+        embs = pipeline.get_decoder_embedding(srcBatch) # be careful of the input here
+    elif opt.type == 'decoder_embd_mixture':
+        embs = pipeline.get_decoder_embedding_mixture(srcBatch) # be careful of the input data here
     elif opt.type == 'encoder_hidden':
         embs = pipeline.get_encoder_output(srcBatch)
     elif opt.type == 'decoder_hidden':
@@ -85,15 +87,45 @@ def main():
         else:
             print ' tgt file not set'
             embs = None
+    elif opt.type == 'decoder_hidden_mixture':
+        if opt.tgt:
+            embs = pipeline.get_hidden_mixture(srcBatch, tgtBatch)
+        else:
+            print 'tgt file not set'
+            embs = None
+    elif opt.type == 'decoder_mixture':
+        if opt.tgt:
+            embs = pipeline.get_mixture_sentbd(srcBatch, tgtBatch)
+        else:
+            print 'tgt file not set'
+            embs = None
+    elif opt.type == 'decoder_wr':
+        if opt.tgt:
+            embs = pipeline.get_hidden_wr(srcBatch, tgtBatch)
+        else:
+            print 'tgt file not set'
+            embs = None
     elif opt.type == 'decoder_states':
         if opt.tgt:
             embs = pipeline.get_hidden_states(srcBatch, tgtBatch)
         else:
             print 'tgt file not set'
             embs = None
+    elif opt.type == 'decoder_states_mixture':
+        if opt.tgt:
+            embs = pipeline.get_hidden_states_mixture(srcBatch, tgtBatch)
+        else:
+            print 'tgt file not set'
+            embs = None
     elif opt.type == 'decoder_ceil':
         if opt.tgt:
             embs = pipeline.get_hidden_ceils(srcBatch, tgtBatch)
+        else:
+            print 'tgt file not set'
+            embs = None
+    elif opt.type == 'decoder_ceils_mixture':
+        if opt.tgt:
+            embs = pipeline.get_hidden_ceils_mixture(srcBatch, tgtBatch)
         else:
             print 'tgt file not set'
             embs = None
